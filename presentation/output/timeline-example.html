@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Slide - Beispiel</title>
+    <link rel="stylesheet" href="../github-presentation-template.css">
+    <style>
+        /* Screenshot Area Border - Klar sichtbar für Screenshots */
+        .screenshot-area {
+            width: 1920px;
+            height: 1080px;
+            position: relative;
+            border: 8px solid #238636; /* GitHub Green Border */
+            box-sizing: border-box;
+            background: var(--color-canvas-default);
+            margin: 0 auto;
+        }
+        
+        /* Optional: Corner Markers für Screenshot-Bereich */
+        .screenshot-area::before,
+        .screenshot-area::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #238636;
+            z-index: 1000;
+        }
+        
+        .screenshot-area::before {
+            top: -8px;
+            left: -8px;
+            border-right: none;
+            border-bottom: none;
+        }
+        
+        .screenshot-area::after {
+            bottom: -8px;
+            right: -8px;
+            border-left: none;
+            border-top: none;
+        }
+        
+        /* Slide innerhalb der Screenshot Area */
+        .slide {
+            width: 100%;
+            height: 100%;
+            border: none;
+            margin: 0;
+            padding: var(--spacing-2xl);
+        }
+        
+        /* Info-Banner außerhalb der Screenshot Area */
+        .screenshot-info {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: rgba(35, 134, 54, 0.1);
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--color-fg-muted);
+            z-index: 999;
+            border: 1px solid var(--github-green);
+            white-space: nowrap;
+        }
+        
+        /* Wrapper für Screenshot Area und Info */
+        .screenshot-wrapper {
+            position: relative;
+            margin: 60px auto;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="screenshot-wrapper">
+        <div class="screenshot-info">Screenshot Area: 1920x1080px</div>
+        <div class="screenshot-area">
+        
+        <!-- Timeline Slide -->
+        <section class="slide">
+            <div class="container">
+                <h2 style="font-size: 56px; margin-bottom: var(--spacing-xl);">Roadmap</h2>
+                
+                <div class="timeline" style="max-width: 1400px; margin: 0 auto;">
+                    <div class="timeline-item">
+                        <h3 style="font-size: 32px; margin-bottom: var(--spacing-sm);">Q1 2024</h3>
+                        <p style="font-size: 20px; color: var(--color-fg-muted); margin-bottom: var(--spacing-md);">Produkt-Launch</p>
+                        <p style="font-size: 18px; line-height: 1.6;">
+                            • 100 Kunden gewinnen<br>
+                            • €50K MRR erreichen<br>
+                            • Erste Partnerschaften etablieren
+                        </p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h3 style="font-size: 32px; margin-bottom: var(--spacing-sm);">Q2 2024</h3>
+                        <p style="font-size: 20px; color: var(--color-fg-muted); margin-bottom: var(--spacing-md);">Skalierung</p>
+                        <p style="font-size: 18px; line-height: 1.6;">
+                            • 500 Kunden gewinnen<br>
+                            • €200K MRR erreichen<br>
+                            • Team auf 10 Personen erweitern
+                        </p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h3 style="font-size: 32px; margin-bottom: var(--spacing-sm);">Q3 2024</h3>
+                        <p style="font-size: 20px; color: var(--color-fg-muted); margin-bottom: var(--spacing-md);">Expansion</p>
+                        <p style="font-size: 18px; line-height: 1.6;">
+                            • 1,500 Kunden gewinnen<br>
+                            • €500K MRR erreichen<br>
+                            • Internationale Expansion starten
+                        </p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <h3 style="font-size: 32px; margin-bottom: var(--spacing-sm);">Q4 2024</h3>
+                        <p style="font-size: 20px; color: var(--color-fg-muted); margin-bottom: var(--spacing-md);">International</p>
+                        <p style="font-size: 18px; line-height: 1.6;">
+                            • 5,000 Kunden gewinnen<br>
+                            • €1M MRR erreichen<br>
+                            • Series A Finanzierung vorbereiten
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </div>
+    </div>
+</body>
+</html>
+

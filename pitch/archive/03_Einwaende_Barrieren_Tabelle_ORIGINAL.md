@@ -1,0 +1,26 @@
+Robo4you – Einwände/Barrieren (Stakeholder) und Antworten
+
+Hinweis: Inhalte basieren auf den vorhandenen Analysen im Repo (Barrieren & Datenschutz, Markt-/Technikstand, 90‑Tage‑Plan, Scope).
+
+| Gegenargument/Barriere (typische Formulierung) | Kategorie | Robo4you-Antwort/Entkräftung | Pilot‑Nachweis/KPI |
+| --- | --- | --- | --- |
+| „Der Markt ist noch nicht reif; niemand zahlt dafür.“ | Wirtschaft/Markt | Pilot‑first statt Vollausbau, nutzwertorientierte Use‑Cases (Bildung/Empfang/Pflege), klare Erfolgsmessung, Referenzen aufbauen. | Task‑Success ≥ 80%, CSAT ≥ 4/5, Wiederbeauftragungsrate. |
+| „Die Geräte sind teuer; Auslastung ist unsicher.“ | Finanzierung/Skalierung | Verleih- und KPI‑basierte Pilotpakete; Leasing-/Abo über Partner; phasenweiser Geräteaufbau nach Nachfrage. | Auslastung > 60% im Pilot; Deckungsbeitragsrechnung je Paket. |
+| „Roboter sind unzuverlässig und fallen aus.“ | Technik/Operation | Einsatz in kontrollierten Indoor‑Umgebungen; Ersatzgeräte; SOPs, Not‑Aus, Human‑in‑the‑loop (Robotik‑Coaches). | 0 kritische Incidents; MTTR < 15 min; Abbruchquote < 5%. |
+| „Datenschutz/DSGVO wird zum Showstopper.“ | Datenschutz/Compliance | Einwilligungen, Datensparsamkeit/Edge‑Verarbeitung, DSFA, klare Rollen (Verantwortlicher/Auftragsverarbeitung), Audit/Logging. | DSFA abgeschlossen; Audit‑Trail vorhanden; keine PII‑Leaks; Reklamationsquote = 0. |
+| „Wer haftet bei Schäden/Unfällen?“ | Recht/Versicherung | Haftpflicht/Versicherungspaket; Schulung/Einweisung; definierte Verantwortlichkeiten (Plattform/Betreiber/Hersteller); Risikozonen ausgeschlossen. | Versicherungspolice aktiv; 0 kritische Incidents; dokumentierte Übergaben. |
+| „Akzeptanz ist gering – Uncanny Valley/Jobangst.“ | Gesellschaft/Psychologie | Begleitete Einführung mit Coaches; klare Nutzenkommunikation (Entlastung statt Ersatz); sanfte Use‑Cases; Feedbackschleifen. | CSAT ≥ 4/5; qualitative Feedbacks; Teilnahmequote an Einweisungen > 90%. |
+| „Proprietäre Software → Lock‑in & Update‑Risiken.“ | Technik/Strategie | Herstellerunabhängiges Portfolio; API/SDK‑Prüfung in der Auswahl; keine tiefen Hard‑Forks; Vertragsklauseln zu Updates. | ≥ 2 unterstützte Modelle pro Use‑Case; Kompatibilitätsliste; SLA‑Einhaltung nach Updates. |
+| „Ohne CE/TÜV/ISO geht in Einrichtungen nichts.“ | Regulierung/Zertifizierung | Auswahl CE‑konformer Geräte; Einsatz in nicht genehmigungspflichtigen Settings; bei Bedarf TÜV/ISO‑Prozesse einplanen. | Geräte‑Nachweise dokumentiert; Standortfreigaben vorliegen; 0 Beanstandungen. |
+| „Rechtlich autonom unterwegs? Im öffentlichen Raum schwierig.“ | Recht/Regulierung | Phase 1: Kein autonomer Außeneinsatz; ausschließlich Indoor mit Einwilligung und Aufsicht. | Scope/Ort eindeutig; Freigaben/Einwilligungen archiviert. |
+| „Logistik und Service fressen die Marge.“ | Operation/Skalierung | Standardisierte SOPs; Time‑to‑Setup < 60 min; regionale Service‑Hubs; Routenbündelung; Ersatzteil‑ und Wartungsplan. | TTS < 60 min; MTTR < 15 min; Servicekosten je Einsatz im Zielkorridor. |
+| „Ihr seid zu breit aufgestellt – Fokus fehlt.“ | Strategie | Top‑2 Use‑Cases je Region; „Nicht‑Ziele“ schriftlich; Gate‑Entscheide; kleine Thin‑Slice gewinnen. | Scope dokumentiert; Gate‑Protokolle; 2 Use‑Cases liefern KPIs. |
+| „Zu früh im Zyklus – nächstes Jahr ist alles billiger/besser.“ | Timing | Risiko reduzierte Piloten, Leasing statt Kauf; Lernvorsprung/Referenzen jetzt aufbauen; Upgrades vertraglich regeln. | Referenz‑Piloten abgeschlossen; Upgrade‑Klauseln; ROI‑Fallstudien. |
+| „Ohne Förderungen klappt die Finanzierung nicht.“ | Finanzierung | Hybrid: Pilotpakete + Leasing + Fördermittel; zeitlich befristet; Tragfähigkeit über Unit Economics belegen. | Break‑even je Paket; Förderquote vs. Eigenanteil; Cash‑Plan mit Gates. |
+| „ROI ist nicht messbar.“ | Wirtschaft/Nutzen | Definiertes Eval‑Set; KPI‑Dashboard (Zeitersparnis, TS, CSAT); Vergleich Vor/Nach‑Einführung. | Relevante KPI‑Verbesserung (z. B. –X% Bearbeitungszeit); Report je Pilot. |
+| „Negative Presse bei Vorfall – Reputationsrisiko.“ | Risiko/Kommunikation | Incident‑Plan, Eskalationspfade, Safety‑Redlines; transparente Kommunikation; nur freigegebene Szenarien. | 0 kritische Incidents; dokumentierte Übungen/Reviews; Reaktionszeit < Ziel. |
+| „Unsere IT blockt: WLAN/Cloud/Integrationen.“ | IT‑Sicherheit | Offline-/Edge‑Optionen wo möglich; minimalinvasive Integrationen; IT‑Security‑Review; Datentrennung. | IT‑Freigaben; keine offenen Findings; Pen‑Test/Checklist ok. |
+| „In Pflege ist das ein Medizinprodukt-Thema.“ | Regulierung | Keine therapeutischen Anwendungen Phase 1; Aktivierung/Animation unter Aufsicht; medizinische Funktionen out of scope. | Scope‑Abgrenzung schriftlich; Einrichtungsfreigaben; 0 regulatorische Findings. |
+| „Geräusch/Barrierefreiheit/ethische Bedenken.“ | Gesellschaft/Ethik | Einsatzprofile anpassen; sensible Bereiche ausschließen; Einwilligungen/Opt‑out; inklusives Design. | Keine Beschwerden; dokumentierte Einwilligungen; Anpassung der Profile. |
+| „Autonomer Transport zum Kunden ist nicht erlaubt.“ | Logistik/Recht | Übergangsphase: Menschlicher Transport/Betreuung (Robotik‑Coaches); klare SLA für An/Abtransport. | Transport‑SLA erfüllt; Schadensquote = 0; positive Nutzerbewertungen. |
+

@@ -1,0 +1,51 @@
+# Temporäre Dateien
+*.tmp
+*.temp
+*~
+.DS_Store
+Thumbs.db
+
+# Backup-Dateien
+*.bak
+*.backup
+*_backup.*
+
+# PowerPoint temporäre Dateien
+~$*.pptx
+~$*.ppt
+
+# Word temporäre Dateien
+~$*.docx
+~$*.doc
+
+# PDF-Zwischendateien
+*.aux
+*.log
+
+# IDE/Editor-spezifisch
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Work-in-Progress (außer versions/)
+*_WIP.*
+*_DRAFT.*
+*_TEST.*
+
+# Private Notizen
+*_PRIVATE.*
+*_NOTES.*
+notes/
+private/
+
+# Exportierte Dateien (außer in assets/slides/)
+/*.pdf
+/*.pptx
+/*.docx
+/*.zip
+
+# Ausnahmen (diese SOLLEN committed werden):
+!assets/slides/*.pdf
+!assets/slides/*.pptx
+

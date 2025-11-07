@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Temporäre Dateien
+*.tmp
+*.temp
+*~
+.DS_Store
+Thumbs.db
+
+# Backup-Dateien
+*.bak
+*.backup
+*_backup.*
+
+# IDE/Editor-spezifisch
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Private Notizen
+*_PRIVATE.*
+*_NOTES.*
+notes/
+private/
+
