@@ -11,8 +11,14 @@ class MockContentAnalyzerAgent:
     def __init__(self, api_key: str = None, model: str = "mock"):
         self.model = model
 
-    def analyze(self, user_input: str, slide_title: str = None) -> dict:
-        """Mock analysis of user input"""
+    def analyze(self, user_input: str, slide_title: str = None, project_scope: str = "") -> dict:
+        """Mock analysis of user input
+
+        Args:
+            user_input: The content to analyze
+            slide_title: Optional slide title
+            project_scope: Project scope/context (optional)
+        """
         # Determine content type based on keywords
         content_type = "mixed"
         if any(word in user_input.lower() for word in ["€", "%", "million", "mio"]):
@@ -32,6 +38,7 @@ class MockContentAnalyzerAgent:
             "has_lists": "-" in user_input or "•" in user_input,
             "has_quotes": '"' in user_input,
             "formatting_preferences": ["clean", "modern"],
+            "project_context_available": bool(project_scope),
         }
 
 
@@ -42,9 +49,16 @@ class MockPresentationStrategistAgent:
         self.model = model
 
     def recommend(
-        self, analysis: dict, style_guide: dict, preferences: dict = None
+        self, analysis: dict, style_guide: dict, preferences: dict = None, project_scope: str = ""
     ) -> dict:
-        """Mock strategy recommendation"""
+        """Mock strategy recommendation
+
+        Args:
+            analysis: Content analysis from ContentAnalyzerAgent
+            style_guide: Project style guide
+            preferences: Optional user preferences
+            project_scope: Project scope/context (optional)
+        """
         available_components = style_guide.get("available_components", [])
         component_count = min(
             len([c for c in available_components if c in ["stat-grid", "bullet-list"]]) or 2,
@@ -66,6 +80,7 @@ class MockPresentationStrategistAgent:
                 "Apply 16px spacing",
             ],
             "reasoning": "Simple, clean layout that respects design system",
+            "scope_aware": bool(project_scope),
         }
 
 
@@ -81,8 +96,17 @@ class MockContentGeneratorAgent:
         strategy: dict,
         style_guide: dict,
         slide_title: str = "Folie",
+        project_scope: str = "",
     ) -> dict:
-        """Mock content generation"""
+        """Mock content generation
+
+        Args:
+            analysis: Content analysis
+            strategy: Strategy recommendations
+            style_guide: Style guide information
+            slide_title: Title for the slide
+            project_scope: Project scope/context (optional)
+        """
         # Generate simple markdown
         markdown = f"""# {slide_title}
 
@@ -124,4 +148,5 @@ class MockContentGeneratorAgent:
             "html": html,
             "component_count": 2,
             "components_used": ["bullet-list", "text"],
+            "used_project_scope": bool(project_scope),
         }

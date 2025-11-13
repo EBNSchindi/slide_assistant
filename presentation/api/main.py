@@ -130,17 +130,10 @@ async def get_project_style(project_name: str):
 
 # Create project endpoint
 @app.post("/api/projects")
-async def create_project(project_name: str):
+async def create_project(project_name: str, initial_style: str = "github"):
     """Create a new project"""
     try:
-        if not project_name or not project_name.replace("-", "").replace("_", "").isalnum():
-            raise ValueError("Invalid project name")
-
-        existing = project_service.list_projects()
-        if project_name in existing:
-            raise ValueError("Project already exists")
-
-        project_path = project_service.create_project(project_name)
+        project_path = project_service.create_project(project_name, initial_style)
         info = project_service.get_project_info(project_name)
 
         return {
@@ -151,6 +144,78 @@ async def create_project(project_name: str):
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Delete project endpoint
+@app.delete("/api/projects/{project_name}")
+async def delete_project(project_name: str, force: bool = False):
+    """Delete a project"""
+    try:
+        success = project_service.delete_project(project_name, force)
+        return {
+            "success": True,
+            "message": f"Project '{project_name}' deleted successfully",
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Rename project endpoint
+@app.put("/api/projects/{project_name}/rename")
+async def rename_project(project_name: str, new_name: str):
+    """Rename a project"""
+    try:
+        if not new_name or not new_name.replace("-", "").replace("_", "").isalnum():
+            raise ValueError("Invalid new project name")
+
+        new_path = project_service.rename_project(project_name, new_name)
+        info = project_service.get_project_info(new_name)
+
+        return {
+            "success": True,
+            "message": f"Project renamed from '{project_name}' to '{new_name}'",
+            "project": info,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Get project scope endpoint
+@app.get("/api/projects/{project_name}/scope")
+async def get_project_scope(project_name: str):
+    """Get project scope/context"""
+    try:
+        scope = project_service.get_project_scope(project_name)
+        return {
+            "success": True,
+            "project_name": project_name,
+            "scope": scope,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Update project scope endpoint
+@app.put("/api/projects/{project_name}/scope")
+async def update_project_scope(project_name: str, scope_content: str):
+    """Update project scope/context"""
+    try:
+        scope_path = project_service.update_project_scope(project_name, scope_content)
+        return {
+            "success": True,
+            "message": "Project scope updated",
+            "scope_path": scope_path,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

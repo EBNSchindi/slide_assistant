@@ -48,6 +48,7 @@ class AgentOrchestrator:
         slides = []
 
         try:
+
             # Step 1: Content Analysis
             step1 = {
                 "agent_name": "Content Analyzer",
