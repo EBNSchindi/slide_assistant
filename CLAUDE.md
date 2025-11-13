@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a **slides helper** system with two main components:
+This is a **slides helper** system with three main components:
 1. **Word-to-Markdown converter** - Converts .docx files to Markdown format
 2. **Presentation system** - Converts Markdown pitch decks into component-based HTML presentations for screenshots
+3. **Project Management GUI** - Web-based interface for creating, renaming, and deleting presentation projects
 
 ## Project Structure
 
@@ -15,8 +16,11 @@ slides_helper/
 ├── convert_word_to_markdown.py          # Word to Markdown converter
 ├── presentation/                         # Presentation system
 │   ├── component-viewer.html            # Main viewer tool
+│   ├── project-manager.html             # Project management GUI
+│   ├── project_manager_api.py           # REST API for project management
 │   ├── markdown-to-components.py        # Markdown to HTML converter
 │   ├── projects.json                    # Project configuration
+│   ├── README-PROJEKTVERWALTUNG.md      # Project management documentation
 │   └── projects/                        # Project workspace
 │       └── beispiel-projekt/            # Example project
 │           ├── html/                    # Generated HTML slides
@@ -24,7 +28,7 @@ slides_helper/
 │           │   ├── input/               # Original markdown
 │           │   └── optimized/           # Per-slide optimized markdown
 │           └── styles/                  # Style variations (github, modern, minimal)
-└── requirements.txt                     # Python dependencies (python-docx)
+└── requirements.txt                     # Python dependencies (python-docx, flask, flask-cors)
 ```
 
 ## Key Architecture
@@ -85,6 +89,57 @@ Each project has:
 - Style variations (GitHub Design, Modern, Minimal)
 
 **Dynamic Style Loading:** The viewer can switch between style themes at runtime via dropdown.
+
+### 4. Project Management System
+
+**Purpose:** Provides a web-based GUI for managing presentation projects.
+
+**Components:**
+- **Backend API:** `project_manager_api.py` - Flask REST API
+- **Frontend GUI:** `project-manager.html` - Web interface for project management
+- **Integration:** Linked from `component-viewer.html` via "⚙️ Projekte" button
+
+**Features:**
+- **Create Projects:** Automatically generates proper directory structure with all required folders
+- **Rename Projects:** Updates both display name and filesystem paths
+- **Delete Projects:** Removes project directory and configuration (with confirmation)
+- **Auto-Configuration:** New projects receive default styles (GitHub, Modern, Minimal)
+
+**API Endpoints:**
+```
+GET    /api/projects         - List all projects
+POST   /api/projects         - Create new project
+PUT    /api/projects/<name>  - Rename project
+DELETE /api/projects/<name>  - Delete project
+```
+
+**Usage:**
+```bash
+# Start API server
+python3 presentation/project_manager_api.py
+
+# In another terminal, start web server
+python3 -m http.server 8000
+
+# Open in browser
+# http://localhost:8000/project-manager.html
+```
+
+**Generated Project Structure:**
+```
+projects/{project-name}/
+├── html/                      # Generated HTML components
+├── markdown/
+│   ├── input/                 # Source markdown files
+│   │   └── README.md          # Auto-generated guide
+│   └── optimized/             # Per-slide optimized markdown
+└── styles/
+    ├── github/style.css       # Default GitHub theme
+    ├── modern/style.css       # Modern theme
+    └── minimal/style.css      # Minimal theme
+```
+
+For detailed usage instructions, see [README-PROJEKTVERWALTUNG.md](presentation/README-PROJEKTVERWALTUNG.md).
 
 ## Development Commands
 

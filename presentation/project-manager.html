@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projektverwaltung - Slide Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0d1117;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            color: #c9d1d9;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #c9d1d9;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header .logo {
+            width: 40px;
+            height: 40px;
+            background: #238636;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .header p {
+            color: #8b949e;
+            font-size: 14px;
+        }
+
+        .actions {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            background: #21262d;
+            color: #c9d1d9;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: #30363d;
+            border-color: #8b949e;
+        }
+
+        .btn-primary {
+            background: #238636;
+            border-color: #238636;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2ea043;
+            border-color: #2ea043;
+        }
+
+        .btn-danger {
+            background: #da3633;
+            border-color: #da3633;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e5534b;
+            border-color: #e5534b;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .project-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .project-card:hover {
+            border-color: #8b949e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .project-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #58a6ff;
+            margin-bottom: 8px;
+        }
+
+        .project-card .meta {
+            font-size: 12px;
+            color: #8b949e;
+            margin-bottom: 12px;
+        }
+
+        .project-card .actions {
+            display: flex;
+            gap: 8px;
+            padding: 0;
+            margin: 0;
+            background: transparent;
+            border: none;
+        }
+
+        .project-card .btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            flex: 1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(13, 17, 23, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #c9d1d9;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            background: #0d1117;
+            color: #c9d1d9;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #1a472a;
+            border: 1px solid #2ea043;
+            color: #3fb950;
+        }
+
+        .alert-error {
+            background: #4c1e1e;
+            border: 1px solid #da3633;
+            color: #f85149;
+        }
+
+        .empty-state {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 48px;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            color: #c9d1d9;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            color: #8b949e;
+            margin-bottom: 16px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 48px;
+            color: #8b949e;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #30363d;
+            border-top-color: #58a6ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .link {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <span class="logo">📊</span>
+                Projektverwaltung
+            </h1>
+            <p>Erstellen, bearbeiten und verwalten Sie Ihre Präsentationsprojekte</p>
+        </div>
+
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn btn-primary" onclick="showCreateModal()">
+                ➕ Neues Projekt
+            </button>
+            <button class="btn" onclick="loadProjects()">
+                🔄 Aktualisieren
+            </button>
+            <a href="component-viewer.html" class="btn">
+                👁️ Komponenten Viewer
+            </a>
+        </div>
+
+        <!-- Projects Grid -->
+        <div id="projectsContainer">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Lade Projekte...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalTitle">Neues Projekt</div>
+            <form id="projectForm" onsubmit="handleSubmit(event)">
+                <div class="form-group">
+                    <label for="projectName">Projektname</label>
+                    <input
+                        type="text"
+                        id="projectName"
+                        name="projectName"
+                        required
+                        placeholder="z.B. Mein Pitch Deck"
+                    >
+                    <small style="color: #8b949e; font-size: 12px; margin-top: 4px; display: block;">
+                        Der Projektname wird automatisch in einen URL-freundlichen Namen konvertiert
+                    </small>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeModal()">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Erstellen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Projekt löschen</div>
+            <p style="margin-bottom: 16px; color: #c9d1d9;">
+                Sind Sie sicher, dass Sie das Projekt <strong id="deleteProjectName"></strong> löschen möchten?
+            </p>
+            <p style="margin-bottom: 16px; color: #f85149; font-size: 14px;">
+                ⚠️ Diese Aktion kann nicht rückgängig gemacht werden. Alle Dateien und Daten werden gelöscht.
+            </p>
+            <div class="form-actions">
+                <button type="button" class="btn" onclick="closeDeleteModal()">Abbrechen</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">Löschen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        let projects = [];
+        let currentEditProject = null;
+        let currentDeleteProject = null;
+
+        // Load projects on page load
+        document.addEventListener('DOMContentLoaded', loadProjects);
+
+        async function loadProjects() {
+            const container = document.getElementById('projectsContainer');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Lade Projekte...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_URL}/projects`);
+                if (!response.ok) {
+                    throw new Error('API nicht erreichbar. Stellen Sie sicher, dass der Backend-Server läuft.');
+                }
+
+                const data = await response.json();
+                projects = data.projects || [];
+
+                renderProjects();
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <h3>Fehler beim Laden der Projekte</h3>
+                        <p>${error.message}</p>
+                        <p style="margin-top: 16px; font-size: 14px;">
+                            Starten Sie den Backend-Server mit:<br>
+                            <code style="background: #0d1117; padding: 4px 8px; border-radius: 3px; display: inline-block; margin-top: 8px;">
+                                python3 presentation/project_manager_api.py
+                            </code>
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderProjects() {
+            const container = document.getElementById('projectsContainer');
+
+            if (projects.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📁</div>
+                        <h3>Keine Projekte vorhanden</h3>
+                        <p>Erstellen Sie Ihr erstes Projekt, um loszulegen</p>
+                        <button class="btn btn-primary" onclick="showCreateModal()" style="margin-top: 16px;">
+                            ➕ Neues Projekt erstellen
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const projectsHtml = projects.map(project => `
+                <div class="project-card">
+                    <h3>${project.displayName}</h3>
+                    <div class="meta">
+                        📁 ${project.name}<br>
+                        📂 ${project.path}
+                    </div>
+                    <div class="actions">
+                        <button class="btn" onclick="showEditModal('${project.name}')">
+                            ✏️ Umbenennen
+                        </button>
+                        <button class="btn btn-danger" onclick="showDeleteModal('${project.name}', '${project.displayName}')">
+                            🗑️ Löschen
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `<div class="projects-grid">${projectsHtml}</div>`;
+        }
+
+        function showCreateModal() {
+            currentEditProject = null;
+            document.getElementById('modalTitle').textContent = 'Neues Projekt';
+            document.getElementById('submitBtn').textContent = 'Erstellen';
+            document.getElementById('projectForm').reset();
+            document.getElementById('projectModal').classList.add('active');
+        }
+
+        function showEditModal(projectName) {
+            const project = projects.find(p => p.name === projectName);
+            if (!project) return;
+
+            currentEditProject = projectName;
+            document.getElementById('modalTitle').textContent = 'Projekt umbenennen';
+            document.getElementById('submitBtn').textContent = 'Speichern';
+            document.getElementById('projectName').value = project.displayName;
+            document.getElementById('projectModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('projectModal').classList.remove('active');
+            currentEditProject = null;
+        }
+
+        function showDeleteModal(projectName, displayName) {
+            currentDeleteProject = projectName;
+            document.getElementById('deleteProjectName').textContent = displayName;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+            currentDeleteProject = null;
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+
+            const displayName = document.getElementById('projectName').value.trim();
+
+            if (!displayName) {
+                showAlert('Bitte geben Sie einen Projektnamen ein', 'error');
+                return;
+            }
+
+            try {
+                let response;
+
+                if (currentEditProject) {
+                    // Rename existing project
+                    response = await fetch(`${API_URL}/projects/${currentEditProject}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ displayName })
+                    });
+                } else {
+                    // Create new project
+                    response = await fetch(`${API_URL}/projects`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ displayName })
+                    });
+                }
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Fehler beim Speichern');
+                }
+
+                showAlert(data.message, 'success');
+                closeModal();
+                await loadProjects();
+            } catch (error) {
+                showAlert(error.message, 'error');
+            }
+        }
+
+        async function confirmDelete() {
+            if (!currentDeleteProject) return;
+
+            try {
+                const response = await fetch(`${API_URL}/projects/${currentDeleteProject}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Fehler beim Löschen');
+                }
+
+                showAlert(data.message, 'success');
+                closeDeleteModal();
+                await loadProjects();
+            } catch (error) {
+                showAlert(error.message, 'error');
+            }
+        }
+
+        function showAlert(message, type = 'success') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+
+            container.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        // Close modals on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeDeleteModal();
+            }
+        });
+
+        // Close modal on background click
+        document.getElementById('projectModal').addEventListener('click', (e) => {
+            if (e.target.id === 'projectModal') {
+                closeModal();
+            }
+        });
+
+        document.getElementById('deleteModal').addEventListener('click', (e) => {
+            if (e.target.id === 'deleteModal') {
+                closeDeleteModal();
+            }
+        });
+    </script>
+</body>
+</html>
