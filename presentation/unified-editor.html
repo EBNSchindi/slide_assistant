@@ -196,6 +196,44 @@
             cursor: not-allowed;
         }
 
+        /* Resize Handle */
+        .resize-handle {
+            width: 8px;
+            background: #0d1117;
+            cursor: col-resize;
+            position: relative;
+            flex-shrink: 0;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .resize-handle:hover {
+            background: #1f6feb;
+        }
+
+        .resize-handle-bar {
+            width: 2px;
+            height: 40px;
+            background: #30363d;
+            border-radius: 2px;
+            pointer-events: none;
+            transition: background 0.2s;
+        }
+
+        .resize-handle:hover .resize-handle-bar {
+            background: #ffffff;
+        }
+
+        .resize-handle.dragging {
+            background: #1f6feb;
+        }
+
+        .resize-handle.dragging .resize-handle-bar {
+            background: #ffffff;
+        }
+
         /* Agent Steps */
         .agent-steps-toggle {
             display: flex;
@@ -423,10 +461,14 @@
             }
 
             .input-panel {
-                width: 100%;
+                width: 100% !important;
                 border-right: none;
                 border-bottom: 1px solid #30363d;
                 max-height: 35vh;
+            }
+
+            .resize-handle {
+                display: none;
             }
 
             .preview-panel {
@@ -492,6 +534,11 @@ Or markdown:
             </div>
         </div>
 
+        <!-- Resize Handle -->
+        <div class="resize-handle" id="resizeHandle">
+            <div class="resize-handle-bar"></div>
+        </div>
+
         <!-- Right Panel -->
         <div class="preview-panel">
             <div class="preview-controls">
@@ -539,6 +586,7 @@ Or markdown:
         document.addEventListener('DOMContentLoaded', () => {
             loadProjects();
             attachEventListeners();
+            initializeResizeHandle();
         });
 
         // Load projects
@@ -731,6 +779,56 @@ Or markdown:
                 `;
             });
             previewContent.innerHTML = html;
+        }
+
+        // Initialize resize handle
+        function initializeResizeHandle() {
+            const resizeHandle = document.getElementById('resizeHandle');
+            const inputPanel = document.querySelector('.input-panel');
+            const previewPanel = document.querySelector('.preview-panel');
+            const editorContainer = document.querySelector('.editor-container');
+
+            let isResizing = false;
+            let startX = 0;
+            let startWidth = 0;
+
+            resizeHandle.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                startX = e.clientX;
+                startWidth = inputPanel.offsetWidth;
+
+                resizeHandle.classList.add('dragging');
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+
+                const containerWidth = editorContainer.offsetWidth;
+                const deltaX = e.clientX - startX;
+                const newWidth = startWidth + deltaX;
+
+                // Min/max constraints (20% - 80% of container width)
+                const minWidth = containerWidth * 0.2;
+                const maxWidth = containerWidth * 0.8;
+
+                if (newWidth >= minWidth && newWidth <= maxWidth) {
+                    const percentage = (newWidth / containerWidth) * 100;
+                    inputPanel.style.width = percentage + '%';
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isResizing) {
+                    isResizing = false;
+                    resizeHandle.classList.remove('dragging');
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                }
+            });
         }
 
         // Regenerate slide
