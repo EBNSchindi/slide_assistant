@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified AI Slide Editor</title>
+    <link rel="stylesheet" href="github-presentation-template.css">
+    <link id="projectStyle" rel="stylesheet" href="">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            background: #0d1117;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            color: #c9d1d9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .editor-header {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .editor-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #c9d1d9;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .editor-title .logo {
+            width: 28px;
+            height: 28px;
+            background: #238636;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .select-input,
+        .text-input {
+            padding: 8px 12px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 13px;
+        }
+
+        .select-input:focus,
+        .text-input:focus {
+            outline: none;
+            border-color: #238636;
+            box-shadow: 0 0 0 3px rgba(35, 134, 54, 0.1);
+        }
+
+        /* Main Container */
+        .editor-container {
+            display: flex;
+            flex: 1;
+            gap: 0;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* Left Panel - Input */
+        .input-panel {
+            width: 35%;
+            background: #161b22;
+            border-right: 1px solid #30363d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #c9d1d9;
+            padding: 12px 16px;
+            border-bottom: 1px solid #30363d;
+            background: #0d1117;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 8px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-family: inherit;
+            font-size: 12px;
+            resize: vertical;
+            max-height: 200px;
+        }
+
+        .textarea:focus {
+            outline: none;
+            border-color: #238636;
+            box-shadow: 0 0 0 3px rgba(35, 134, 54, 0.1);
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            background: #21262d;
+            color: #c9d1d9;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #30363d;
+            border-color: #8b949e;
+        }
+
+        .btn.primary {
+            background: #238636;
+            color: white;
+            border-color: #238636;
+            width: 100%;
+        }
+
+        .btn.primary:hover {
+            background: #2ea043;
+            border-color: #2ea043;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Agent Steps */
+        .agent-steps-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .agent-steps-toggle input {
+            cursor: pointer;
+        }
+
+        .agent-steps-panel {
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            padding: 8px;
+            background: #0d1117;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+        }
+
+        .agent-steps-panel.show {
+            display: block;
+        }
+
+        .agent-step {
+            padding: 8px;
+            background: #21262d;
+            border-left: 3px solid #238636;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+
+        .agent-step.error {
+            border-left-color: #da3633;
+        }
+
+        .agent-step-name {
+            font-weight: 600;
+            color: #c9d1d9;
+        }
+
+        .agent-step-status {
+            font-size: 10px;
+            color: #8b949e;
+            margin-top: 4px;
+        }
+
+        /* Right Panel - Preview */
+        .preview-panel {
+            flex: 1;
+            background: #0d1117;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .preview-controls {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 12px 16px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            font-size: 12px;
+        }
+
+        .preview-control-group {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .preview-control-label {
+            color: #8b949e;
+            font-weight: 500;
+        }
+
+        .width-btns {
+            display: flex;
+            gap: 4px;
+        }
+
+        .width-btn {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #30363d;
+            background: #21262d;
+            color: #c9d1d9;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+
+        .width-btn:hover {
+            background: #30363d;
+            border-color: #8b949e;
+        }
+
+        .width-btn.active {
+            background: #238636;
+            border-color: #238636;
+            color: white;
+        }
+
+        .preview-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #0d1117;
+        }
+
+        .slide-wrapper {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .slide-content {
+            padding: 32px;
+        }
+
+        .slide-meta {
+            padding: 12px 16px;
+            background: #f6f8fa;
+            border-top: 1px solid #d0d7de;
+            font-size: 11px;
+            color: #57606a;
+        }
+
+        .slide-feedback {
+            padding: 12px 16px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .feedback-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 6px 8px;
+            border: 1px solid #d0d7de;
+            border-radius: 4px;
+            font-size: 12px;
+            background: white;
+            color: #24292f;
+        }
+
+        .feedback-input:focus {
+            outline: none;
+            border-color: #238636;
+            box-shadow: 0 0 0 3px rgba(35, 134, 54, 0.1);
+        }
+
+        .regen-btn {
+            padding: 6px 10px;
+            background: #238636;
+            color: white;
+            border: 1px solid #238636;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .regen-btn:hover {
+            background: #2ea043;
+            border-color: #2ea043;
+        }
+
+        /* Status Messages */
+        .status-message {
+            padding: 12px;
+            background: #1f6feb;
+            border-radius: 6px;
+            font-size: 12px;
+            color: white;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .error-message {
+            background: #da3633;
+        }
+
+        .success-message {
+            background: #238636;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8b949e;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .editor-container {
+                flex-direction: column;
+            }
+
+            .input-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #30363d;
+                max-height: 35vh;
+            }
+
+            .preview-panel {
+                height: 65vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="editor-header">
+        <div class="header-left">
+            <div class="editor-title">
+                <div class="logo">✨</div>
+                <span>Unified AI Slide Editor</span>
+            </div>
+        </div>
+        <div class="header-controls">
+            <select id="projectSelect" class="select-input">
+                <option value="">Select Project...</option>
+            </select>
+            <select id="styleSelect" class="select-input">
+                <option value="">Select Style...</option>
+            </select>
+            <input type="text" id="slideTitle" class="text-input" placeholder="Slide Title (optional)" style="max-width: 150px;">
+        </div>
+    </div>
+
+    <!-- Main Editor -->
+    <div class="editor-container">
+        <!-- Left Panel -->
+        <div class="input-panel">
+            <div class="panel-header">📝 Content Input</div>
+            <div class="panel-content">
+                <div class="input-section">
+                    <textarea
+                        id="userInput"
+                        class="textarea"
+                        placeholder="Describe your slide content:
+- Bullet points
+- Markdown formatted text
+- Free text description
+
+Examples:
+• Team: 5 experts, 20 years experience
+• Locations: Berlin & Munich
+
+Or markdown:
+# Team
+- Expert 1
+- Expert 2"></textarea>
+                </div>
+
+                <button class="btn primary" id="generateBtn">Generate Content</button>
+
+                <div style="border-top: 1px solid #30363d; padding-top: 12px;">
+                    <label class="agent-steps-toggle">
+                        <input type="checkbox" id="showAgentSteps" />
+                        <span>Show Agent Steps</span>
+                    </label>
+                    <div class="agent-steps-panel" id="agentStepsPanel"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="preview-panel">
+            <div class="preview-controls">
+                <div class="preview-control-group">
+                    <span class="preview-control-label">Component Width:</span>
+                    <div class="width-btns">
+                        <button class="width-btn active" data-width="auto">Auto</button>
+                        <button class="width-btn" data-width="400px">400px</button>
+                        <button class="width-btn" data-width="600px">600px</button>
+                        <button class="width-btn" data-width="800px">800px</button>
+                        <button class="width-btn" data-width="100%">Full</button>
+                    </div>
+                </div>
+            </div>
+            <div class="preview-content" id="previewContent">
+                <div style="text-align: center; color: #8b949e; padding-top: 40px;">
+                    <p>👆 Select project, enter content, and generate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8001/api';
+        const DEFAULT_PROJECT = 'beispiel-projekt';
+        const DEFAULT_STYLE = 'github';
+
+        // DOM Elements
+        const projectSelect = document.getElementById('projectSelect');
+        const styleSelect = document.getElementById('styleSelect');
+        const slideTitle = document.getElementById('slideTitle');
+        const userInput = document.getElementById('userInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const previewContent = document.getElementById('previewContent');
+        const agentStepsPanel = document.getElementById('agentStepsPanel');
+        const showAgentStepsCheckbox = document.getElementById('showAgentSteps');
+
+        // State
+        let currentProject = null;
+        let currentStyle = DEFAULT_STYLE;
+        let isGenerating = false;
+        let currentSlides = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProjects();
+            attachEventListeners();
+        });
+
+        // Load projects
+        async function loadProjects() {
+            try {
+                const response = await fetch(`${API_BASE}/projects`);
+                const data = await response.json();
+
+                if (data.success && data.projects.length > 0) {
+                    projectSelect.innerHTML = '<option value="">Select Project...</option>' +
+                        data.projects.map(p =>
+                            `<option value="${p}" ${p === DEFAULT_PROJECT ? 'selected' : ''}>${p}</option>`
+                        ).join('');
+
+                    if (data.projects.includes(DEFAULT_PROJECT)) {
+                        currentProject = DEFAULT_PROJECT;
+                        projectSelect.value = DEFAULT_PROJECT;
+                        loadProjectStyles(DEFAULT_PROJECT);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load projects:', error);
+            }
+        }
+
+        // Load project styles
+        async function loadProjectStyles(projectName) {
+            try {
+                const response = await fetch(`${API_BASE}/projects/${projectName}`);
+                const data = await response.json();
+
+                if (data.success && data.project.available_styles) {
+                    styleSelect.innerHTML = data.project.available_styles
+                        .map(s =>
+                            `<option value="${s}" ${s === DEFAULT_STYLE ? 'selected' : ''}>${s}</option>`
+                        ).join('');
+
+                    currentStyle = DEFAULT_STYLE;
+                    styleSelect.value = DEFAULT_STYLE;
+                    loadStyleSheet(projectName, DEFAULT_STYLE);
+                }
+            } catch (error) {
+                console.error('Failed to load styles:', error);
+            }
+        }
+
+        // Load CSS stylesheet
+        function loadStyleSheet(projectName, styleName) {
+            const cssPath = `projects/${projectName}/styles/${styleName}/style.css`;
+            const styleLink = document.getElementById('projectStyle');
+            styleLink.href = cssPath;
+        }
+
+        // Attach event listeners
+        function attachEventListeners() {
+            projectSelect.addEventListener('change', (e) => {
+                currentProject = e.target.value;
+                if (currentProject) {
+                    loadProjectStyles(currentProject);
+                }
+            });
+
+            styleSelect.addEventListener('change', (e) => {
+                currentStyle = e.target.value;
+                if (currentProject && currentStyle) {
+                    loadStyleSheet(currentProject, currentStyle);
+                }
+            });
+
+            generateBtn.addEventListener('click', generateContent);
+
+            showAgentStepsCheckbox.addEventListener('change', (e) => {
+                agentStepsPanel.classList.toggle('show', e.target.checked);
+            });
+
+            // Width controls
+            document.querySelectorAll('.width-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.width-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+
+                    const width = e.target.dataset.width;
+                    document.documentElement.style.setProperty('--component-width', width);
+
+                    // Update slide content widths
+                    document.querySelectorAll('.slide-content').forEach(slide => {
+                        if (width === 'auto') {
+                            slide.style.width = 'auto';
+                        } else {
+                            slide.style.maxWidth = width;
+                        }
+                    });
+                });
+            });
+
+            userInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    generateContent();
+                }
+            });
+        }
+
+        // Generate content
+        async function generateContent() {
+            if (!currentProject) {
+                alert('Please select a project');
+                return;
+            }
+
+            if (!userInput.value.trim()) {
+                alert('Please enter content');
+                return;
+            }
+
+            isGenerating = true;
+            generateBtn.disabled = true;
+            userInput.disabled = true;
+            agentStepsPanel.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_BASE}/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        project_name: currentProject,
+                        user_input: userInput.value,
+                        slide_title: slideTitle.value || null,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Generation failed');
+                }
+
+                // Show agent steps
+                if (data.agent_steps) {
+                    data.agent_steps.forEach(step => {
+                        const stepEl = document.createElement('div');
+                        stepEl.className = `agent-step ${step.status}`;
+                        stepEl.innerHTML = `
+                            <div class="agent-step-name">
+                                ${step.status === 'completed' ? '✓' : step.status === 'error' ? '✗' : '⏳'}
+                                ${step.agent_name}
+                            </div>
+                            <div class="agent-step-status">${step.output || step.error || 'Processing...'}</div>
+                        `;
+                        agentStepsPanel.appendChild(stepEl);
+                    });
+                }
+
+                if (data.success) {
+                    currentSlides = data.generated_slides;
+                    displayPreviews(data.generated_slides);
+                } else {
+                    throw new Error(data.message || 'Generation failed');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                isGenerating = false;
+                generateBtn.disabled = false;
+                userInput.disabled = false;
+            }
+        }
+
+        // Display previews
+        function displayPreviews(slides) {
+            let html = '';
+            slides.forEach((slide, index) => {
+                html += `
+                    <div class="slide-wrapper" id="slide-${index}">
+                        <div class="slide-content">
+                            ${slide.html_content || '<p>No content generated</p>'}
+                        </div>
+                        <div class="slide-meta">
+                            <strong>${slide.slide_title}</strong> | File: ${slide.slide_name} | Components: ${slide.components.join(', ') || 'Text'}
+                        </div>
+                        <div class="slide-feedback">
+                            <input type="text"
+                                   class="feedback-input"
+                                   id="feedback-${index}"
+                                   placeholder="Feedback to regenerate (e.g., 'Make it more concise')...">
+                            <button class="regen-btn" onclick="regenerateSlide('${slide.slide_name}', ${index})">
+                                🔄 Regenerate
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            previewContent.innerHTML = html;
+        }
+
+        // Regenerate slide
+        async function regenerateSlide(slideName, slideIndex) {
+            const feedbackInput = document.getElementById(`feedback-${slideIndex}`);
+            const feedback = feedbackInput.value.trim();
+
+            if (!feedback) {
+                alert('Please provide feedback');
+                return;
+            }
+
+            if (!currentProject) {
+                alert('Project not selected');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            userInput.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/regenerate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        project_name: currentProject,
+                        slide_name: slideName,
+                        feedback: feedback,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Regeneration failed');
+                }
+
+                if (data.success) {
+                    currentSlides = data.generated_slides;
+                    displayPreviews(data.generated_slides);
+                    feedbackInput.value = '';
+                } else {
+                    throw new Error(data.message || 'Regeneration failed');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                generateBtn.disabled = false;
+                userInput.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

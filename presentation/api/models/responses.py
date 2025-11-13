@@ -17,6 +17,8 @@ class GeneratedSlide(BaseModel):
     markdown_path: str
     html_path: str
     components: List[str] = []
+    html_content: Optional[str] = None
+    markdown_content: Optional[str] = None
 
 
 class GenerateContentResponse(BaseModel):

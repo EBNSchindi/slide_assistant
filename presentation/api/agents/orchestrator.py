@@ -117,6 +117,8 @@ class AgentOrchestrator:
                 "markdown_path": markdown_path,
                 "html_path": html_path,
                 "components": generated.get("components_used", []),
+                "html_content": generated.get("html", ""),
+                "markdown_content": generated.get("markdown", ""),
             }
             slides.append(slide_result)
 

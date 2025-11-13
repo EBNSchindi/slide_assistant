@@ -103,9 +103,25 @@ presentation/
 
 ## 💬 Wie du es nutzt
 
-### Schritt 1: Projekt wählen
+### NEU: Unified Editor (Empfohlen!)
 
-Öffne `ai-editor.html` und wähle ein Projekt aus der Dropdown-Liste aus.
+Öffne **`unified-editor.html`** - eine integrierte Oberfläche mit:
+- Chat-Input (links)
+- Live-Rendered Preview mit echtem CSS (rechts)
+- Agent-Steps Toggle (optional)
+- Style-Switcher
+- Component Width Controls
+- Feedback-Loop
+
+### Oder: Legacy Editor
+
+Öffne `ai-editor.html` (älter, einfacher)
+
+---
+
+## Schritt 1: Projekt wählen
+
+Öffne `unified-editor.html` und wähle ein Projekt aus der Dropdown-Liste aus.
 
 ### Schritt 2: Content eingeben
 
@@ -137,24 +153,49 @@ Beschreibe dein Team: 5 erfahrene Experten mit 20 Jahren kombinierter Erfahrung,
 basierend in Berlin und München mit weltweiter Präsenz.
 ```
 
-### Schritt 3: Generieren lassen
+### Schritt 2: Style auswählen (optional)
+
+Im Header kannst du das Style-Theme auswählen:
+- **github** (Default) - GitHub Design System
+- **modern** - Moderner Style
+- **minimal** - Minimalistischer Ansatz
+
+Das CSS wird live geladen und auf die Preview angewendet!
+
+### Schritt 3: Content eingeben
+
+Im Input-Panel (links) kannst du eingeben:
+- Stichpunkte mit Bullets
+- Markdown-formatierter Text
+- Freier Text/Beschreibung
+
+### Schritt 4: Generieren
 
 1. Text eingeben
-2. Slide Title optional setzen
-3. "Generate" Button klicken
-4. Warten auf Content-Generierung
+2. "Generate Content" Button klicken
+3. **Live-Preview auf der rechten Seite zeigt das Ergebnis mit CSS!**
 
-### Schritt 4: Vorschau & Regenerierung
+**Optional: Agent-Steps anzeigen**
+- Checkbox "Show Agent Steps" aktivieren
+- Siehst du jeden Schritt der Agent-Chain in Echtzeit
 
-Im Preview-Panel auf der rechten Seite siehst du:
-- Generierte Slide-Titel
-- Komponenten-Liste
-- Dateipfade
+### Schritt 5: Preview & Styling
 
-**So regenerierst du mit Feedback:**
-1. Feedback eingeben: z.B. "Mach es prägnanter" oder "Füge Statistiken hinzu"
+Im Preview-Panel (rechts) siehst du:
+- **Echte HTML mit CSS gerendert** (nicht nur Text!)
+- Slide-Titel und Komponenten-Info
+- **Component Width Controls** zum Optimieren für Screenshots:
+  - Auto (automatische Breite)
+  - 400px, 600px, 800px (feste Breiten)
+  - Full (volle Breite)
+
+### Schritt 6: Feedback & Regenerierung
+
+Unter jeder generierten Slide:
+1. Feedback-Text eingeben: z.B. "Mach es prägnanter", "Füge mehr Details hinzu"
 2. "🔄 Regenerate" Button klicken
-3. Agent analysiert Feedback und generiert neu
+3. Agent analysiert Feedback und generiert die Slide neu
+4. Live-Preview aktualisiert sich sofort mit echtem CSS!
 
 ## 🔧 Agent Chain Erklärung
 

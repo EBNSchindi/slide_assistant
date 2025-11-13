@@ -1,12 +1,5 @@
 # Team
 
-## Komponente 1: Inhalt
+## Component 1
 
-- Punkt 1
-- Punkt 2
-- Punkt 3
-
-## Komponente 2: Details
-
-- Detail A
-- Detail B
+- The team consists of 5 experts.
