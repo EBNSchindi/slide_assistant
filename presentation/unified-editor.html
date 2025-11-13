@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unified AI Slide Editor</title>
+
+    <!-- Optional: Override API URL for production deployments -->
+    <!-- Example: <meta name="api-url" content="https://api.myapp.com/api"> -->
+
     <link rel="stylesheet" href="github-presentation-template.css">
     <link id="projectStyle" rel="stylesheet" href="">
     <style>
@@ -921,7 +925,27 @@ Any specific requirements or limitations?
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8001/api';
+        // API Configuration - automatically detects environment
+        // In development (localhost), uses explicit localhost:8001
+        // In production, uses relative path or custom API_URL from meta tag
+        const getApiBase = () => {
+            // Check for custom API_URL in meta tag
+            const metaApiUrl = document.querySelector('meta[name="api-url"]');
+            if (metaApiUrl && metaApiUrl.content) {
+                return metaApiUrl.content;
+            }
+
+            // Check if running on localhost (development mode)
+            const hostname = window.location.hostname;
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return 'http://localhost:8001/api';
+            }
+
+            // Production: use relative path (assumes API is served on same domain)
+            return '/api';
+        };
+
+        const API_BASE = getApiBase();
         const DEFAULT_PROJECT = 'beispiel-projekt';
         const DEFAULT_STYLE = 'github';
 

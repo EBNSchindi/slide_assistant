@@ -11,6 +11,44 @@ class ProjectService:
     def __init__(self, projects_base_path: str):
         self.projects_base_path = projects_base_path
 
+    def _validate_project_name(self, project_name: str) -> None:
+        """Validate project name to prevent path traversal attacks
+
+        Args:
+            project_name: Name to validate
+
+        Raises:
+            ValueError: If project name is invalid or contains path traversal attempts
+        """
+        # Check for path traversal attempts
+        if '..' in project_name or '/' in project_name or '\\' in project_name:
+            raise ValueError(
+                "Invalid project name: path traversal characters detected"
+            )
+
+        # Check for empty or whitespace-only names
+        if not project_name or not project_name.strip():
+            raise ValueError("Project name cannot be empty")
+
+        # Validate alphanumeric with hyphens/underscores only
+        if not project_name.replace('-', '').replace('_', '').isalnum():
+            raise ValueError(
+                "Project name can only contain letters, numbers, hyphens, and underscores"
+            )
+
+        # Ensure resolved path is within base path
+        try:
+            project_path = (Path(self.projects_base_path) / project_name).resolve()
+            base_path = Path(self.projects_base_path).resolve()
+
+            # Check if project path is relative to base path
+            if not str(project_path).startswith(str(base_path)):
+                raise ValueError(
+                    "Invalid project name: resolves outside base directory"
+                )
+        except (OSError, RuntimeError) as e:
+            raise ValueError(f"Invalid project name: {e}")
+
     def list_projects(self) -> List[str]:
         """List all available projects"""
         projects = []
@@ -34,7 +72,20 @@ class ProjectService:
         return os.path.exists(markdown_path)
 
     def get_project_path(self, project_name: str) -> str:
-        """Get full path for a project"""
+        """Get full path for a project
+
+        Args:
+            project_name: Name of the project
+
+        Returns:
+            Absolute path to project directory
+
+        Raises:
+            ValueError: If project name is invalid or project not found
+        """
+        # Validate project name first
+        self._validate_project_name(project_name)
+
         project_path = os.path.join(self.projects_base_path, project_name)
 
         if not os.path.exists(project_path):
@@ -51,14 +102,14 @@ class ProjectService:
 
         Returns:
             Project path
-        """
-        project_path = os.path.join(self.projects_base_path, project_name)
 
-        # Validate project name
-        if not project_name.replace('-', '').replace('_', '').isalnum():
-            raise ValueError(
-                "Project name can only contain letters, numbers, hyphens, and underscores"
-            )
+        Raises:
+            ValueError: If project name is invalid or project already exists
+        """
+        # Validate project name (includes path traversal check)
+        self._validate_project_name(project_name)
+
+        project_path = os.path.join(self.projects_base_path, project_name)
 
         # Check if project already exists
         if os.path.exists(project_path):
@@ -197,19 +248,16 @@ class ProjectService:
         Raises:
             ValueError: If old project doesn't exist or new name already exists
         """
-        # Validate old project exists
+        # Validate old project exists (also validates old_name for path traversal)
         old_path = self.get_project_path(old_name)
 
-        # Validate new name is available
+        # Validate new name (includes path traversal check)
+        self._validate_project_name(new_name)
+
+        # Check if new name is available
         new_path = os.path.join(self.projects_base_path, new_name)
         if os.path.exists(new_path):
             raise ValueError(f"Project '{new_name}' already exists")
-
-        # Validate new name format (alphanumeric, hyphens, underscores only)
-        if not new_name.replace('-', '').replace('_', '').isalnum():
-            raise ValueError(
-                "Project name can only contain letters, numbers, hyphens, and underscores"
-            )
 
         # Rename directory
         os.rename(old_path, new_path)

@@ -1,7 +1,7 @@
 """
 FastAPI Server for Slides Helper AI Content Generation
 """
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
@@ -17,6 +17,7 @@ from config import (
     PORT,
     DEFAULT_MODEL,
     TEST_MODE,
+    ALLOWED_ORIGINS,
 )
 from models import (
     GenerateContentRequest,
@@ -40,11 +41,18 @@ app = FastAPI(
 )
 
 # Add CORS middleware
+# Parse ALLOWED_ORIGINS (comma-separated string to list)
+origins_list = [origin.strip() for origin in ALLOWED_ORIGINS.split(",") if origin.strip()]
+
+# If "*" is in the list, allow all origins (NOT recommended for production)
+if "*" in origins_list:
+    origins_list = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=origins_list,
+    allow_credentials=True if "*" not in origins_list else False,  # Don't use credentials with *
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -130,7 +138,10 @@ async def get_project_style(project_name: str):
 
 # Create project endpoint
 @app.post("/api/projects")
-async def create_project(project_name: str, initial_style: str = "github"):
+async def create_project(
+    project_name: str = Query(..., min_length=1, max_length=100, pattern=r'^[a-zA-Z0-9_-]+$'),
+    initial_style: str = Query(default="github", max_length=50, pattern=r'^[a-zA-Z0-9_-]+$')
+):
     """Create a new project"""
     try:
         project_path = project_service.create_project(project_name, initial_style)
@@ -166,12 +177,12 @@ async def delete_project(project_name: str, force: bool = False):
 
 # Rename project endpoint
 @app.put("/api/projects/{project_name}/rename")
-async def rename_project(project_name: str, new_name: str):
+async def rename_project(
+    project_name: str,
+    new_name: str = Query(..., min_length=1, max_length=100, pattern=r'^[a-zA-Z0-9_-]+$')
+):
     """Rename a project"""
     try:
-        if not new_name or not new_name.replace("-", "").replace("_", "").isalnum():
-            raise ValueError("Invalid new project name")
-
         new_path = project_service.rename_project(project_name, new_name)
         info = project_service.get_project_info(new_name)
 
@@ -205,7 +216,10 @@ async def get_project_scope(project_name: str):
 
 # Update project scope endpoint
 @app.put("/api/projects/{project_name}/scope")
-async def update_project_scope(project_name: str, scope_content: str):
+async def update_project_scope(
+    project_name: str,
+    scope_content: str = Query(..., max_length=100000)  # 100KB limit for scope
+):
     """Update project scope/context"""
     try:
         scope_path = project_service.update_project_scope(project_name, scope_content)

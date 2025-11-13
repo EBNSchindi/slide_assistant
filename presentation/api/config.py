@@ -26,3 +26,9 @@ HTML_OUTPUT_PATH = "{project_path}/html"
 # Server Configuration
 HOST = "localhost"
 PORT = 8001
+
+# CORS Configuration
+# Comma-separated list of allowed origins
+# Example: "http://localhost:3000,http://localhost:8000,https://myapp.com"
+# Use "*" only for development (NOT recommended for production)
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8000")
