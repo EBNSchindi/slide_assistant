@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slides Helper - AI Content Editor</title>
+    <link rel="stylesheet" href="github-presentation-template.css">
+    <link id="dynamicStyleSheet" rel="stylesheet" href="">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0d1117;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            color: #c9d1d9;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .editor-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #c9d1d9;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .editor-title .logo {
+            width: 32px;
+            height: 32px;
+            background: #238636;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+
+        .editor-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .select-input,
+        .text-input {
+            padding: 8px 12px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 14px;
+        }
+
+        .select-input:focus,
+        .text-input:focus {
+            outline: none;
+            border-color: #238636;
+            box-shadow: 0 0 0 3px rgba(35, 134, 54, 0.1);
+        }
+
+        .editor-container {
+            display: flex;
+            flex: 1;
+            gap: 0;
+            min-height: 0;
+        }
+
+        .chat-panel {
+            width: 35%;
+            background: #161b22;
+            border-right: 1px solid #30363d;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: #c9d1d9;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background: #238636;
+            color: white;
+            align-self: flex-end;
+            max-width: 90%;
+            text-align: right;
+        }
+
+        .message.system {
+            background: #21262d;
+            color: #8b949e;
+            font-style: italic;
+        }
+
+        .message.agent {
+            background: #264653;
+            color: #adbac7;
+            max-width: 90%;
+        }
+
+        .chat-input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-top: 1px solid #30363d;
+            padding-top: 12px;
+        }
+
+        .chat-textarea {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            max-height: 120px;
+        }
+
+        .chat-textarea:focus {
+            outline: none;
+            border-color: #238636;
+            box-shadow: 0 0 0 3px rgba(35, 134, 54, 0.1);
+        }
+
+        .chat-button-row {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            background: #21262d;
+            color: #c9d1d9;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .btn:hover {
+            background: #30363d;
+            border-color: #8b949e;
+        }
+
+        .btn.primary {
+            background: #238636;
+            color: white;
+            border-color: #238636;
+        }
+
+        .btn.primary:hover {
+            background: #2ea043;
+            border-color: #2ea043;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .preview-panel {
+            flex: 1;
+            background: #0d1117;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .preview-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .slide-preview {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            color: #333;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #30363d;
+            border-top-color: #238636;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-message {
+            padding: 12px;
+            background: #1f6feb;
+            border-radius: 6px;
+            font-size: 13px;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .error-message {
+            padding: 12px;
+            background: #da3633;
+            border-radius: 6px;
+            font-size: 13px;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .success-message {
+            padding: 12px;
+            background: #238636;
+            border-radius: 6px;
+            font-size: 13px;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .agent-step {
+            padding: 8px 12px;
+            background: #21262d;
+            border-left: 3px solid #238636;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .agent-step.completed {
+            border-left-color: #238636;
+        }
+
+        .agent-step.error {
+            border-left-color: #da3633;
+        }
+
+        .agent-step-name {
+            font-weight: 600;
+            color: #c9d1d9;
+        }
+
+        .agent-step-status {
+            font-size: 11px;
+            color: #8b949e;
+        }
+
+        @media (max-width: 1024px) {
+            .editor-container {
+                flex-direction: column;
+            }
+
+            .chat-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #30363d;
+                max-height: 40vh;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8b949e;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-header">
+        <div class="editor-title">
+            <div class="logo">✨</div>
+            <span>AI Content Editor</span>
+        </div>
+        <div class="editor-controls">
+            <select id="projectSelect" class="select-input">
+                <option value="">Select Project...</option>
+            </select>
+            <input type="text" id="slideTitle" class="text-input" placeholder="Slide Title (optional)">
+        </div>
+    </div>
+
+    <div class="editor-container">
+        <!-- Chat Panel -->
+        <div class="chat-panel">
+            <div class="chat-header">💬 Content Generator</div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-area">
+                <textarea
+                    id="userInput"
+                    class="chat-textarea"
+                    placeholder="Describe your slide content here. You can use bullet points, markdown, or free text..."></textarea>
+                <div class="chat-button-row">
+                    <button class="btn primary" id="generateBtn">Generate</button>
+                    <button class="btn" id="clearBtn">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="preview-panel">
+            <div class="preview-content" id="previewContent">
+                <div style="text-align: center; color: #8b949e; padding-top: 40px;">
+                    <p>👆 Select a project and describe your content to get started</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8001/api';
+        const DEFAULT_PROJECT = 'beispiel-projekt';
+
+        // DOM Elements
+        const projectSelect = document.getElementById('projectSelect');
+        const slideTitle = document.getElementById('slideTitle');
+        const userInput = document.getElementById('userInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const chatMessages = document.getElementById('chatMessages');
+        const previewContent = document.getElementById('previewContent');
+
+        // State
+        let currentProject = null;
+        let isGenerating = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProjects();
+            attachEventListeners();
+        });
+
+        // Load available projects
+        async function loadProjects() {
+            try {
+                const response = await fetch(`${API_BASE}/projects`);
+                const data = await response.json();
+
+                if (data.success && data.projects.length > 0) {
+                    projectSelect.innerHTML = '<option value="">Select Project...</option>' +
+                        data.projects.map(p =>
+                            `<option value="${p}" ${p === DEFAULT_PROJECT ? 'selected' : ''}>${p}</option>`
+                        ).join('');
+
+                    if (data.projects.includes(DEFAULT_PROJECT)) {
+                        currentProject = DEFAULT_PROJECT;
+                        projectSelect.value = DEFAULT_PROJECT;
+                    } else if (data.projects.length > 0) {
+                        currentProject = data.projects[0];
+                        projectSelect.value = data.projects[0];
+                    }
+                }
+            } catch (error) {
+                showError('Failed to load projects: ' + error.message);
+            }
+        }
+
+        // Attach event listeners
+        function attachEventListeners() {
+            projectSelect.addEventListener('change', (e) => {
+                currentProject = e.target.value;
+                if (currentProject) {
+                    addMessage('system', `Project changed to: ${currentProject}`);
+                }
+            });
+
+            generateBtn.addEventListener('click', generateContent);
+            clearBtn.addEventListener('click', clearChat);
+
+            userInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    generateContent();
+                }
+            });
+        }
+
+        // Generate content
+        async function generateContent() {
+            if (!currentProject) {
+                showError('Please select a project first');
+                return;
+            }
+
+            if (!userInput.value.trim()) {
+                showError('Please enter content description');
+                return;
+            }
+
+            isGenerating = true;
+            generateBtn.disabled = true;
+            userInput.disabled = true;
+
+            addMessage('user', userInput.value);
+            addMessage('system', 'Starting content generation...');
+
+            try {
+                const response = await fetch(`${API_BASE}/generate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        project_name: currentProject,
+                        user_input: userInput.value,
+                        slide_title: slideTitle.value || null,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Generation failed');
+                }
+
+                // Show agent steps
+                if (data.agent_steps) {
+                    data.agent_steps.forEach(step => {
+                        const status = step.status === 'completed' ? '✓' :
+                                     step.status === 'error' ? '✗' : '⏳';
+                        addMessage('agent',
+                            `${status} ${step.agent_name}: ${step.output || step.error || 'Processing...'}`,
+                            step.status);
+                    });
+                }
+
+                if (data.success) {
+                    addMessage('system', `✓ Successfully generated ${data.total_components} components`);
+                    showSuccess(`Generated ${data.generated_slides.length} slide(s) with ${data.total_components} components`);
+
+                    // Preview generated content
+                    if (data.generated_slides.length > 0) {
+                        displayPreview(data.generated_slides);
+                    }
+
+                    userInput.value = '';
+                } else {
+                    throw new Error(data.message || 'Generation failed');
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+                addMessage('system', '✗ Generation failed: ' + error.message);
+            } finally {
+                isGenerating = false;
+                generateBtn.disabled = false;
+                userInput.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        // Display preview
+        function displayPreview(slides) {
+            let html = '';
+            slides.forEach((slide, index) => {
+                html += `
+                    <div class="slide-preview" id="slide-${index}">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                                <h2>${slide.slide_title}</h2>
+                                <p style="color: #666; font-size: 14px; margin-top: 8px;">
+                                    File: ${slide.slide_name}<br>
+                                    Components: ${slide.components.join(', ') || 'Text'}
+                                </p>
+                                <hr style="margin: 16px 0; border: none; border-top: 1px solid #ddd;">
+                                <div style="font-size: 13px; color: #666;">
+                                    <strong>Generated Content:</strong><br>
+                                    Preview loaded in ${slide.markdown_path}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #eee;">
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <input type="text"
+                                       class="feedback-input"
+                                       id="feedback-${index}"
+                                       placeholder="Feedback for regeneration (e.g., 'Make it more concise')..."
+                                       style="flex: 1; min-width: 200px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                <button class="btn" onclick="regenerateSlide('${slide.slide_name}', ${index})" style="white-space: nowrap;">
+                                    🔄 Regenerate
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            previewContent.innerHTML = html;
+        }
+
+        // Regenerate slide with feedback
+        async function regenerateSlide(slideName, slideIndex) {
+            const feedbackInput = document.getElementById(`feedback-${slideIndex}`);
+            const feedback = feedbackInput?.value?.trim();
+
+            if (!feedback) {
+                alert('Please provide feedback for regeneration');
+                return;
+            }
+
+            if (!currentProject) {
+                showError('Project not selected');
+                return;
+            }
+
+            isGenerating = true;
+            generateBtn.disabled = true;
+            userInput.disabled = true;
+
+            addMessage('system', `🔄 Regenerating slide: ${slideName} with feedback...`);
+
+            try {
+                const response = await fetch(`${API_BASE}/regenerate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        project_name: currentProject,
+                        slide_name: slideName,
+                        feedback: feedback,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Regeneration failed');
+                }
+
+                // Show agent steps
+                if (data.agent_steps) {
+                    data.agent_steps.forEach(step => {
+                        const status = step.status === 'completed' ? '✓' :
+                                     step.status === 'error' ? '✗' : '⏳';
+                        addMessage('agent',
+                            `${status} ${step.agent_name}: ${step.output || step.error || 'Processing...'}`,
+                            step.status);
+                    });
+                }
+
+                if (data.success) {
+                    addMessage('system', `✓ Successfully regenerated slide with ${data.total_components} components`);
+                    showSuccess(`Slide regenerated based on feedback`);
+
+                    // Update preview
+                    if (data.generated_slides.length > 0) {
+                        displayPreview(data.generated_slides);
+                    }
+
+                    // Clear feedback input
+                    feedbackInput.value = '';
+                } else {
+                    throw new Error(data.message || 'Regeneration failed');
+                }
+            } catch (error) {
+                showError('Error: ' + error.message);
+                addMessage('system', '✗ Regeneration failed: ' + error.message);
+            } finally {
+                isGenerating = false;
+                generateBtn.disabled = false;
+                userInput.disabled = false;
+            }
+        }
+
+        // Message utilities
+        function addMessage(type, content, agentStatus = null) {
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${type}`;
+
+            if (type === 'agent' && agentStatus) {
+                messageEl.innerHTML = `<div>${content}</div>`;
+            } else {
+                messageEl.textContent = content;
+            }
+
+            chatMessages.appendChild(messageEl);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showError(message) {
+            const errorEl = document.createElement('div');
+            errorEl.className = 'error-message';
+            errorEl.textContent = '❌ ' + message;
+            chatMessages.insertBefore(errorEl, chatMessages.firstChild);
+        }
+
+        function showSuccess(message) {
+            const successEl = document.createElement('div');
+            successEl.className = 'success-message';
+            successEl.textContent = '✅ ' + message;
+            chatMessages.insertBefore(successEl, chatMessages.firstChild);
+        }
+
+        function clearChat() {
+            chatMessages.innerHTML = '';
+            userInput.value = '';
+            previewContent.innerHTML = '<div style="text-align: center; color: #8b949e; padding-top: 40px;"><p>👆 Select a project and describe your content to get started</p></div>';
+            userInput.focus();
+        }
+    </script>
+</body>
+</html>

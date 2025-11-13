@@ -1,0 +1,2893 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robo4you - Komponenten Viewer</title>
+    <link rel="stylesheet" href="github-presentation-template.css">
+    <!-- Dynamisches Style-Sheet wird hier eingefügt -->
+    <link id="dynamicStyleSheet" rel="stylesheet" href="">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0d1117;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            color: #c9d1d9;
+        }
+        
+        .viewer-header {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .viewer-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #c9d1d9;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .viewer-title .logo {
+            width: 32px;
+            height: 32px;
+            background: #238636;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .width-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: #21262d;
+            padding: 4px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+        }
+        
+        .width-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid #30363d;
+            background: #161b22;
+            color: #c9d1d9;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 50px;
+            transition: all 0.2s;
+        }
+        
+        .width-btn:hover {
+            background: #30363d;
+            border-color: #8b949e;
+        }
+        
+        .width-btn.active {
+            background: #238636;
+            border-color: #238636;
+            color: white;
+        }
+        
+        .width-display {
+            padding: 6px 12px;
+            font-size: 14px;
+            color: #c9d1d9;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .project-selector,
+        .file-selector,
+        .style-selector {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .project-selector {
+            min-width: 180px;
+        }
+        
+        .file-selector {
+            min-width: 300px;
+        }
+        
+        .style-selector {
+            min-width: 160px;
+        }
+        
+        .file-selector:disabled,
+        .style-selector:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .project-selector:hover,
+        .file-selector:hover:not(:disabled),
+        .style-selector:hover:not(:disabled) {
+            background: #30363d;
+        }
+        
+        .project-selector:focus,
+        .file-selector:focus,
+        .style-selector:focus {
+            outline: 2px solid #238636;
+            outline-offset: 2px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            background: #21262d;
+            color: #c9d1d9;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn:hover {
+            background: #30363d;
+            border-color: #8b949e;
+        }
+        
+        .btn-primary {
+            background: #238636;
+            border-color: #238636;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2ea043;
+            border-color: #2ea043;
+        }
+        
+        .content-area {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: calc(100vh - 80px);
+        }
+        
+        .component-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .component {
+            background: #ffffff;
+            border: 2px solid #d0d7de;
+            border-radius: 6px;
+            padding: 48px;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            transition: all 0.2s;
+            width: var(--component-width, fit-content);
+            max-width: 100%;
+            margin-bottom: 0;
+            /* Sicherstellen, dass Komponenten nie überlappen */
+            isolation: isolate;
+        }
+        
+        .component.width-auto {
+            width: fit-content;
+        }
+        
+        .component.width-narrow {
+            width: 400px;
+        }
+        
+        .component.width-medium {
+            width: 600px;
+        }
+        
+        .component.width-wide {
+            width: 800px;
+        }
+        
+        .component.width-full {
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .component:hover {
+            border-color: #238636;
+            box-shadow: 0 4px 12px rgba(35, 134, 54, 0.15);
+        }
+        
+        .component-label {
+            position: absolute;
+            top: -12px;
+            left: 16px;
+            background: #238636;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 10;
+            /* Sicherstellen, dass Label nicht zu Überlappungen führt */
+            pointer-events: none;
+            /* Label sollte nicht über die Komponente hinausragen und Überlappungen verursachen */
+            transform: translateY(0);
+        }
+        
+        /* Zusätzlicher Abstand für erste Komponente in einer Folie, wenn sie ein Label hat */
+        .slide-section > .component:first-child {
+            margin-top: 0;
+            padding-top: 48px;
+        }
+        
+        /* Component Actions entfernt - Buttons nicht mehr benötigt */
+        
+        .slide-section {
+            margin-bottom: 48px;
+            padding-bottom: 32px;
+            padding-top: 16px;
+            border-bottom: 2px solid #30363d;
+            /* Sicherstellen, dass Folien-Abschnitte genug Abstand haben */
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            /* Sicherstellen, dass Labels nicht überlappen */
+            position: relative;
+        }
+        
+        /* Zusätzlicher Abstand für Komponenten innerhalb einer Folie */
+        .slide-section > .component {
+            margin-bottom: 0;
+            /* Zusätzlicher Abstand oben für Labels */
+            margin-top: 0;
+        }
+        
+        /* Sicherstellen, dass Komponenten mit Labels genug Platz haben */
+        .slide-section > .component:has(.component-label) {
+            margin-top: 0;
+        }
+        
+        /* Abstand zwischen Komponenten wird durch gap in slide-section geregelt */
+        .slide-section > * + .component {
+            margin-top: 0;
+        }
+        
+        .slide-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #238636;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            background: #161b22;
+            border-radius: 6px;
+            border-left: 4px solid #238636;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 80px 24px;
+            color: #8b949e;
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .empty-state h2 {
+            font-size: 24px;
+            color: #c9d1d9;
+            margin-bottom: 12px;
+        }
+        
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        
+        .info-banner {
+            background: #dff6e8;
+            border: 1px solid #238636;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 24px;
+            color: #0a3f20;
+        }
+        
+        .info-banner strong {
+            color: #0a3f20;
+        }
+        
+        /* Komponenten-Styles werden jetzt dynamisch aus Style-Dateien geladen */
+        /* Responsive Anpassungen */
+        @media (max-width: 1200px) {
+            .component {
+                max-width: 90vw;
+            }
+        }
+        
+        .screenshot-guide {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #238636;
+            color: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            max-width: 320px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            z-index: 999;
+        }
+        
+        .screenshot-guide strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .screenshot-guide ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 8px 0 0 0;
+        }
+        
+        .screenshot-guide li {
+            padding: 4px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .screenshot-guide li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+        }
+        
+        /* CSS-Variable für Breite */
+        :root {
+            --component-width: fit-content;
+        }
+    </style>
+</head>
+<body>
+    <div class="viewer-header">
+        <div class="viewer-title">
+            <div class="logo">🤖</div>
+            <span>Robo4you Komponenten Viewer</span>
+        </div>
+        
+        <div class="controls">
+            <select class="project-selector" id="projectSelector" onchange="onProjectSelected()">
+                <option value="">📂 Projekt auswählen...</option>
+            </select>
+            
+            <select class="file-selector" id="fileSelector" onchange="loadSelectedFile()" disabled>
+                <option value="">📁 HTML-Datei auswählen...</option>
+            </select>
+            
+            <select class="style-selector" id="styleSelector" onchange="onStyleSelected()" disabled>
+                <option value="">🎨 Style auswählen...</option>
+            </select>
+            
+            <div class="width-controls">
+                <button class="width-btn" onclick="setWidth('auto', this)" title="Automatisch (Inhaltsbreite)">Auto</button>
+                <button class="width-btn" onclick="setWidth('narrow', this)" title="Schmal (400px)">Schmal</button>
+                <button class="width-btn active" onclick="setWidth('medium', this)" title="Mittel (600px)">Mittel</button>
+                <button class="width-btn" onclick="setWidth('wide', this)" title="Breit (800px)">Breit</button>
+                <button class="width-btn" onclick="setWidth('full', this)" title="Vollbreite (max. 1200px)">Voll</button>
+                <span class="width-display" id="widthDisplay">Mittel</span>
+            </div>
+            
+            <button class="btn" onclick="refreshFileList()" title="Projektliste neu laden">
+                🔄 Neu laden
+            </button>
+            
+            <a href="README-KOMPONENTEN.md" class="btn" target="_blank">
+                📖 Anleitung
+            </a>
+        </div>
+    </div>
+    
+    <div class="content-area">
+        <div id="contentContainer">
+            <div class="empty-state">
+                <div class="empty-state-icon">📦</div>
+                <h2>Willkommen beim Komponenten Viewer</h2>
+                <p>Wählen Sie oben ein Projekt und dann eine HTML-Datei aus.</p>
+                <div style="margin-top: 32px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    <h3 style="color: #c9d1d9; margin-bottom: 16px;">So funktioniert's:</h3>
+                    <ol style="color: #8b949e; line-height: 2;">
+                        <li><strong style="color: #c9d1d9;">Markdown schreiben:</strong> Erstellen Sie Ihr Pitch-Deck als Markdown</li>
+                        <li><strong style="color: #c9d1d9;">LLM konvertieren:</strong> Lassen Sie ein LLM das Markdown zu HTML konvertieren</li>
+                        <li><strong style="color: #c9d1d9;">Speichern:</strong> HTML in <code>output/</code> Ordner speichern</li>
+                        <li><strong style="color: #c9d1d9;">Auswählen:</strong> Datei oben im Dropdown auswählen</li>
+                        <li><strong style="color: #c9d1d9;">Screenshot:</strong> Komponenten einzeln screenshotten</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="screenshot-guide">
+        <strong>💡 Screenshot-Tipps:</strong>
+        <ul>
+            <li>Breite: Auto, Schmal, Mittel, Breit, Voll</li>
+            <li>Chrome: DevTools → Element → Screenshot</li>
+            <li>Firefox: Rechtsklick → Screenshot des Knotens</li>
+            <li>Tastatur: Strg/Cmd + ←/→ für Breite</li>
+        </ul>
+    </div>
+
+    <script>
+        // Eingebettete Beispiel-Dateien (funktionieren immer, auch ohne Server)
+        const embeddedExamples = {
+            'beispiel-01-problem.html': `<div class="slide-section">
+    <div class="slide-title">Folie 1: Problem - Demografischer Wandel</div>
+    
+    <div class="component" id="slide-1-comp-1">
+        <div class="component-label">Komponente 1.1</div>
+        <h2>Die Zahlen sprechen für sich</h2>
+        
+        <div class="stat-grid">
+            <div class="stat-card">
+                <span class="stat-number">83,6 Mio</span>
+                <span class="stat-label">Einwohner in Deutschland (2024)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">5,7 Mio</span>
+                <span class="stat-label">Pflegebedürftige (Stand 2023)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">500.000</span>
+                <span class="stat-label">Fehlende Pflegekräfte bis 2030</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">16.500</span>
+                <span class="stat-label">Pflegeheime benötigen Unterstützung</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component" id="slide-1-comp-2">
+        <div class="component-label">Komponente 1.2</div>
+        <h2>Wachsende Belastung</h2>
+        
+        <p>Der Altersquotient steigt dramatisch:</p>
+        
+        <ul class="bullet-list">
+            <li><strong>37%</strong> heute (37 über 67-Jährige pro 100 Erwerbsfähige)</li>
+            <li><strong>>50%</strong> bis 2040 prognostiziert</li>
+        </ul>
+        
+        <div class="quote">
+            "17 Millionen erwirtschaften für 90 Millionen"
+        </div>
+    </div>
+    
+    <div class="component" id="slide-1-comp-3">
+        <div class="component-label">Komponente 1.3</div>
+        <h2>Finanzielle Belastung</h2>
+        
+        <div class="stat-grid">
+            <div class="stat-card">
+                <span class="stat-number">52,9%</span>
+                <span class="stat-label">Einkommensbelastungsquote (2025)</span>
+            </div>
+        </div>
+        
+        <ul class="bullet-list">
+            <li>Mehr als die Hälfte des Einkommens geht an den Staat</li>
+            <li>Tendenz steigend</li>
+        </ul>
+    </div>
+</div>`,
+            'beispiel-02-loesung.html': `<div class="slide-section">
+    <div class="slide-title">Folie 2: Lösung - Robo4you</div>
+    
+    <div class="component" id="slide-2-comp-1">
+        <div class="component-label">Komponente 2.1</div>
+        <h2>Unser Konzept</h2>
+        
+        <p><strong>Robotik as a Service</strong> - Wir vermieten humanoide Roboter mit umfassendem Service-Paket.</p>
+        
+        <h3>Die drei Säulen</h3>
+        
+        <ul class="bullet-list">
+            <li><strong>🤖 Hardware:</strong> Marktführende humanoide Roboter</li>
+            <li><strong>🎓 Schulung:</strong> Robotik-Coaches für optimale Nutzung</li>
+            <li><strong>🔧 Service:</strong> Wartung, Updates, Support inklusive</li>
+        </ul>
+    </div>
+    
+    <div class="component" id="slide-2-comp-2">
+        <div class="component-label">Komponente 2.2</div>
+        <h2>Vorteile für Kunden</h2>
+        
+        <ul class="bullet-list">
+            <li><strong>Kein Kapitaleinsatz:</strong> Monatliche Miete statt 50.000-150.000 € Kaufpreis</li>
+            <li><strong>Planbare Kosten:</strong> Feste monatliche Rate, keine Überraschungen</li>
+            <li><strong>Immer aktuell:</strong> Software-Updates und Hardware-Upgrades inklusive</li>
+            <li><strong>Risikofrei:</strong> Technologie-Risiko liegt bei uns</li>
+        </ul>
+    </div>
+    
+    <div class="component" id="slide-2-comp-3">
+        <div class="component-label">Komponente 2.3</div>
+        <h2>Zielgruppen</h2>
+        
+        <h3>Phase 1: Institutioneller Markt (2026-2028)</h3>
+        <ul class="bullet-list">
+            <li><strong>Pflegeheime:</strong> 16.500 Einrichtungen</li>
+            <li><strong>Bibliotheken:</strong> 8.800 öffentliche Bibliotheken</li>
+            <li><strong>Schulen:</strong> 32.000 allgemeinbildende Schulen</li>
+        </ul>
+        
+        <h3>Phase 2: Privater Markt (ab 2029)</h3>
+        <ul class="bullet-list">
+            <li><strong>Haushalte:</strong> ~15 Mio Zielgruppe (Sandwich-Generation)</li>
+            <li>Konservatives Szenario: 1% Penetration = 150.000 Haushalte</li>
+        </ul>
+    </div>
+</div>`,
+            'beispiel-03-markt.html': `<div class="slide-section">
+    <div class="slide-title">Folie 3: Markt - Robotik-Boom</div>
+    
+    <div class="component" id="slide-3-comp-1">
+        <div class="component-label">Komponente 3.1</div>
+        <h2>Marktreife Modelle (2025)</h2>
+        
+        <p>Erste humanoide Roboter sind bereits verfügbar:</p>
+        
+        <div class="stat-grid">
+            <div class="stat-card">
+                <span class="stat-number">~84.000 €</span>
+                <span class="stat-label">Unitree H1<br>(High-End, Industrie)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">~18.500 €</span>
+                <span class="stat-label">1X NEO<br>(Service-Roboter)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">~15.000 €</span>
+                <span class="stat-label">Unitree G1<br>(Bildung/Forschung)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">~5.100 €</span>
+                <span class="stat-label">Unitree R1<br>(Entry-Level)</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component" id="slide-3-comp-2">
+        <div class="component-label">Komponente 3.2</div>
+        <h2>Referenz-Deployments</h2>
+        
+        <h3>GXO × Agility Robotics</h3>
+        <p>Erster kommerzieller Dauerbetrieb von humanoiden Robotern in der Logistik (Atlanta, seit Juni 2024).</p>
+        
+        <h3>BMW × Figure AI</h3>
+        <p>Humanoide Roboter im Produktionseinsatz (Spartanburg, 2024).</p>
+        
+        <h3>Neura Robotics</h3>
+        <p>Deutscher Hersteller, Serienstart Ende 2025 angekündigt (IFA 2025).</p>
+    </div>
+    
+    <div class="component" id="slide-3-comp-3">
+        <div class="component-label">Komponente 3.3</div>
+        <h2>Marktprognosen</h2>
+        
+        <div class="stat-grid">
+            <div class="stat-card">
+                <span class="stat-number">18.000</span>
+                <span class="stat-label">Einheiten weltweit in 2025<br>(Bank of America)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">>1 Mrd.</span>
+                <span class="stat-label">Roboter bis 2050<br>(Morgan Stanley)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">$5 Billionen</span>
+                <span class="stat-label">Marktvolumen bis 2050</span>
+            </div>
+        </div>
+        
+        <div class="quote">
+            "Die nächste industrielle Revolution hat bereits begonnen"
+        </div>
+    </div>
+</div>`,
+            'beispiel-04-tabelle.html': `<div class="slide-section">
+    <div class="slide-title">Folie 4: Vergleichstabelle - Roboter-Modelle</div>
+    
+    <div class="component" id="slide-4-comp-1">
+        <div class="component-label">Komponente 4.1</div>
+        <h2>Roboter-Modell Vergleich</h2>
+        
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Modell</th>
+                    <th>Preis</th>
+                    <th>Einsatzbereich</th>
+                    <th>Verfügbarkeit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Unitree H1</td>
+                    <td>~84.000 €</td>
+                    <td>Industrie, Forschung</td>
+                    <td><span class="badge badge-success">Verfügbar</span></td>
+                </tr>
+                <tr>
+                    <td>1X NEO</td>
+                    <td>~18.500 €</td>
+                    <td>Service, Haushalt</td>
+                    <td><span class="badge badge-warning">2026</span></td>
+                </tr>
+                <tr>
+                    <td>Unitree G1</td>
+                    <td>~15.000 €</td>
+                    <td>Bildung, Forschung</td>
+                    <td><span class="badge badge-success">Verfügbar</span></td>
+                </tr>
+                <tr>
+                    <td>Unitree R1</td>
+                    <td>~5.100 €</td>
+                    <td>Entry-Level, Entwicklung</td>
+                    <td><span class="badge badge-success">Verfügbar</span></td>
+                </tr>
+                <tr>
+                    <td>Neura 4NE-1</td>
+                    <td><50.000 €</td>
+                    <td>Industrie, Service</td>
+                    <td><span class="badge badge-warning">Ende 2025</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="component" id="slide-4-comp-2">
+        <div class="component-label">Komponente 4.2</div>
+        <h2>Geschäftsmodell Vergleich</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Kriterium</th>
+                    <th>Kauf</th>
+                    <th>Miete (Robo4you)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Anschaffungskosten</td>
+                    <td>50.000 - 150.000 €</td>
+                    <td>0 €</td>
+                </tr>
+                <tr>
+                    <td>Monatliche Kosten</td>
+                    <td>Wartung: ~500 €</td>
+                    <td>2.500 - 4.500 € (alles inkl.)</td>
+                </tr>
+                <tr>
+                    <td>Updates & Upgrades</td>
+                    <td>Zusätzliche Kosten</td>
+                    <td>Inklusive</td>
+                </tr>
+                <tr>
+                    <td>Risiko</td>
+                    <td>Beim Kunden</td>
+                    <td>Bei Robo4you</td>
+                </tr>
+                <tr>
+                    <td>Flexibilität</td>
+                    <td>Gering</td>
+                    <td>Hoch (kündbar)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>`,
+            'beispiel-05-prozesskette.html': `<div class="slide-section">
+    <div class="slide-title">Folie 5: Prozesskette - Deployment-Workflow</div>
+    
+    <div class="component" id="slide-5-comp-1">
+        <div class="component-label">Komponente 5.1</div>
+        <h2>Vertikale Prozesskette</h2>
+        
+        <div class="process-chain">
+            <div class="process-step">
+                <div class="process-number">1</div>
+                <div class="process-content">
+                    <h4>Bedarfserhebung</h4>
+                    <p>Analyse der Anforderungen und Einsatzbereiche beim Kunden</p>
+                </div>
+            </div>
+            <div class="process-step">
+                <div class="process-number">2</div>
+                <div class="process-content">
+                    <h4>Roboter-Auswahl</h4>
+                    <p>Passendes Modell basierend auf Anforderungen und Budget</p>
+                </div>
+            </div>
+            <div class="process-step">
+                <div class="process-number">3</div>
+                <div class="process-content">
+                    <h4>Installation & Setup</h4>
+                    <p>Vor-Ort Installation und erste Konfiguration durch unsere Techniker</p>
+                </div>
+            </div>
+            <div class="process-step">
+                <div class="process-number">4</div>
+                <div class="process-content">
+                    <h4>Schulung & Training</h4>
+                    <p>Umfassende Schulung der Mitarbeiter durch Robotik-Coaches</p>
+                </div>
+            </div>
+            <div class="process-step">
+                <div class="process-number">5</div>
+                <div class="process-content">
+                    <h4>Betrieb & Support</h4>
+                    <p>Kontinuierlicher Support, Wartung und Updates während der Laufzeit</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component" id="slide-5-comp-2">
+        <div class="component-label">Komponente 5.2</div>
+        <h2>Horizontale Prozesskette</h2>
+        
+        <div class="process-horizontal">
+            <div class="process-item">
+                <div class="process-item-circle">1</div>
+                <div class="process-item-title">Kontakt</div>
+                <div class="process-item-desc">Erstgespräch</div>
+            </div>
+            <div class="process-item">
+                <div class="process-item-circle">2</div>
+                <div class="process-item-title">Analyse</div>
+                <div class="process-item-desc">Bedarf prüfen</div>
+            </div>
+            <div class="process-item">
+                <div class="process-item-circle">3</div>
+                <div class="process-item-title">Angebot</div>
+                <div class="process-item-desc">Kosten kalkulieren</div>
+            </div>
+            <div class="process-item">
+                <div class="process-item-circle">4</div>
+                <div class="process-item-title">Deployment</div>
+                <div class="process-item-desc">Installation</div>
+            </div>
+            <div class="process-item">
+                <div class="process-item-circle">5</div>
+                <div class="process-item-title">Betrieb</div>
+                <div class="process-item-desc">Support & Wartung</div>
+            </div>
+        </div>
+    </div>
+</div>`,
+            'beispiel-06-features.html': `<div class="slide-section">
+    <div class="slide-title">Folie 6: Features & Vorteile</div>
+    
+    <div class="component" id="slide-6-comp-1">
+        <div class="component-label">Komponente 6.1</div>
+        <h2>Unsere Service-Features</h2>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>🤖 Hardware</h4>
+                <p>Marktführende humanoide Roboter von etablierten Herstellern. Regelmäßige Hardware-Upgrades inklusive.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🎓 Schulung</h4>
+                <p>Umfassende Schulungen durch zertifizierte Robotik-Coaches. Initial-Training und fortlaufende Weiterbildung.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔧 Wartung</h4>
+                <p>Proaktive Wartung und Reparaturen durch unser Service-Team. Minimale Ausfallzeiten garantiert.</p>
+            </div>
+            <div class="feature-card">
+                <h4>📱 Software-Updates</h4>
+                <p>Automatische Software-Updates und neue Features. Immer auf dem neuesten Stand der Technik.</p>
+            </div>
+            <div class="feature-card">
+                <h4>📞 Support</h4>
+                <p>24/7 Support-Hotline für kritische Fragen. Schnelle Reaktionszeiten bei Problemen.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔄 Flexibilität</h4>
+                <p>Monatlich kündbar, keine langfristigen Verträge. Anpassung der Anzahl der Roboter möglich.</p>
+            </div>
+        </div>
+    </div>
+</div>`,
+            'beispiel-07-daten.html': `<div class="slide-section">
+    <div class="slide-title">Folie 7: Daten & Metriken</div>
+    
+    <div class="component" id="slide-7-comp-1">
+        <div class="component-label">Komponente 7.1</div>
+        <h2>Unit Economics</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Position</th>
+                    <th>Monatlich</th>
+                    <th>Jährlich</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Mieteinnahmen</td>
+                    <td>3.500 €</td>
+                    <td>42.000 €</td>
+                </tr>
+                <tr>
+                    <td>Finanzierung/Abschreibung</td>
+                    <td>-800 €</td>
+                    <td>-9.600 €</td>
+                </tr>
+                <tr>
+                    <td>Wartung & Support</td>
+                    <td>-400 €</td>
+                    <td>-4.800 €</td>
+                </tr>
+                <tr>
+                    <td>Versicherung</td>
+                    <td>-200 €</td>
+                    <td>-2.400 €</td>
+                </tr>
+                <tr>
+                    <td>Robotik-Coach (anteilig)</td>
+                    <td>-300 €</td>
+                    <td>-3.600 €</td>
+                </tr>
+                <tr style="background: #f6f8fa; font-weight: 600;">
+                    <td>Deckungsbeitrag</td>
+                    <td>1.800 €</td>
+                    <td>21.600 €</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <p style="margin-top: 16px; color: #57606a; font-size: 14px;">
+            <strong>Break-Even:</strong> Nach 17 Monaten | <strong>Deckungsbeitrag:</strong> 51%
+        </p>
+    </div>
+    
+    <div class="component" id="slide-7-comp-2">
+        <div class="component-label">Komponente 7.2</div>
+        <h2>Wachstumsprognose</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Jahr</th>
+                    <th>Roboter</th>
+                    <th>ARR</th>
+                    <th>EBITDA</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2026</td>
+                    <td>50</td>
+                    <td>1,5 Mio €</td>
+                    <td>-500.000 €</td>
+                </tr>
+                <tr>
+                    <td>2027</td>
+                    <td>150</td>
+                    <td>4,5 Mio €</td>
+                    <td>1,2 Mio €</td>
+                </tr>
+                <tr>
+                    <td>2028</td>
+                    <td>300</td>
+                    <td>9 Mio €</td>
+                    <td>3,5 Mio €</td>
+                </tr>
+                <tr>
+                    <td>2029</td>
+                    <td>500</td>
+                    <td>15 Mio €</td>
+                    <td>6 Mio €</td>
+                </tr>
+                <tr>
+                    <td>2030</td>
+                    <td>2.500</td>
+                    <td>75 Mio €</td>
+                    <td>25 Mio €</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>`,
+            'beispiel-08-bilder.html': `<div class="slide-section">
+    <div class="slide-title">Folie 8: Bilder & Visualisierungen</div>
+    
+    <div class="component" id="slide-8-comp-1">
+        <div class="component-label">Komponente 8.1</div>
+        <h2>Einzelnes Bild mit Rahmen</h2>
+        
+        <div class="image-container">
+            <div class="image-wrapper">
+                <div class="image-placeholder">Bild Platzhalter</div>
+            </div>
+            <div class="image-content">
+                <h4>Unitree H1 - High-End Roboter</h4>
+                <p>Der Unitree H1 ist ein humanoider Roboter für industrielle Anwendungen. Mit einer Höhe von 1,80m und 47 kg Gewicht bietet er beeindruckende Bewegungsfähigkeiten und kann Lasten bis zu 30 kg tragen.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component" id="slide-8-comp-2">
+        <div class="component-label">Komponente 8.2</div>
+        <h2>Bild-Grid (mehrere Bilder)</h2>
+        
+        <div class="image-grid">
+            <div class="image-card">
+                <div class="image-wrapper">
+                    <div class="image-placeholder" style="height: 120px;">🤖</div>
+                    <span class="image-badge">
+                        <span class="badge badge-success">Verfügbar</span>
+                    </span>
+                </div>
+                <div class="image-content">
+                    <h4>Unitree H1</h4>
+                    <p>High-End Industrie-Roboter</p>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <div class="image-wrapper">
+                    <div class="image-placeholder" style="height: 120px;">🤖</div>
+                    <span class="image-badge">
+                        <span class="badge badge-warning">2026</span>
+                    </span>
+                </div>
+                <div class="image-content">
+                    <h4>1X NEO</h4>
+                    <p>Service-Roboter für Haushalt</p>
+                </div>
+            </div>
+            
+            <div class="image-card">
+                <div class="image-wrapper">
+                    <div class="image-placeholder" style="height: 120px;">🤖</div>
+                    <span class="image-badge">
+                        <span class="badge badge-success">Verfügbar</span>
+                    </span>
+                </div>
+                <div class="image-content">
+                    <h4>Unitree G1</h4>
+                    <p>Bildung & Forschung</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component" id="slide-8-comp-3">
+        <div class="component-label">Komponente 8.3</div>
+        <h2>Referenz-Deployment</h2>
+        
+        <div class="image-container">
+            <div class="image-wrapper">
+                <div class="image-placeholder">GXO × Agility Robotics Deployment</div>
+            </div>
+            <div class="image-content">
+                <h4>Erster kommerzieller Dauerbetrieb</h4>
+                <p>GXO Logistics und Agility Robotics haben im Juni 2024 den ersten kommerziellen Dauerbetrieb von humanoiden Robotern in einem Lager nahe Atlanta gestartet. Die Digit-Roboter unterstützen bei der Materialhandhabung und Logistik.</p>
+                <p style="margin-top: 12px; color: #57606a; font-size: 13px;">
+                    <strong>Standort:</strong> Atlanta, USA | <strong>Start:</strong> Juni 2024 | <strong>Status:</strong> <span class="badge badge-success">Aktiv</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="component" id="slide-8-comp-4">
+        <div class="component-label">Komponente 8.4</div>
+        <h2>Roboter im Einsatz</h2>
+        
+        <div class="image-container">
+            <div class="image-wrapper" style="min-height: 250px;">
+                <div class="image-placeholder" style="height: 250px;">Roboter in Pflegeeinrichtung</div>
+            </div>
+            <div class="image-content">
+                <h4>Einsatz in Pflegeheimen</h4>
+                <p>Humanoide Roboter unterstützen Pflegekräfte bei alltäglichen Aufgaben wie Materialtransport, Patientenbetreuung und Dokumentation. Dies entlastet das Personal und ermöglicht mehr Zeit für die direkte Pflege.</p>
+                <ul class="bullet-list" style="margin-top: 12px;">
+                    <li>Materialtransport zwischen Stationen</li>
+                    <li>Unterstützung bei der Patientenbetreuung</li>
+                    <li>Dokumentationshilfe</li>
+                    <li>24/7 Verfügbarkeit</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>`
+        };
+        
+        // Eingebettete CSS-Styles für file:// Protokoll
+        const embeddedStyles = {
+            'projects/beispiel-projekt/styles/github/variables.css': `/* GitHub Design System - CSS Variablen */
+
+:root {
+  /* Primärfarben */
+  --color-primary: #238636;
+  --color-primary-light: #2ea043;
+  --color-primary-dark: #1a7f37;
+  
+  /* Komponenten-Hintergrund */
+  --color-bg-component: #ffffff;
+  --color-bg-component-hover: #f6f8fa;
+  --color-bg-subtle: #f6f8fa;
+  --color-bg-overlay: #ffffff;
+  
+  /* Text-Farben */
+  --color-text-primary: #24292f;
+  --color-text-secondary: #57606a;
+  --color-text-muted: #6e7781;
+  --color-text-on-primary: #ffffff;
+  
+  /* Rahmen-Farben */
+  --color-border: #d0d7de;
+  --color-border-muted: #d8dee4;
+  --color-border-hover: #238636;
+  
+  /* Akzentfarben */
+  --color-accent: #0969da;
+  --color-success: #1a7f37;
+  --color-success-bg: #dff6e8;
+  --color-success-text: #0a3f20;
+  --color-warning: #9a6700;
+  --color-warning-bg: #fff8c5;
+  --color-warning-text: #7d4e00;
+  --color-danger: #cf222e;
+  --color-danger-bg: #ffebe9;
+  --color-danger-text: #82071e;
+  
+  /* Schatten */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.1);
+  --shadow-lg: 0 4px 12px rgba(35, 134, 54, 0.15);
+  --shadow-xl: 0 8px 24px rgba(140, 149, 159, 0.2);
+  
+  /* Border Radius */
+  --border-radius-sm: 3px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 12px;
+  --border-radius-full: 50%;
+  
+  /* Schriftart */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-family-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  
+  /* Komponenten-spezifisch */
+  --component-padding: 48px;
+  --component-border-width: 2px;
+  --component-border-radius: var(--border-radius-md);
+  --component-shadow: var(--shadow-sm);
+  --component-shadow-hover: var(--shadow-lg);
+  
+  /* Label */
+  --label-bg: var(--color-primary);
+  --label-color: var(--color-text-on-primary);
+  --label-padding: 4px 12px;
+  --label-border-radius: var(--border-radius-sm);
+  
+  /* Slide Title */
+  --slide-title-bg: #161b22;
+  --slide-title-color: var(--color-primary);
+  --slide-title-border: var(--color-primary);
+}`,
+            'projects/beispiel-projekt/styles/github/style.css': `/* GitHub Design System - Komponenten Styles */
+
+/* CSS Variablen (eingebettet) */
+:root {
+  /* Primärfarben */
+  --color-primary: #238636;
+  --color-primary-light: #2ea043;
+  --color-primary-dark: #1a7f37;
+  
+  /* Komponenten-Hintergrund */
+  --color-bg-component: #ffffff;
+  --color-bg-component-hover: #f6f8fa;
+  --color-bg-subtle: #f6f8fa;
+  --color-bg-overlay: #ffffff;
+  
+  /* Text-Farben */
+  --color-text-primary: #24292f;
+  --color-text-secondary: #57606a;
+  --color-text-muted: #6e7781;
+  --color-text-on-primary: #ffffff;
+  
+  /* Rahmen-Farben */
+  --color-border: #d0d7de;
+  --color-border-muted: #d8dee4;
+  --color-border-hover: #238636;
+  
+  /* Akzentfarben */
+  --color-accent: #0969da;
+  --color-success: #1a7f37;
+  --color-success-bg: #dff6e8;
+  --color-success-text: #0a3f20;
+  --color-warning: #9a6700;
+  --color-warning-bg: #fff8c5;
+  --color-warning-text: #7d4e00;
+  --color-danger: #cf222e;
+  --color-danger-bg: #ffebe9;
+  --color-danger-text: #82071e;
+  
+  /* Schatten */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.1);
+  --shadow-lg: 0 4px 12px rgba(35, 134, 54, 0.15);
+  --shadow-xl: 0 8px 24px rgba(140, 149, 159, 0.2);
+  
+  /* Border Radius */
+  --border-radius-sm: 3px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 12px;
+  --border-radius-full: 50%;
+  
+  /* Schriftart */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-family-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  
+  /* Komponenten-spezifisch */
+  --component-padding: 48px;
+  --component-border-width: 2px;
+  --component-border-radius: var(--border-radius-md);
+  --component-shadow: var(--shadow-sm);
+  --component-shadow-hover: var(--shadow-lg);
+  
+  /* Label */
+  --label-bg: var(--color-primary);
+  --label-color: var(--color-text-on-primary);
+  --label-padding: 4px 12px;
+  --label-border-radius: var(--border-radius-sm);
+  
+  /* Slide Title */
+  --slide-title-bg: #161b22;
+  --slide-title-color: var(--color-primary);
+  --slide-title-border: var(--color-primary);
+}
+
+/* Komponenten-Basis */
+.component {
+    background: var(--color-bg-component);
+    border: var(--component-border-width) solid var(--color-border);
+    border-radius: var(--component-border-radius);
+    padding: var(--component-padding);
+    position: relative;
+    box-shadow: var(--component-shadow);
+    transition: all 0.2s;
+    width: var(--component-width, fit-content);
+    max-width: 100%;
+    margin-bottom: 0;
+    isolation: isolate;
+}
+
+.component:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--component-shadow-hover);
+}
+
+.component-label {
+    position: absolute;
+    top: -12px;
+    left: 16px;
+    background: var(--label-bg);
+    color: var(--label-color);
+    padding: var(--label-padding);
+    border-radius: var(--label-border-radius);
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 10;
+    pointer-events: none;
+    transform: translateY(0);
+}
+
+.slide-section {
+    margin-bottom: var(--spacing-2xl);
+    padding-bottom: var(--spacing-xl);
+    padding-top: var(--spacing-md);
+    border-bottom: 2px solid #30363d;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    position: relative;
+}
+
+.slide-section > .component:first-child {
+    margin-top: 0;
+    padding-top: var(--component-padding);
+}
+
+.slide-section > .component {
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+.slide-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--slide-title-color);
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md) 20px;
+    background: var(--slide-title-bg);
+    border-radius: var(--component-border-radius);
+    border-left: 4px solid var(--slide-title-border);
+}
+
+/* Typografie */
+.component h1, .component h2, .component h3, .component h4 {
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-md);
+}
+
+.component h1 { font-size: 48px; font-weight: 700; }
+.component h2 { font-size: 32px; font-weight: 600; }
+.component h3 { font-size: 24px; font-weight: 600; }
+.component h4 { font-size: 20px; font-weight: 600; }
+
+.component p {
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+/* Statistik-Grid */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+    width: 100%;
+}
+
+.stat-card {
+    background: var(--color-bg-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--component-border-radius);
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--color-primary);
+    display: block;
+    margin-bottom: var(--spacing-sm);
+}
+
+.stat-label {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+}
+
+/* Bullet-Liste */
+.bullet-list {
+    list-style: none;
+    padding: 0;
+    margin: var(--spacing-md) 0;
+}
+
+.bullet-list li {
+    padding: 12px var(--spacing-md);
+    margin: var(--spacing-sm) 0;
+    background: var(--color-bg-subtle);
+    border-left: 4px solid var(--color-primary);
+    border-radius: var(--border-radius-sm);
+    color: var(--color-text-primary);
+}
+
+.bullet-list li strong {
+    color: var(--color-primary);
+}
+
+/* Quote */
+.quote {
+    border-left: 4px solid var(--color-primary);
+    padding-left: 20px;
+    margin: 20px 0;
+    font-style: italic;
+    color: var(--color-text-secondary);
+}
+
+/* Code */
+code {
+    background: var(--color-bg-subtle);
+    padding: 2px 6px;
+    border-radius: var(--border-radius-sm);
+    font-family: var(--font-family-mono);
+    font-size: 14px;
+    color: var(--color-text-primary);
+}
+
+/* Tabellen */
+.component table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--spacing-md) 0;
+    font-size: 14px;
+}
+
+.component table th {
+    background: var(--color-bg-subtle);
+    color: var(--color-text-primary);
+    font-weight: 600;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid var(--color-border);
+}
+
+.component table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+}
+
+.component table tr:hover {
+    background: var(--color-bg-subtle);
+}
+
+.component table tr:last-child td {
+    border-bottom: none;
+}
+
+.comparison-table th:first-child,
+.comparison-table td:first-child {
+    font-weight: 600;
+    background: var(--color-bg-subtle);
+}
+
+/* Prozesskette */
+.process-chain {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    margin: var(--spacing-lg) 0;
+}
+
+.process-step {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    position: relative;
+}
+
+.process-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 48px;
+    width: 2px;
+    height: calc(100% + 8px);
+    background: var(--color-border);
+}
+
+.process-number {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-full);
+    background: var(--color-primary);
+    color: var(--color-text-on-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 18px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.process-content {
+    flex: 1;
+    padding-top: var(--spacing-sm);
+}
+
+.process-content h4 {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--color-text-primary);
+    font-size: 18px;
+}
+
+.process-content p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+}
+
+/* Horizontale Prozesskette */
+.process-horizontal {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin: var(--spacing-lg) 0;
+    position: relative;
+}
+
+.process-horizontal::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 60px;
+    right: 60px;
+    height: 2px;
+    background: var(--color-border);
+    z-index: 0;
+}
+
+.process-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.process-item-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-full);
+    background: var(--color-primary);
+    color: var(--color-text-on-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.process-item-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    text-align: center;
+    margin-bottom: 4px;
+}
+
+.process-item-desc {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    text-align: center;
+}
+
+/* Feature-Grid */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.feature-card {
+    background: var(--color-bg-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: var(--component-border-radius);
+    padding: 20px;
+}
+
+.feature-card h4 {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--color-text-primary);
+    font-size: 16px;
+}
+
+.feature-card p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+}
+
+/* Badge / Tag */
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge-success {
+    background: var(--color-success-bg);
+    color: var(--color-success-text);
+}
+
+.badge-warning {
+    background: var(--color-warning-bg);
+    color: var(--color-warning-text);
+}
+
+.badge-danger {
+    background: var(--color-danger-bg);
+    color: var(--color-danger-text);
+}
+
+/* Bild-Komponenten */
+.image-container {
+    border: 1px solid var(--color-border);
+    border-radius: var(--component-border-radius);
+    overflow: hidden;
+    background: var(--color-bg-component);
+    margin: var(--spacing-md) 0;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.image-wrapper {
+    width: 100%;
+    background: var(--color-bg-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    position: relative;
+    min-height: 0;
+    box-sizing: border-box;
+}
+
+.image-wrapper:not(:has(img)) {
+    min-height: 200px;
+}
+
+.image-wrapper img {
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-md);
+    display: block;
+    flex-shrink: 0;
+    object-fit: contain;
+    vertical-align: bottom;
+}
+
+.image-wrapper:has(img) .image-placeholder {
+    display: none;
+}
+
+.image-placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 200px;
+    background: linear-gradient(135deg, var(--color-bg-subtle) 0%, #e1e4e8 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    border-radius: var(--border-radius-sm);
+    gap: var(--spacing-sm);
+}
+
+.image-placeholder::before {
+    content: '🖼️';
+    font-size: 48px;
+    line-height: 1;
+}
+
+.image-content {
+    padding: 20px;
+}
+
+.image-content h4 {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--color-text-primary);
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.image-content p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.image-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--component-border-radius);
+    overflow: hidden;
+    background: var(--color-bg-component);
+}
+
+.image-card .image-wrapper {
+    padding: 20px;
+    min-height: 0;
+}
+
+.image-card .image-wrapper:not(:has(img)) {
+    min-height: 150px;
+}
+
+.image-card .image-placeholder {
+    min-height: 150px;
+}
+
+.image-card .image-content {
+    padding: var(--spacing-md);
+}
+
+.image-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 5;
+}`
+        };
+        
+        // Projekte und Dateien
+        let projects = [];
+        let currentProject = null;
+        let currentStyle = null;
+        let availableFiles = [];
+        let availableStyles = [];
+        let projectsConfig = null;
+        
+        // Prüfe ob file:// Protokoll verwendet wird
+        function isFileProtocol() {
+            return window.location.protocol === 'file:';
+        }
+        
+        // Initialisierung
+        document.addEventListener('DOMContentLoaded', function() {
+            // Lade Fallback-Styles sofort, damit Komponenten immer gestylt sind
+            loadFallbackStyles();
+            loadProjects();
+            // Setze Standard-Breite auf Mittel
+            setWidth('medium');
+        });
+        
+        // Lade Projekte (automatisch + manuell)
+        async function loadProjects() {
+            projects = [];
+            
+            // 1. Lade manuelle Konfiguration (falls vorhanden)
+            try {
+                const configResponse = await fetch('projects.json');
+                if (configResponse.ok) {
+                    projectsConfig = await configResponse.json();
+                    if (projectsConfig.projects) {
+                        projectsConfig.projects.forEach(proj => {
+                            projects.push({
+                                name: proj.name,
+                                displayName: proj.displayName || proj.name,
+                                path: proj.path,
+                                htmlPath: proj.htmlPath || 'html',
+                                markdownPath: proj.markdownPath || 'markdown',
+                                styles: proj.styles || [],
+                                config: true
+                            });
+                        });
+                    }
+                }
+            } catch (e) {
+                // Keine Konfigurationsdatei vorhanden - kein Problem
+            }
+            
+            // 2. Automatische Erkennung: Scanne projects/ Ordner
+            try {
+                const response = await fetch('projects/');
+                if (response.ok) {
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const links = doc.querySelectorAll('a[href]');
+                    
+                    links.forEach(link => {
+                        const href = link.getAttribute('href');
+                        // Ignoriere Parent-Links und Dateien
+                        if (href && href.endsWith('/') && href !== '../') {
+                            const projectName = href.replace('/', '');
+                            // Prüfe, ob Projekt bereits in Config vorhanden
+                            const exists = projects.find(p => p.name === projectName);
+                            if (!exists) {
+                        projects.push({
+                            name: projectName,
+                            displayName: projectName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                            path: `projects/${projectName}`,
+                            htmlPath: 'html',
+                            markdownPath: 'markdown',
+                            config: false,
+                            styles: [
+                                {
+                                    name: 'github',
+                                    displayName: 'GitHub Design',
+                                    cssPath: 'styles/github/style.css',
+                                    default: true
+                                }
+                            ]
+                        });
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                // Kein Server oder kein projects/ Ordner - kein Problem
+            }
+            
+            // 3. Fallback: Eingebettete Beispiele als "Projekt"
+            if (projects.length === 0) {
+                projects.push({
+                    name: 'beispiele',
+                    displayName: 'Beispiele',
+                    path: 'embedded',
+                    htmlPath: '',
+                    markdownPath: '',
+                    config: false,
+                    embedded: true
+                });
+            }
+            
+            updateProjectSelector();
+        }
+        
+        // Projekt wurde ausgewählt
+        function onProjectSelected() {
+            const selector = document.getElementById('projectSelector');
+            const projectName = selector.value;
+            
+            if (!projectName) {
+                currentProject = null;
+                currentStyle = null;
+                availableFiles = [];
+                availableStyles = [];
+                document.getElementById('fileSelector').disabled = true;
+                document.getElementById('styleSelector').disabled = true;
+                updateFileSelector();
+                updateStyleSelector();
+                showEmptyState();
+                return;
+            }
+            
+            currentProject = projects.find(p => p.name === projectName);
+            if (!currentProject) {
+                return;
+            }
+            
+            loadStylesForProject(currentProject);
+            loadFilesForProject(currentProject);
+        }
+        
+        // Lade verfügbare Styles für ein Projekt
+        function loadStylesForProject(project) {
+            availableStyles = [];
+            
+            // Für eingebettete Projekte: Verwende nur Fallback-Styles
+            if (project.embedded || project.path === 'embedded') {
+                availableStyles = [{
+                    name: 'fallback',
+                    displayName: 'Standard (Fallback)',
+                    cssPath: '',
+                    default: true,
+                    embedded: true
+                }];
+                document.getElementById('styleSelector').disabled = false;
+                updateStyleSelector();
+                loadFallbackStyles();
+                showToast('✨ Fallback-Styles für eingebettete Beispiele aktiv');
+                return;
+            }
+            
+            // Styles aus Konfiguration laden
+            if (project.styles && Array.isArray(project.styles)) {
+                availableStyles = project.styles;
+            } else {
+                // Fallback: Standard-Style
+                availableStyles = [{
+                    name: 'github',
+                    displayName: 'GitHub Design',
+                    cssPath: 'styles/github/style.css',
+                    default: true
+                }];
+            }
+            
+            document.getElementById('styleSelector').disabled = false;
+            updateStyleSelector();
+            
+            // Lade Default-Style
+            const defaultStyle = availableStyles.find(s => s.default) || availableStyles[0];
+            if (defaultStyle) {
+                const selector = document.getElementById('styleSelector');
+                if (selector) {
+                    selector.value = defaultStyle.name;
+                }
+                // Warte kurz, damit das Dropdown aktualisiert ist
+                setTimeout(() => {
+                    loadStyle(defaultStyle);
+                }, 100);
+            } else {
+                // Wenn kein Style verfügbar, lade Fallback
+                loadFallbackStyles();
+            }
+        }
+        
+        // Style wurde ausgewählt
+        function onStyleSelected() {
+            const selector = document.getElementById('styleSelector');
+            const styleName = selector.value;
+            
+            if (!styleName || !currentProject) {
+                return;
+            }
+            
+            const style = availableStyles.find(s => s.name === styleName);
+            if (!style) {
+                return;
+            }
+            
+            currentStyle = style;
+            
+            // Für eingebettete Styles: Verwende nur Fallback
+            if (style.embedded) {
+                loadFallbackStyles();
+                showToast('✨ Fallback-Styles aktiv');
+                return;
+            }
+            
+            loadStyle(style);
+        }
+        
+        // Lade CSS-Style dynamisch
+        function loadStyle(style) {
+            if (!currentProject || !style) {
+                return;
+            }
+            
+            // Für eingebettete Projekte verwende nur Fallback-Styles
+            if (currentProject.embedded || currentProject.path === 'embedded') {
+                console.log('Eingebettetes Projekt: Verwende Fallback-Styles');
+                loadFallbackStyles();
+                showToast(`🎨 Fallback-Styles für "${style.displayName}" aktiv`);
+                return;
+            }
+            
+            // Prüfe ob file:// Protokoll verwendet wird
+            if (isFileProtocol()) {
+                // Verwende eingebettete Styles für file:// Protokoll
+                const basePath = `${currentProject.path}/${style.cssPath.replace('/style.css', '')}`;
+                const variablesPath = `${basePath}/variables.css`;
+                const stylePath = `${basePath}/style.css`;
+                
+                // Entferne alte Style-Sheets
+                const oldSheets = document.querySelectorAll('link[id^="dynamicStyle"], style[id^="embeddedStyle"]');
+                oldSheets.forEach(sheet => sheet.remove());
+                
+                // Prüfe ob eingebettete Styles verfügbar sind
+                if (embeddedStyles[variablesPath] && embeddedStyles[stylePath]) {
+                    // Erstelle Style-Element für Variablen
+                    const variablesStyle = document.createElement('style');
+                    variablesStyle.id = 'embeddedStyleVariables';
+                    variablesStyle.textContent = embeddedStyles[variablesPath];
+                    document.head.appendChild(variablesStyle);
+                    
+                    // Erstelle Style-Element für Styles (enthält bereits Variablen)
+                    const styleElement = document.createElement('style');
+                    styleElement.id = 'embeddedStyleSheet';
+                    styleElement.textContent = embeddedStyles[stylePath];
+                    document.head.appendChild(styleElement);
+                    
+                    showToast(`🎨 Style "${style.displayName}" geladen (eingebettet)`);
+                    return;
+                } else {
+                    // Fallback wenn eingebettete Styles nicht verfügbar
+                    console.warn('Eingebettete Styles nicht gefunden, verwende Fallback:', stylePath);
+                    loadFallbackStyles();
+                    showToast(`⚠️ Fallback-Styles für "${style.displayName}" aktiv`);
+                    return;
+                }
+            }
+            
+            // Normale Logik für http/https Protokoll
+            // Entferne alte Style-Sheets
+            const oldSheets = document.querySelectorAll('link[id^="dynamicStyle"], style[id^="embeddedStyle"]');
+            oldSheets.forEach(sheet => sheet.remove());
+            
+            const basePath = `${currentProject.path}/${style.cssPath.replace('/style.css', '')}`;
+            const variablesPath = `${basePath}/variables.css`;
+            const stylePath = `${basePath}/style.css`;
+            
+            // Lade zuerst variables.css, dann style.css
+            loadVariablesThenStyle(variablesPath, stylePath, style);
+        }
+        
+        function loadVariablesThenStyle(variablesPath, stylePath, style) {
+            // Erstelle Link für variables.css
+            const variablesLink = document.createElement('link');
+            variablesLink.id = 'dynamicStyleVariables';
+            variablesLink.rel = 'stylesheet';
+            variablesLink.href = variablesPath;
+            
+            variablesLink.onload = function() {
+                // Wenn variables.css geladen ist, lade style.css
+                const styleLink = document.createElement('link');
+                styleLink.id = 'dynamicStyleSheet';
+                styleLink.rel = 'stylesheet';
+                styleLink.href = stylePath;
+                
+                styleLink.onload = function() {
+                    showToast(`🎨 Style "${style.displayName}" geladen`);
+                };
+                
+                styleLink.onerror = function() {
+                    console.error('Fehler beim Laden von style.css:', stylePath);
+                    // Versuche es ohne variables.css (falls bereits im style.css enthalten)
+                    const fallbackLink = document.createElement('link');
+                    fallbackLink.id = 'dynamicStyleSheet';
+                    fallbackLink.rel = 'stylesheet';
+                    fallbackLink.href = stylePath;
+                    document.head.appendChild(fallbackLink);
+                    showToast(`🎨 Style "${style.displayName}" geladen (ohne Variablen)`);
+                };
+                
+                document.head.appendChild(styleLink);
+            };
+            
+            variablesLink.onerror = function() {
+                console.warn('variables.css nicht gefunden, versuche style.css direkt:', variablesPath);
+                // Wenn variables.css nicht gefunden wird, versuche style.css direkt
+                const styleLink = document.createElement('link');
+                styleLink.id = 'dynamicStyleSheet';
+                styleLink.rel = 'stylesheet';
+                styleLink.href = stylePath;
+                
+                styleLink.onload = function() {
+                    showToast(`🎨 Style "${style.displayName}" geladen`);
+                };
+                
+                styleLink.onerror = function() {
+                    console.error('Fehler beim Laden des Styles:', stylePath);
+                    showToast(`❌ Style konnte nicht geladen werden: ${style.displayName}`);
+                    // Fallback auf GitHub-Style
+                    if (style.name !== 'github') {
+                        const githubStyle = availableStyles.find(s => s.name === 'github');
+                        if (githubStyle) {
+                            loadStyle(githubStyle);
+                            const selector = document.getElementById('styleSelector');
+                            if (selector) {
+                                selector.value = 'github';
+                            }
+                        }
+                    } else {
+                        // Wenn auch GitHub-Style nicht lädt, lade Fallback-Styles direkt
+                        loadFallbackStyles();
+                    }
+                };
+                
+                document.head.appendChild(styleLink);
+            };
+            
+            document.head.appendChild(variablesLink);
+        }
+        
+        // Fallback: Lade Komponenten-Styles direkt ein, wenn keine Style-Datei geladen werden kann
+        function loadFallbackStyles() {
+            const fallbackStyle = document.getElementById('fallbackComponentStyles');
+            if (!fallbackStyle) {
+                // Erstelle Fallback-Style-Element
+                const styleElement = document.createElement('style');
+                styleElement.id = 'fallbackComponentStyles';
+                styleElement.textContent = getFallbackComponentStyles();
+                document.head.appendChild(styleElement);
+                showToast('⚠️ Fallback-Styles geladen');
+            }
+        }
+        
+        function getFallbackComponentStyles() {
+            return `
+                .component {
+                    background: #ffffff;
+                    border: 2px solid #d0d7de;
+                    border-radius: 6px;
+                    padding: 48px;
+                    position: relative;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+                    transition: all 0.2s;
+                    width: var(--component-width, fit-content);
+                    max-width: 100%;
+                    margin-bottom: 0;
+                    isolation: isolate;
+                }
+                .component:hover {
+                    border-color: #238636;
+                    box-shadow: 0 4px 12px rgba(35, 134, 54, 0.15);
+                }
+                .component-label {
+                    position: absolute;
+                    top: -12px;
+                    left: 16px;
+                    background: #238636;
+                    color: white;
+                    padding: 4px 12px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                    z-index: 10;
+                    pointer-events: none;
+                    transform: translateY(0);
+                }
+                .slide-section > .component:first-child {
+                    margin-top: 0;
+                    padding-top: 48px;
+                }
+                .slide-title {
+                    font-size: 24px;
+                    font-weight: 700;
+                    color: #238636;
+                    margin-bottom: 24px;
+                    padding: 16px 20px;
+                    background: #161b22;
+                    border-radius: 6px;
+                    border-left: 4px solid #238636;
+                }
+                .component h1, .component h2, .component h3, .component h4 {
+                    color: #24292f;
+                    margin-bottom: 16px;
+                }
+                .component h1 { font-size: 48px; font-weight: 700; }
+                .component h2 { font-size: 32px; font-weight: 600; }
+                .component h3 { font-size: 24px; font-weight: 600; }
+                .component h4 { font-size: 20px; font-weight: 600; }
+                .component p {
+                    color: #24292f;
+                    line-height: 1.6;
+                    margin-bottom: 12px;
+                }
+                .stat-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 16px;
+                    margin: 16px 0;
+                    width: 100%;
+                }
+                .stat-card {
+                    background: #f6f8fa;
+                    border: 1px solid #d0d7de;
+                    border-radius: 6px;
+                    padding: 20px;
+                    text-align: center;
+                }
+                .stat-number {
+                    font-size: 36px;
+                    font-weight: 700;
+                    color: #238636;
+                    display: block;
+                    margin-bottom: 8px;
+                }
+                .stat-label {
+                    font-size: 14px;
+                    color: #57606a;
+                }
+                .bullet-list {
+                    list-style: none;
+                    padding: 0;
+                    margin: 16px 0;
+                }
+                .bullet-list li {
+                    padding: 12px 16px;
+                    margin: 8px 0;
+                    background: #f6f8fa;
+                    border-left: 4px solid #238636;
+                    border-radius: 4px;
+                    color: #24292f;
+                }
+                .bullet-list li strong {
+                    color: #238636;
+                }
+                .quote {
+                    border-left: 4px solid #238636;
+                    padding-left: 20px;
+                    margin: 20px 0;
+                    font-style: italic;
+                    color: #57606a;
+                }
+                code {
+                    background: #f6f8fa;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-family: monospace;
+                    font-size: 14px;
+                    color: #24292f;
+                }
+                .component table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 16px 0;
+                    font-size: 14px;
+                }
+                .component table th {
+                    background: #f6f8fa;
+                    color: #24292f;
+                    font-weight: 600;
+                    padding: 12px;
+                    text-align: left;
+                    border-bottom: 2px solid #d0d7de;
+                }
+                .component table td {
+                    padding: 12px;
+                    border-bottom: 1px solid #d0d7de;
+                    color: #24292f;
+                }
+                .component table tr:hover {
+                    background: #f6f8fa;
+                }
+                .component table tr:last-child td {
+                    border-bottom: none;
+                }
+                .comparison-table th:first-child,
+                .comparison-table td:first-child {
+                    font-weight: 600;
+                    background: #f6f8fa;
+                }
+                .process-chain {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 24px;
+                    margin: 24px 0;
+                }
+                .process-step {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 16px;
+                    position: relative;
+                }
+                .process-step:not(:last-child)::after {
+                    content: '';
+                    position: absolute;
+                    left: 20px;
+                    top: 48px;
+                    width: 2px;
+                    height: calc(100% + 8px);
+                    background: #d0d7de;
+                }
+                .process-number {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background: #238636;
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 600;
+                    font-size: 18px;
+                    flex-shrink: 0;
+                    position: relative;
+                    z-index: 1;
+                }
+                .process-content {
+                    flex: 1;
+                    padding-top: 8px;
+                }
+                .process-content h4 {
+                    margin: 0 0 8px 0;
+                    color: #24292f;
+                    font-size: 18px;
+                }
+                .process-content p {
+                    margin: 0;
+                    color: #57606a;
+                    font-size: 14px;
+                }
+                .process-horizontal {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin: 24px 0;
+                    position: relative;
+                }
+                .process-horizontal::before {
+                    content: '';
+                    position: absolute;
+                    top: 20px;
+                    left: 60px;
+                    right: 60px;
+                    height: 2px;
+                    background: #d0d7de;
+                    z-index: 0;
+                }
+                .process-item {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    flex: 1;
+                    position: relative;
+                    z-index: 1;
+                }
+                .process-item-circle {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background: #238636;
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 600;
+                    font-size: 18px;
+                    margin-bottom: 12px;
+                }
+                .process-item-title {
+                    font-weight: 600;
+                    font-size: 14px;
+                    color: #24292f;
+                    text-align: center;
+                    margin-bottom: 4px;
+                }
+                .process-item-desc {
+                    font-size: 12px;
+                    color: #57606a;
+                    text-align: center;
+                }
+                .feature-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                    gap: 20px;
+                    margin: 20px 0;
+                }
+                .feature-card {
+                    background: #f6f8fa;
+                    border: 1px solid #d0d7de;
+                    border-radius: 6px;
+                    padding: 20px;
+                }
+                .feature-card h4 {
+                    margin: 0 0 8px 0;
+                    color: #24292f;
+                    font-size: 16px;
+                }
+                .feature-card p {
+                    margin: 0;
+                    color: #57606a;
+                    font-size: 14px;
+                }
+                .badge {
+                    display: inline-block;
+                    padding: 4px 8px;
+                    border-radius: 12px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    background: #dff6e8;
+                    color: #0a3f20;
+                }
+                .badge-success {
+                    background: #dff6e8;
+                    color: #0a3f20;
+                }
+                .badge-warning {
+                    background: #fff8c5;
+                    color: #7d4e00;
+                }
+                .badge-danger {
+                    background: #ffebe9;
+                    color: #82071e;
+                }
+                .image-container {
+                    border: 1px solid #d0d7de;
+                    border-radius: 6px;
+                    overflow: hidden;
+                    background: #ffffff;
+                    margin: 16px 0;
+                    display: flex;
+                    flex-direction: column;
+                    box-sizing: border-box;
+                    width: 100%;
+                }
+                .image-wrapper {
+                    width: 100%;
+                    background: #f6f8fa;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 40px;
+                    position: relative;
+                    min-height: 0;
+                    box-sizing: border-box;
+                }
+                .image-wrapper:not(:has(img)) {
+                    min-height: 200px;
+                }
+                .image-wrapper img {
+                    max-width: 100%;
+                    width: auto;
+                    height: auto;
+                    border-radius: 4px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    display: block;
+                    flex-shrink: 0;
+                    object-fit: contain;
+                    vertical-align: bottom;
+                }
+                .image-wrapper:has(img) .image-placeholder {
+                    display: none;
+                }
+                .image-placeholder {
+                    width: 100%;
+                    height: 100%;
+                    min-height: 200px;
+                    background: linear-gradient(135deg, #f6f8fa 0%, #e1e4e8 100%);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    color: #57606a;
+                    font-size: 14px;
+                    border-radius: 4px;
+                    gap: 8px;
+                }
+                .image-placeholder::before {
+                    content: '🖼️';
+                    font-size: 48px;
+                    line-height: 1;
+                }
+                .image-content {
+                    padding: 20px;
+                }
+                .image-content h4 {
+                    margin: 0 0 8px 0;
+                    color: #24292f;
+                    font-size: 18px;
+                    font-weight: 600;
+                }
+                .image-content p {
+                    margin: 0;
+                    color: #57606a;
+                    font-size: 14px;
+                    line-height: 1.5;
+                }
+                .image-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                    gap: 20px;
+                    margin: 20px 0;
+                }
+                .image-card {
+                    border: 1px solid #d0d7de;
+                    border-radius: 6px;
+                    overflow: hidden;
+                    background: #ffffff;
+                }
+                .image-card .image-wrapper {
+                    padding: 20px;
+                    min-height: 0;
+                }
+                .image-card .image-wrapper:not(:has(img)) {
+                    min-height: 150px;
+                }
+                .image-card .image-placeholder {
+                    min-height: 150px;
+                }
+                .image-card .image-content {
+                    padding: 16px;
+                }
+                .image-badge {
+                    position: absolute;
+                    top: 12px;
+                    right: 12px;
+                    z-index: 5;
+                }
+            `;
+        }
+        
+        // Aktualisiere Style-Dropdown
+        function updateStyleSelector() {
+            const selector = document.getElementById('styleSelector');
+            
+            // Leere aktuelle Optionen (außer erste)
+            while (selector.options.length > 1) {
+                selector.remove(1);
+            }
+            
+            // Füge Styles hinzu
+            availableStyles.forEach(style => {
+                const option = document.createElement('option');
+                option.value = style.name;
+                option.textContent = style.displayName;
+                if (style.default) {
+                    option.selected = true;
+                }
+                selector.appendChild(option);
+            });
+            
+            // Zeige Anzahl
+            if (availableStyles.length === 0) {
+                selector.options[0].textContent = '🎨 Keine Styles verfügbar';
+            } else {
+                selector.options[0].textContent = `🎨 ${availableStyles.length} Style(s) verfügbar`;
+            }
+        }
+        
+        // Lade Dateien für ein Projekt
+        async function loadFilesForProject(project) {
+            availableFiles = [];
+            
+            // Eingebettete Beispiele
+            if (project.embedded || project.path === 'embedded') {
+                availableFiles = [
+                    { name: 'beispiel-01-problem.html', embedded: true, project: project.name },
+                    { name: 'beispiel-02-loesung.html', embedded: true, project: project.name },
+                    { name: 'beispiel-03-markt.html', embedded: true, project: project.name },
+                    { name: 'beispiel-04-tabelle.html', embedded: true, project: project.name },
+                    { name: 'beispiel-05-prozesskette.html', embedded: true, project: project.name },
+                    { name: 'beispiel-06-features.html', embedded: true, project: project.name },
+                    { name: 'beispiel-07-daten.html', embedded: true, project: project.name },
+                    { name: 'beispiel-08-bilder.html', embedded: true, project: project.name }
+                ];
+            } else {
+                // Lade HTML-Dateien aus projects/[projekt]/html/
+                try {
+                    const htmlPath = `${project.path}/${project.htmlPath}/`;
+                    const response = await fetch(htmlPath);
+                    
+                    if (response.ok) {
+                        const html = await response.text();
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const links = doc.querySelectorAll('a[href$=".html"]');
+                        
+                        links.forEach(link => {
+                            const fileName = link.getAttribute('href');
+                            availableFiles.push({
+                                name: fileName,
+                                embedded: false,
+                                project: project.name,
+                                path: htmlPath + fileName
+                            });
+                        });
+                    } else {
+                        console.warn('HTML-Ordner nicht gefunden, versuche direkten Zugriff auf Dateien');
+                        // Versuche, Dateien direkt zu laden (auch ohne Server-Listing)
+                        const fileNames = [
+                            'folie-01-problem.html',
+                            'folie-02-loesung.html',
+                            'folie-03-markt.html',
+                            'folie-04-tabelle.html',
+                            'folie-05-prozesskette.html',
+                            'folie-06-features.html',
+                            'folie-07-daten.html',
+                            'folie-08-bilder.html'
+                        ];
+                        
+                        // Prüfe welche Dateien existieren
+                        for (const fileName of fileNames) {
+                            availableFiles.push({
+                                name: fileName,
+                                embedded: false,
+                                project: project.name,
+                                path: htmlPath + fileName
+                            });
+                        }
+                        
+                        // Wenn keine Dateien gefunden, verwende eingebettete Beispiele
+                        if (availableFiles.length === 0) {
+                            availableFiles = [
+                                { name: 'beispiel-01-problem.html', embedded: true, project: project.name },
+                                { name: 'beispiel-02-loesung.html', embedded: true, project: project.name },
+                                { name: 'beispiel-03-markt.html', embedded: true, project: project.name },
+                                { name: 'beispiel-04-tabelle.html', embedded: true, project: project.name },
+                                { name: 'beispiel-05-prozesskette.html', embedded: true, project: project.name },
+                                { name: 'beispiel-06-features.html', embedded: true, project: project.name },
+                                { name: 'beispiel-07-daten.html', embedded: true, project: project.name },
+                                { name: 'beispiel-08-bilder.html', embedded: true, project: project.name }
+                            ];
+                        }
+                    }
+                } catch (e) {
+                    console.error('Fehler beim Laden der Projekt-Dateien:', e);
+                    // Fallback: Verwende eingebettete Beispiele bei Fehler
+                    availableFiles = [
+                        { name: 'beispiel-01-problem.html', embedded: true, project: project.name },
+                        { name: 'beispiel-02-loesung.html', embedded: true, project: project.name },
+                        { name: 'beispiel-03-markt.html', embedded: true, project: project.name },
+                        { name: 'beispiel-04-tabelle.html', embedded: true, project: project.name },
+                        { name: 'beispiel-05-prozesskette.html', embedded: true, project: project.name },
+                        { name: 'beispiel-06-features.html', embedded: true, project: project.name },
+                        { name: 'beispiel-07-daten.html', embedded: true, project: project.name },
+                        { name: 'beispiel-08-bilder.html', embedded: true, project: project.name }
+                    ];
+                }
+            }
+            
+            // Aktiviere Datei-Dropdown und aktualisiere
+            const fileSelector = document.getElementById('fileSelector');
+            if (fileSelector) {
+                fileSelector.disabled = false;
+                updateFileSelector();
+            }
+        }
+        
+        // Aktualisiere Projekt-Dropdown
+        function updateProjectSelector() {
+            const selector = document.getElementById('projectSelector');
+            
+            // Leere aktuelle Optionen (außer erste)
+            while (selector.options.length > 1) {
+                selector.remove(1);
+            }
+            
+            // Füge Projekte hinzu
+            projects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project.name;
+                option.textContent = project.embedded ? `✨ ${project.displayName}` : project.displayName;
+                selector.appendChild(option);
+            });
+            
+            // Zeige Anzahl
+            if (projects.length === 0) {
+                selector.options[0].textContent = '📂 Keine Projekte gefunden';
+            } else {
+                selector.options[0].textContent = `📂 ${projects.length} Projekt(e) verfügbar`;
+            }
+        }
+        
+        function updateFileSelector() {
+            const selector = document.getElementById('fileSelector');
+            
+            // Leere aktuelle Optionen (außer erste)
+            while (selector.options.length > 1) {
+                selector.remove(1);
+            }
+            
+            // Füge verfügbare Dateien hinzu
+            availableFiles.forEach(file => {
+                const option = document.createElement('option');
+                option.value = file.name;
+                const displayName = file.name.replace('.html', '').replace(/folie-(\d+)-/g, 'Folie $1: ').replace(/-/g, ' ');
+                option.textContent = file.embedded ? `✨ ${displayName}` : displayName;
+                selector.appendChild(option);
+            });
+            
+            // Zeige Anzahl
+            if (availableFiles.length === 0) {
+                selector.options[0].textContent = '📁 Keine HTML-Dateien gefunden';
+            } else {
+                const embeddedCount = availableFiles.filter(f => f.embedded).length;
+                selector.options[0].textContent = `📁 ${availableFiles.length} Datei(en) verfügbar${embeddedCount > 0 ? ` (${embeddedCount} Beispiele)` : ''}`;
+            }
+        }
+        
+        async function loadSelectedFile() {
+            const selector = document.getElementById('fileSelector');
+            const fileName = selector.value;
+            
+            if (!fileName || !currentProject) {
+                showEmptyState();
+                return;
+            }
+            
+            // Finde die Datei-Informationen
+            const fileInfo = availableFiles.find(f => f.name === fileName);
+            if (!fileInfo) {
+                showErrorWithServerHint('Datei nicht gefunden: ' + fileName);
+                return;
+            }
+            
+            // Prüfe, ob es eine eingebettete Beispiel-Datei ist
+            if (fileInfo.embedded && embeddedExamples[fileName]) {
+                displayContent(embeddedExamples[fileName]);
+                return;
+            }
+            
+            // Versuche, Datei zu laden
+            try {
+                const filePath = fileInfo.path || `${currentProject.path}/${currentProject.htmlPath}/${fileName}`;
+                const response = await fetch(filePath);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const html = await response.text();
+                displayContent(html);
+                
+            } catch (error) {
+                console.error('Fehler beim Laden der Datei:', error);
+                // Fallback: Prüfe ob es eine eingebettete Version gibt (mit anderem Namen)
+                const embeddedName = fileName.replace(/^folie-(\d+)-/, 'beispiel-0$1-');
+                if (embeddedExamples[embeddedName]) {
+                    console.log('Verwende eingebettete Version:', embeddedName);
+                    displayContent(embeddedExamples[embeddedName]);
+                } else {
+                    showErrorWithServerHint('Datei konnte nicht geladen werden: ' + fileName);
+                }
+            }
+        }
+        
+        // Refresh-Funktion aktualisiert jetzt Projekte
+        function refreshFileList() {
+            loadProjects();
+            showToast('🔄 Projektliste aktualisiert');
+        }
+        
+        function showErrorWithServerHint(message) {
+            const container = document.getElementById('contentContainer');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">❌</div>
+                    <h2>Datei konnte nicht geladen werden</h2>
+                    <p>${message}</p>
+                    
+                    <div style="margin-top: 32px; padding: 24px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                        <h3 style="color: #c9d1d9; margin-bottom: 16px;">💡 Lösung: Lokalen Server starten</h3>
+                        <p style="color: #8b949e; margin-bottom: 16px;">
+                            Für eigene HTML-Dateien benötigen Sie einen lokalen Server. 
+                            Die Beispiel-Dateien funktionieren auch ohne Server.
+                        </p>
+                        
+                        <h4 style="color: #c9d1d9; margin: 16px 0 8px 0;">Python (empfohlen):</h4>
+                        <code style="display: block; padding: 12px; background: #0d1117; border-radius: 4px; margin-bottom: 16px; color: #c9d1d9;">
+                            cd /home/ubuntudani/Projects/Robo4you/presentation<br>
+                            python3 -m http.server 8000
+                        </code>
+                        
+                        <h4 style="color: #c9d1d9; margin: 16px 0 8px 0;">Node.js:</h4>
+                        <code style="display: block; padding: 12px; background: #0d1117; border-radius: 4px; margin-bottom: 16px; color: #c9d1d9;">
+                            npx http-server -p 8000
+                        </code>
+                        
+                        <p style="color: #8b949e; margin-top: 16px;">
+                            Dann öffnen Sie: <code style="color: #238636;">http://localhost:8000/component-viewer.html</code>
+                        </p>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="refreshFileList()" style="margin-top: 24px;">
+                        🔄 Erneut versuchen
+                    </button>
+                </div>
+            `;
+        }
+        
+        // Breiten-Funktionalität
+        let currentWidth = 'medium';
+        const widthConfig = {
+            'auto': { class: 'width-auto', label: 'Auto', css: 'fit-content' },
+            'narrow': { class: 'width-narrow', label: 'Schmal', css: '400px' },
+            'medium': { class: 'width-medium', label: 'Mittel', css: '600px' },
+            'wide': { class: 'width-wide', label: 'Breit', css: '800px' },
+            'full': { class: 'width-full', label: 'Voll', css: '100%' }
+        };
+        
+        function setWidth(width, clickedButton) {
+            currentWidth = width;
+            const config = widthConfig[width];
+            
+            if (!config) return;
+            
+            // Update CSS Variable
+            document.documentElement.style.setProperty('--component-width', config.css);
+            
+            // Update aktive Button
+            document.querySelectorAll('.width-btn').forEach(btn => {
+                btn.classList.remove('active');
+                // Finde Button mit passendem Text
+                if (clickedButton) {
+                    if (btn === clickedButton) {
+                        btn.classList.add('active');
+                    }
+                } else {
+                    // Wenn kein Button übergeben, finde passenden Button
+                    const btnText = btn.textContent.trim().toLowerCase();
+                    const configLabel = config.label.toLowerCase();
+                    if (btnText === configLabel || (width === 'auto' && btnText === 'auto') ||
+                        (width === 'narrow' && btnText === 'schmal') ||
+                        (width === 'medium' && btnText === 'mittel') ||
+                        (width === 'wide' && btnText === 'breit') ||
+                        (width === 'full' && btnText === 'voll')) {
+                        btn.classList.add('active');
+                    }
+                }
+            });
+            
+            // Update Display
+            const display = document.getElementById('widthDisplay');
+            if (display) {
+                display.textContent = config.label;
+            }
+            
+            // Wende Breite auf alle Komponenten an
+            const components = document.querySelectorAll('.component');
+            components.forEach(comp => {
+                // Entferne alle Breiten-Klassen
+                Object.values(widthConfig).forEach(cfg => {
+                    comp.classList.remove(cfg.class);
+                });
+                // Füge neue Klasse hinzu
+                comp.classList.add(config.class);
+            });
+        }
+        
+        function displayContent(html) {
+            const container = document.getElementById('contentContainer');
+            container.innerHTML = html;
+            
+            // Stelle sicher, dass slide-sections korrekt strukturiert sind
+            const slideSections = container.querySelectorAll('.slide-section');
+            slideSections.forEach(section => {
+                // Stelle sicher, dass Komponenten direkt in slide-section sind
+                const components = section.querySelectorAll('.component');
+                components.forEach((comp, index) => {
+                    // Entferne eventuelle margin-bottom von Komponenten
+                    comp.style.marginBottom = '0';
+                });
+            });
+            
+            // Wende aktuelle Breite an
+            setWidth(currentWidth);
+        }
+        
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 24px;
+                background: #238636;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+        
+        function showEmptyState() {
+            const container = document.getElementById('contentContainer');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📦</div>
+                    <h2>Keine Datei ausgewählt</h2>
+                    <p>Wählen Sie eine HTML-Datei aus dem Dropdown oben aus.</p>
+                </div>
+            `;
+        }
+        
+        function showError(message) {
+            showErrorWithServerHint(message);
+        }
+        
+        
+        // Tastenkombinationen
+        document.addEventListener('keydown', function(e) {
+            // Strg/Cmd + K: Fokus auf File Selector
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('fileSelector').focus();
+            }
+            
+            // Strg/Cmd + Pfeil rechts: Breiter
+            if ((e.ctrlKey || e.metaKey) && e.key === 'ArrowRight') {
+                e.preventDefault();
+                const widths = ['auto', 'narrow', 'medium', 'wide', 'full'];
+                const currentIndex = widths.indexOf(currentWidth);
+                if (currentIndex < widths.length - 1) {
+                    setWidth(widths[currentIndex + 1]);
+                }
+            }
+            
+            // Strg/Cmd + Pfeil links: Schmaler
+            if ((e.ctrlKey || e.metaKey) && e.key === 'ArrowLeft') {
+                e.preventDefault();
+                const widths = ['auto', 'narrow', 'medium', 'wide', 'full'];
+                const currentIndex = widths.indexOf(currentWidth);
+                if (currentIndex > 0) {
+                    setWidth(widths[currentIndex - 1]);
+                }
+            }
+            
+            // Strg/Cmd + M: Reset auf Mittel
+            if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
+                e.preventDefault();
+                setWidth('medium');
+            }
+        });
+    </script>
+    
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    </style>
+</body>
+</html>
+

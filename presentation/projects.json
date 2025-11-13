@@ -1,0 +1,33 @@
+{
+  "defaultStyle": "github",
+  "projects": [
+    {
+      "name": "beispiel-projekt",
+      "displayName": "Beispiel Projekt",
+      "path": "projects/beispiel-projekt",
+      "htmlPath": "html",
+      "markdownPath": "markdown",
+      "styles": [
+        {
+          "name": "github",
+          "displayName": "GitHub Design",
+          "cssPath": "styles/github/style.css",
+          "default": true
+        },
+        {
+          "name": "modern",
+          "displayName": "Modern",
+          "cssPath": "styles/modern/style.css",
+          "default": false
+        },
+        {
+          "name": "minimal",
+          "displayName": "Minimal",
+          "cssPath": "styles/minimal/style.css",
+          "default": false
+        }
+      ]
+    }
+  ]
+}
+

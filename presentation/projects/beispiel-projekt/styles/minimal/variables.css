@@ -1,0 +1,80 @@
+/* Minimal Design System - CSS Variablen */
+
+:root {
+  /* Primärfarben */
+  --color-primary: #666666;
+  --color-primary-light: #888888;
+  --color-primary-dark: #444444;
+  
+  /* Komponenten-Hintergrund */
+  --color-bg-component: #ffffff;
+  --color-bg-component-hover: #fafafa;
+  --color-bg-subtle: #fafafa;
+  --color-bg-overlay: #ffffff;
+  
+  /* Text-Farben */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #666666;
+  --color-text-muted: #999999;
+  --color-text-on-primary: #ffffff;
+  
+  /* Rahmen-Farben */
+  --color-border: #e5e5e5;
+  --color-border-muted: #eeeeee;
+  --color-border-hover: #666666;
+  
+  /* Akzentfarben */
+  --color-accent: #666666;
+  --color-success: #666666;
+  --color-success-bg: #f5f5f5;
+  --color-success-text: #333333;
+  --color-warning: #999999;
+  --color-warning-bg: #f5f5f5;
+  --color-warning-text: #666666;
+  --color-danger: #999999;
+  --color-danger-bg: #f5f5f5;
+  --color-danger-text: #666666;
+  
+  /* Schatten - Minimal */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  
+  /* Border Radius */
+  --border-radius-sm: 2px;
+  --border-radius-md: 4px;
+  --border-radius-lg: 8px;
+  --border-radius-full: 50%;
+  
+  /* Schriftart */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-family-mono: 'Courier New', monospace;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  
+  /* Komponenten-spezifisch */
+  --component-padding: 48px;
+  --component-border-width: 1px;
+  --component-border-radius: var(--border-radius-md);
+  --component-shadow: none;
+  --component-shadow-hover: none;
+  
+  /* Label */
+  --label-bg: var(--color-primary);
+  --label-color: var(--color-text-on-primary);
+  --label-padding: 4px 12px;
+  --label-border-radius: var(--border-radius-sm);
+  
+  /* Slide Title */
+  --slide-title-bg: #fafafa;
+  --slide-title-color: var(--color-primary);
+  --slide-title-border: var(--color-primary);
+}
+

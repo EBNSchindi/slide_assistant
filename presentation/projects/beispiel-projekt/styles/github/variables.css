@@ -1,0 +1,80 @@
+/* GitHub Design System - CSS Variablen */
+
+:root {
+  /* Primärfarben */
+  --color-primary: #238636;
+  --color-primary-light: #2ea043;
+  --color-primary-dark: #1a7f37;
+  
+  /* Komponenten-Hintergrund */
+  --color-bg-component: #ffffff;
+  --color-bg-component-hover: #f6f8fa;
+  --color-bg-subtle: #f6f8fa;
+  --color-bg-overlay: #ffffff;
+  
+  /* Text-Farben */
+  --color-text-primary: #24292f;
+  --color-text-secondary: #57606a;
+  --color-text-muted: #6e7781;
+  --color-text-on-primary: #ffffff;
+  
+  /* Rahmen-Farben */
+  --color-border: #d0d7de;
+  --color-border-muted: #d8dee4;
+  --color-border-hover: #238636;
+  
+  /* Akzentfarben */
+  --color-accent: #0969da;
+  --color-success: #1a7f37;
+  --color-success-bg: #dff6e8;
+  --color-success-text: #0a3f20;
+  --color-warning: #9a6700;
+  --color-warning-bg: #fff8c5;
+  --color-warning-text: #7d4e00;
+  --color-danger: #cf222e;
+  --color-danger-bg: #ffebe9;
+  --color-danger-text: #82071e;
+  
+  /* Schatten */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.1);
+  --shadow-lg: 0 4px 12px rgba(35, 134, 54, 0.15);
+  --shadow-xl: 0 8px 24px rgba(140, 149, 159, 0.2);
+  
+  /* Border Radius */
+  --border-radius-sm: 3px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 12px;
+  --border-radius-full: 50%;
+  
+  /* Schriftart */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-family-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  
+  /* Komponenten-spezifisch */
+  --component-padding: 48px;
+  --component-border-width: 2px;
+  --component-border-radius: var(--border-radius-md);
+  --component-shadow: var(--shadow-sm);
+  --component-shadow-hover: var(--shadow-lg);
+  
+  /* Label */
+  --label-bg: var(--color-primary);
+  --label-color: var(--color-text-on-primary);
+  --label-padding: 4px 12px;
+  --label-border-radius: var(--border-radius-sm);
+  
+  /* Slide Title */
+  --slide-title-bg: #161b22;
+  --slide-title-color: var(--color-primary);
+  --slide-title-border: var(--color-primary);
+}
+

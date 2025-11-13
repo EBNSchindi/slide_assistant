@@ -1,207 +1,383 @@
-# GitHub Design Pitch Deck Templates
+# 🤖 Robo4you Präsentations-System
 
-Vier verschiedene Startup-Pitch-Deck-Templates im GitHub-Design-Stil, optimiert für 16:9 Format (1920x1080px) zum Screenshoten.
-
-## Templates
-
-### Template 1: Classic (`template-1-classic.html`)
-**Stil:** Klassisches Pitch-Deck mit Cards und Grid-Layouts
-**Besonderheiten:**
-- Strukturierte Card-basierte Layouts
-- Klare Grid-Systeme für Inhalte
-- Traditionelle Pitch-Deck-Struktur
-- Ideal für: Standard-Pitch-Präsentationen
-
-**Slides:**
-1. Titel
-2. Problem (3 Cards)
-3. Lösung (Split Layout)
-4. Markt & Opportunity (4 Statistik-Cards)
-5. Geschäftsmodell (3 Revenue Streams)
-6. Traction & Metrics (Charts & Progress Bars)
-7. Wettbewerb & Differenzierung (Vergleichstabelle)
-8. Team (3 Team-Mitglieder)
-9. Roadmap (Timeline)
-10. Investment Opportunity
+**Komponentenbasiertes System für Screenshot-freundliche Pitch-Decks**
 
 ---
 
-### Template 2: Modern (`template-2-modern.html`)
-**Stil:** Modern mit großen visuellen Elementen
-**Besonderheiten:**
-- Große Hero-Sections
-- Visuelle Elemente im Fokus
-- Gradient-Hintergründe
-- Moderne Typografie
-- Ideal für: Visuell ansprechende Präsentationen
+## 🎯 Was ist das?
 
-**Slides:**
-1. Hero Titel mit Badges
-2. Problem mit großem Impact
-3. Lösung mit visueller Darstellung
-4. Markt mit großen Zahlen
-5. Geschäftsmodell visuell (3 Pricing-Tiers)
-6. Traction mit visuellen Elementen
-7. Wettbewerb visuell
-8. Team modern (4 Team-Mitglieder)
-9. Roadmap visuell (4 Quartale)
-10. Ask modern
+Ein System, das aus **Markdown-Pitch-Decks einzelne HTML-Komponenten** erstellt, die Sie separat screenshotten und in PowerPoint/Keynote einfügen können.
+
+### Konzept
+
+```
+1 Markdown-Abschnitt (# Folie) = 1 Folie
+└── Mehrere Komponenten (## Titel) = Screenshot-bare Elemente
+```
 
 ---
 
-### Template 3: Minimal (`template-3-minimal.html`)
-**Stil:** Minimalistisch mit viel Whitespace
-**Besonderheiten:**
-- Viel Whitespace
-- Fokus auf Typografie
-- Minimalistische Designelemente
-- Klare Linien und Divider
-- Ideal für: Elegante, reduzierte Präsentationen
+## 🚀 Schnellstart
 
-**Slides:**
-1. Titel minimal
-2. Problem minimal
-3. Lösung minimal (3 Features)
-4. Markt minimal (2 große Zahlen)
-5. Geschäftsmodell minimal (Liste)
-6. Traction minimal (4 Metriken)
-7. Wettbewerbsvorteil (Vergleich)
-8. Team minimal (3 Team-Mitglieder)
-9. Roadmap minimal (Liste)
-10. Investment minimal
+### 1. Viewer öffnen
 
----
+```bash
+open component-viewer.html
+```
 
-### Template 4: Data Driven (`template-4-data-driven.html`)
-**Stil:** Datengetrieben mit vielen Statistiken
-**Besonderheiten:**
-- Viele Charts und Diagramme
-- Detaillierte Metriken
-- Tabellen und Vergleichsdaten
-- Unit Economics
-- Ideal für: Datenfokussierte Präsentationen
+Oder doppelklicken Sie im Dateimanager.
 
-**Slides:**
-1. Titel mit Zahlen (4 Key Metrics)
-2. Problem in Zahlen (Charts & Daten)
-3. Lösung mit Metriken (ROI Berechnung)
-4. Geschäftsmodell & Unit Economics
-5. Traction & Wachstum (detailliert)
-6. Wettbewerbsanalyse (Tabelle)
-7. Team & Expertise (mit Metriken)
-8. Roadmap & Meilensteine (mit Progress Bars)
-9. Investment Opportunity (detaillierte Zahlen)
+### 2. Beispiele anschauen
+
+Wählen Sie im Dropdown oben eine Beispiel-Datei aus:
+- `beispiel 01 problem` - Demografische Statistiken
+- `beispiel 02 loesung` - Robo4you Konzept
+- `beispiel 03 markt` - Marktanalyse
+
+### 3. Eigenes erstellen
+
+1. **Markdown schreiben** (siehe `beispiel-pitch.md`)
+2. **LLM konvertieren** (siehe `LLM-PROMPT.md`)
+3. **HTML speichern** in `output/` Ordner
+4. **Im Viewer anzeigen** und screenshotten
 
 ---
 
-## Verwendung
+## 📚 Dokumentation
 
-### 1. Template auswählen
-Öffnen Sie die gewünschte HTML-Datei in einem Browser:
-- `template-1-classic.html`
-- `template-2-modern.html`
-- `template-3-minimal.html`
-- `template-4-data-driven.html`
-
-### 2. Inhalte anpassen
-Bearbeiten Sie die HTML-Datei und passen Sie die Platzhaltertexte an:
-- Startup Name
-- Problem-Beschreibungen
-- Lösung-Details
-- Zahlen und Statistiken
-- Team-Informationen
-- etc.
-
-### 3. Screenshots erstellen
-Da jedes Slide genau 1920x1080px groß ist, können Sie:
-- **Browser DevTools:** F12 → Device Toolbar → Custom → 1920x1080
-- **Screenshot-Tools:** Verwenden Sie Tools wie:
-  - Browser-Erweiterungen für Full-Page Screenshots
-  - Screenshot-Software mit festen Dimensionen
-  - Browser DevTools Screenshot-Funktion
-
-### 4. Anpassungen
-Alle Templates verwenden die gemeinsame CSS-Datei `github-presentation-template.css`. Sie können:
-- Farben über CSS-Variablen ändern
-- Schriftgrößen anpassen
-- Layouts modifizieren
-- Neue Slides hinzufügen
+| Datei | Zweck | Für wen |
+|-------|-------|----------|
+| **INDEX.md** | 📋 Vollständige Übersicht | Alle |
+| **QUICK-START.md** | 🚀 5-Minuten Anleitung | Einsteiger |
+| **LLM-PROMPT.md** | 🤖 LLM-Integration | Nutzer |
+| **README-KOMPONENTEN.md** | 📖 Detaillierte Docs | Fortgeschritten |
+| **github-design-guide.md** | 🎨 Design-System | Designer |
 
 ---
 
-## Design-System
+## 🛠️ Haupt-Tools
 
-### Farben
-- **Primär:** GitHub Green `#238636`
-- **Text:** `#24292f` (Light) / `#c9d1d9` (Dark)
-- **Akzent:** Blau `#0969da`
-- **Hintergrund:** `#ffffff` (Light) / `#0d1117` (Dark)
+### 1. Component Viewer (Haupttool)
 
-### Typografie
-- **Font Stack:** System Fonts (-apple-system, BlinkMacSystemFont, Segoe UI, etc.)
-- **Titel:** 48-72px, Bold (700)
-- **Überschriften:** 24-32px, SemiBold (600)
-- **Text:** 16-20px, Regular (400)
+**Datei:** `component-viewer.html`
 
-### Spacing
-- Basis-Einheit: 4px
-- Kleine Abstände: 4px, 8px
-- Mittlere Abstände: 16px, 24px
-- Große Abstände: 32px, 48px
+**Funktion:** 
+- Zeigt generierte HTML-Komponenten an
+- Dropdown zur Auswahl verschiedener Folien
+- Hover-Aktionen für Screenshots
 
-### Border Radius
-- Klein: 3px
-- Mittel: 6px
-- Groß: 12px
+**Verwendung:**
+```bash
+open component-viewer.html
+# Oder im Browser: file:///home/ubuntudani/Projects/Robo4you/presentation/component-viewer.html
+```
+
+### 2. LLM-Konvertierung (Empfohlen)
+
+**Datei:** `LLM-PROMPT.md`
+
+**Funktion:**
+- Claude/ChatGPT konvertiert Markdown → HTML
+- Automatische Erkennung von Statistiken, Aufzählungen, Zitaten
+- Korrekte CSS-Klassen
+
+**Workflow:**
+1. Öffnen Sie Claude/ChatGPT
+2. Kopieren Sie Prompt aus `LLM-PROMPT.md`
+3. Fügen Sie Ihr Markdown ein
+4. Speichern Sie generiertes HTML in `output/`
+
+### 3. Python-Script (Optional)
+
+**Datei:** `markdown-to-components.py`
+
+**Funktion:** Batch-Konvertierung ohne LLM
+
+**Verwendung:**
+```bash
+python markdown-to-components.py input.md output/
+```
 
 ---
 
-## Tipps für Screenshots
+## 📂 Verzeichnisstruktur
 
-1. **Browser-Zoom:** Stellen Sie sicher, dass der Browser-Zoom auf 100% steht
-2. **Viewport:** Verwenden Sie Browser DevTools, um den Viewport auf 1920x1080px einzustellen
-3. **Full-Page Screenshot:** Nutzen Sie Browser-Erweiterungen für Full-Page Screenshots
-4. **Einzelne Slides:** Jedes `<section class="slide">` ist ein einzelnes Slide
+```
+presentation/
+├── component-viewer.html           ← 🎯 HAUPTTOOL
+├── INDEX.md                        ← 📋 Vollständige Übersicht
+├── QUICK-START.md                  ← 🚀 Schnellanleitung
+├── LLM-PROMPT.md                   ← 🤖 LLM-Integration
+├── README-KOMPONENTEN.md           ← 📖 Detaillierte Docs
+├── beispiel-pitch.md               ← 📝 Beispiel-Pitch
+├── github-presentation-template.css ← 🎨 Styling
+├── github-design-guide.md          ← 🎨 Design-Docs
+└── output/                         ← 💾 Generierte HTMLs
+    ├── beispiel-01-problem.html
+    ├── beispiel-02-loesung.html
+    └── beispiel-03-markt.html
+```
 
 ---
 
-## Anpassungen
+## 🔄 Workflow
+
+### Standard-Workflow (mit LLM)
+
+```
+┌────────────────────────┐
+│  1. Markdown schreiben │  (z.B. vim pitch.md)
+└───────────┬────────────┘
+            │
+            ▼
+┌────────────────────────┐
+│  2. LLM konvertieren   │  (Claude/ChatGPT mit LLM-PROMPT.md)
+└───────────┬────────────┘
+            │
+            ▼
+┌────────────────────────┐
+│  3. HTML speichern     │  (output/folie-01-problem.html)
+└───────────┬────────────┘
+            │
+            ▼
+┌────────────────────────┐
+│  4. Viewer öffnen      │  (component-viewer.html)
+└───────────┬────────────┘
+            │
+            ▼
+┌────────────────────────┐
+│  5. Screenshots        │  (Chrome DevTools / Firefox)
+└───────────┬────────────┘
+            │
+            ▼
+┌────────────────────────┐
+│  6. PowerPoint         │  (Screenshots einfügen)
+└────────────────────────┘
+```
+
+### Alternative: Python-Script
+
+```bash
+# Automatische Konvertierung
+python markdown-to-components.py pitch.md output/
+
+# Dann direkt im Viewer öffnen
+open component-viewer.html
+```
+
+---
+
+## 🎨 Komponenten-Typen
+
+### Automatisch erkannt vom LLM:
+
+1. **📊 Statistik-Cards** - Zahlen mit Einheiten (Mio, %, €, etc.)
+2. **📝 Aufzählungen** - Bullet-Listen mit Formatierung
+3. **💬 Zitate** - Wichtige Aussagen hervorheben
+4. **📄 Text** - Absätze mit **fett** und `code`
+
+---
+
+## 🖼️ Screenshots erstellen
+
+### Methode 1: Chrome DevTools (Empfohlen)
+
+1. `F12` → DevTools öffnen
+2. Element-Selektor (`Strg+Shift+C`)
+3. Komponente anklicken
+4. 3-Punkte-Menü → "Capture node screenshot"
+
+### Methode 2: Firefox
+
+1. Rechtsklick auf Komponente
+2. "Screenshot des Knotens erstellen"
+
+### Methode 3: Browser-Extension
+
+- **Awesome Screenshot**
+- **GoFullPage**
+
+---
+
+## 💡 Beispiele
+
+### Beispiel 1: Statistik-Komponente
+
+**Input (Markdown):**
+```markdown
+## Demografische Daten
+
+- 83,6 Mio Einwohner in Deutschland
+- 5,7 Mio Pflegebedürftige
+- 500.000 fehlende Pflegekräfte
+```
+
+**Output (HTML):**
+```html
+<div class="component" id="slide-1-comp-1">
+    <div class="component-label">Komponente 1.1</div>
+    <h2>Demografische Daten</h2>
+    
+    <div class="stat-grid">
+        <div class="stat-card">
+            <span class="stat-number">83,6 Mio</span>
+            <span class="stat-label">Einwohner in Deutschland</span>
+        </div>
+        <!-- Weitere Cards... -->
+    </div>
+</div>
+```
+
+**Ergebnis:** Schöne Statistik-Cards zum Screenshotten
+
+---
+
+## ✨ Features
+
+- ✅ **Komponentenbasiert:** Einzelne Elemente statt ganze Folien
+- ✅ **Screenshot-freundlich:** Jede Komponente einzeln exportierbar
+- ✅ **LLM-Integration:** Automatische Konvertierung mit Claude/GPT
+- ✅ **GitHub-Design:** Professionelles, modernes Styling
+- ✅ **Flexibel:** Komponenten beliebig kombinierbar
+- ✅ **Versionierbar:** Markdown in Git trackbar
+
+---
+
+## 🎓 Best Practices
+
+### ✅ Empfohlen
+
+1. **Kurze Komponenten:** 1 Komponente = 1 Aussage
+2. **Klare Titel:** Jede Komponente braucht H2-Überschrift
+3. **Gruppierte Stats:** 2-4 Statistiken pro Grid
+4. **Konsistenz:** Gleiches Format für ähnliche Inhalte
+
+### ❌ Vermeiden
+
+1. Zu viel Text in einer Komponente
+2. Mehr als 4 Komponenten pro Folie
+3. Inkonsistente Formatierung
+4. Fehlende Komponenten-Labels
+
+---
+
+## 🛠️ Anpassungen
 
 ### Farben ändern
-Bearbeiten Sie die CSS-Variablen in `github-presentation-template.css`:
+
+Bearbeiten Sie `github-presentation-template.css`:
+
 ```css
 :root {
-  --github-green: #238636; /* Ihre Farbe */
-  --color-fg-default: #24292f; /* Textfarbe */
-  /* etc. */
+  --github-green: #238636;      /* Primärfarbe */
+  --color-fg-default: #24292f;  /* Textfarbe */
 }
 ```
 
-### Neue Slides hinzufügen
-Kopieren Sie ein bestehendes `<section class="slide">` und passen Sie den Inhalt an.
+### Neue Komponenten-Typen
 
-### Layout ändern
-Verwenden Sie die vorhandenen Utility-Klassen:
-- `.grid` - Grid-Layout
-- `.grid-2`, `.grid-3`, `.grid-4` - Spaltenanzahl
-- `.card` - Card-Container
-- `.split-layout` - Zwei-Spalten-Layout
+Fügen Sie CSS-Klassen in `github-presentation-template.css` hinzu und passen Sie `LLM-PROMPT.md` an.
 
 ---
 
-## Dateien
+## ❓ FAQ
 
-- `github-presentation-template.css` - Gemeinsame Stylesheet
-- `github-design-guide.md` - Design-Dokumentation
-- `template-1-classic.html` - Klassisches Template
-- `template-2-modern.html` - Modernes Template
-- `template-3-minimal.html` - Minimalistisches Template
-- `template-4-data-driven.html` - Datengetriebenes Template
+### Brauche ich Programmierkenntnisse?
+
+**Nein!** Sie schreiben nur Markdown. Der Rest macht der LLM oder das Python-Script.
+
+### Welchen LLM soll ich nutzen?
+
+- ✅ **Claude 3.5 Sonnet** (Empfohlen)
+- ✅ **ChatGPT-4** (Gut)
+- ⚠️ **GPT-3.5** (OK, manchmal Fehler)
+
+### Funktioniert es offline?
+
+- ✅ **Viewer:** Ja
+- ❌ **LLM-Konvertierung:** Nein (braucht Internet)
+- ✅ **Python-Script:** Ja
+
+### Wie viele Komponenten pro Folie?
+
+Ideal: 2-3 Komponenten. Maximum: 4-5.
 
 ---
 
-## Lizenz
+## 🆘 Support & Troubleshooting
 
-Diese Templates verwenden das GitHub Design System als Inspiration und sind für den eigenen Gebrauch bestimmt.
+| Problem | Lösung |
+|---------|--------|
+| Viewer zeigt nichts | Datei in `output/` speichern, in `availableFiles` eintragen |
+| Komponenten falsch | CSS-Klassen prüfen, Beispiele vergleichen |
+| LLM macht Fehler | Exakten Prompt aus `LLM-PROMPT.md` verwenden |
+| Screenshots unscharf | Browser-Zoom 100%, DevTools nutzen |
 
+**Weitere Hilfe:** Siehe Dokumentation in `INDEX.md`
 
+---
+
+## 📄 Dateien-Übersicht
+
+### Dokumentation
+- `INDEX.md` - Vollständige System-Übersicht
+- `README.md` - Diese Datei (Schnellübersicht)
+- `QUICK-START.md` - 5-Minuten Anleitung
+- `README-KOMPONENTEN.md` - Detaillierte Dokumentation
+- `LLM-PROMPT.md` - LLM-Integration Anleitung
+
+### Tools
+- `component-viewer.html` - Haupt-Viewer
+- `markdown-to-components.py` - Python-Script (optional)
+
+### Styling
+- `github-presentation-template.css` - Haupt-Stylesheet
+- `github-design-guide.md` - Design-System Docs
+- `github-presentation-example.html` - Design-Beispiele
+
+### Beispiele
+- `beispiel-pitch.md` - Vollständiges Pitch-Deck
+- `output/beispiel-*.html` - 3 Beispiel-Folien
+
+### Legacy
+- `template-*.html` - Alte Vollfolien-Templates
+- `_OLD_component-generator.html` - Altes System (Backup)
+
+---
+
+## 🚀 Los geht's!
+
+### Für Einsteiger:
+
+1. ✅ Öffnen Sie `component-viewer.html`
+2. ✅ Schauen Sie die Beispiele an
+3. ✅ Lesen Sie `QUICK-START.md`
+
+### Für Ihr Pitch-Deck:
+
+1. ✅ Lesen Sie `LLM-PROMPT.md`
+2. ✅ Schreiben Sie Ihr Markdown (siehe `beispiel-pitch.md`)
+3. ✅ Lassen Sie LLM konvertieren
+4. ✅ Screenshots erstellen und in PowerPoint einfügen
+
+---
+
+## 📊 System-Vorteile
+
+| Vorteil | Beschreibung |
+|---------|--------------|
+| 🎯 **Flexibel** | Komponenten einzeln oder kombiniert verwenden |
+| ⚡ **Effizient** | Nur benötigte Teile screenshotten |
+| 🔄 **Wiederverwendbar** | Komponenten in mehreren Decks nutzen |
+| 📝 **Wartbar** | Markdown als Single Source of Truth |
+| 🌳 **Versionierbar** | Git-friendly Markdown-Format |
+| 🎨 **Professionell** | GitHub-Design-System |
+
+---
+
+**Viel Erfolg mit Ihrem Robo4you Pitch! 🤖🚀**
+
+---
+
+*Erstellt für Robo4you GmbH - Robotik as a Service*
+*Version: 1.0 | November 2024*
