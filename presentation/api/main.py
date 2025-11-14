@@ -14,6 +14,11 @@ from datetime import datetime
 # Add parent directory to path for relative imports
 sys.path.insert(0, os.path.dirname(__file__))
 
+# Setup logging before importing other modules
+from utils import setup_logger
+
+logger = setup_logger(__name__)
+
 from config import (
     OPENAI_API_KEY,
     PROJECTS_BASE_PATH,
@@ -60,9 +65,11 @@ project_service = ProjectService(PROJECTS_BASE_PATH)
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
+    logger.debug("Health check called")
     return {
         "status": "ok",
         "api_key_configured": bool(OPENAI_API_KEY),
+        "test_mode": TEST_MODE,
     }
 
 
@@ -71,13 +78,16 @@ async def health_check():
 async def list_projects():
     """List all available projects"""
     try:
+        logger.debug("Listing all projects")
         projects = project_service.list_projects()
+        logger.info(f"Listed {len(projects)} projects")
         return {
             "success": True,
             "projects": projects,
             "total": len(projects),
         }
     except Exception as e:
+        logger.error(f"Error listing projects: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -229,8 +239,11 @@ async def update_project_scope(project_name: str, scope_content: str):
 async def generate_content(request: GenerateContentRequest):
     """Generate content using AI agents"""
 
+    logger.info(f"Content generation requested for project: {request.project_name}")
+
     # Validate API key (skip if test mode)
     if not TEST_MODE and not OPENAI_API_KEY:
+        logger.error("API key not configured")
         raise HTTPException(
             status_code=500,
             detail="OPENAI_API_KEY not configured. Set it in .env or enable TEST_MODE",
@@ -254,6 +267,7 @@ async def generate_content(request: GenerateContentRequest):
         )
 
         if result["success"]:
+            logger.info(f"Content generation successful for: {request.project_name}")
             return GenerateContentResponse(
                 success=True,
                 project_name=request.project_name,
@@ -263,16 +277,19 @@ async def generate_content(request: GenerateContentRequest):
                 total_components=result["total_components"],
             )
         else:
+            logger.warning(f"Content generation failed for {request.project_name}: {result.get('message')}")
             raise HTTPException(
                 status_code=400,
                 detail=result.get("message", "Content generation failed"),
             )
 
     except ValueError as e:
+        logger.error(f"Validation error: {e}")
         raise HTTPException(status_code=404, detail=str(e))
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"Unexpected error during content generation: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -363,9 +380,12 @@ async def upload_image(project_name: str, file: UploadFile = File(...)):
         # Validate project exists
         project_path = project_service.get_project_path(project_name)
 
+        logger.info(f"Image upload request for project: {project_name}, file: {file.filename}")
+
         # Validate file type
         allowed_types = ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/svg+xml"]
         if file.content_type not in allowed_types:
+            logger.warning(f"Invalid file type rejected: {file.content_type}")
             raise HTTPException(
                 status_code=400,
                 detail=f"Invalid file type. Allowed: PNG, JPG, GIF, SVG. Got: {file.content_type}"
@@ -416,6 +436,8 @@ async def upload_image(project_name: str, file: UploadFile = File(...)):
 
         # Return relative path for use in HTML
         relative_path = f"images/uploads/{final_filename}"
+
+        logger.info(f"Image uploaded successfully: {final_filename} ({len(content)} bytes)")
 
         return {
             "success": True,
@@ -513,13 +535,14 @@ async def delete_project_image(project_name: str, filename: str):
 @app.on_event("startup")
 async def startup_event():
     """Run on startup"""
-    print("=" * 50)
-    print("Slides Helper AI API Starting...")
-    print(f"Base Path: {PROJECTS_BASE_PATH}")
-    print(f"API Key Configured: {bool(OPENAI_API_KEY)}")
-    print(f"Test Mode: {TEST_MODE}")
-    print(f"Default Model: {DEFAULT_MODEL}")
-    print("=" * 50)
+    logger.info("=" * 50)
+    logger.info("Slides Helper AI API Starting...")
+    logger.info(f"Base Path: {PROJECTS_BASE_PATH}")
+    logger.info(f"API Key Configured: {bool(OPENAI_API_KEY)}")
+    logger.info(f"Test Mode: {TEST_MODE}")
+    logger.info(f"Default Model: {DEFAULT_MODEL}")
+    logger.info(f"Host: {HOST}:{PORT}")
+    logger.info("=" * 50)
 
 
 if __name__ == "__main__":

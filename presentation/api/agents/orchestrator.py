@@ -7,6 +7,9 @@ import os
 # Import services - use absolute imports when running from main
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from config import TEST_MODE
+from utils import sanitize_slide_name, get_logger
+
+logger = get_logger(__name__)
 
 if TEST_MODE:
     from .mock_agents import (
@@ -35,6 +38,8 @@ class AgentOrchestrator:
         self.presentation_strategist = PresentationStrategistAgent(api_key, model)
         self.content_generator = ContentGeneratorAgent(api_key, model)
 
+        logger.info(f"AgentOrchestrator initialized (model={model}, test_mode={self.test_mode})")
+
     def process(
         self,
         user_input: str,
@@ -55,17 +60,12 @@ class AgentOrchestrator:
             image_references: Optional list of image filenames to include
         """
 
-        # DEBUG: Log image references received
-        print("\n" + "="*50)
-        print("=== DEBUG ORCHESTRATOR ===")
-        print(f"image_references received: {image_references}")
-        print(f"Type: {type(image_references)}")
+        # Log processing start
+        logger.info(f"Processing content generation for project: {project_name}, slide: {slide_title or 'untitled'}")
         if image_references:
-            print(f"Count: {len(image_references)}")
-            print(f"Filenames: {image_references}")
+            logger.debug(f"Image references provided: {len(image_references)} image(s) - {image_references}")
         else:
-            print("⚠️ WARNING: image_references is None or empty!")
-        print("="*50 + "\n")
+            logger.debug("No image references provided")
 
         steps = []
         slides = []
@@ -84,10 +84,12 @@ class AgentOrchestrator:
             analysis = self.content_analyzer.analyze(user_input, slide_title)
             step1["status"] = "completed"
             step1["output"] = f"Identified content type: {analysis.get('content_type')}"
+            logger.debug(f"Content analysis completed: type={analysis.get('content_type')}")
 
             # Step 2: Load Style Guide
-            style_parser = StyleParser(project_path)
+            style_parser = StyleParser(project_path, use_cache=True)
             style_guide = style_parser.parse_project_style()
+            logger.debug(f"Style guide loaded for project")
 
             # Step 3: Presentation Strategy
             step2 = {
@@ -105,6 +107,7 @@ class AgentOrchestrator:
             step2[
                 "output"
             ] = f"Recommended {strategy.get('component_count', 1)} components"
+            logger.debug(f"Strategy recommendation completed: {strategy.get('component_count', 1)} component(s)")
 
             # Step 4: Content Generation
             step3 = {
@@ -120,13 +123,15 @@ class AgentOrchestrator:
             )
             step3["status"] = "completed"
             step3["output"] = f"Generated {generated.get('component_count', 1)} components"
+            logger.debug(f"Content generation completed: {generated.get('component_count', 1)} component(s)")
 
             # Step 5: Save Files
             file_service = FileService(project_path)
 
-            slide_name = self._sanitize_slide_name(
+            slide_name = sanitize_slide_name(
                 slide_title or f"folie-{len(file_service.list_slides()['markdown']) + 1}"
             )
+            logger.debug(f"Saving slide as: {slide_name}")
 
             markdown_path = file_service.save_markdown_slide(
                 slide_name, generated.get("markdown", "")
@@ -146,6 +151,8 @@ class AgentOrchestrator:
             }
             slides.append(slide_result)
 
+            logger.info(f"Successfully generated slide: {slide_name}")
+
             return {
                 "success": True,
                 "agent_steps": steps,
@@ -162,6 +169,8 @@ class AgentOrchestrator:
                 steps[-1]["status"] = "error"
                 steps[-1]["error"] = str(e)
 
+            logger.error(f"Content generation failed: {str(e)}", exc_info=True)
+
             return {
                 "success": False,
                 "agent_steps": steps,
@@ -170,17 +179,3 @@ class AgentOrchestrator:
                 "error": str(e),
             }
 
-    def _sanitize_slide_name(self, name: str) -> str:
-        """Sanitize slide name"""
-        import re
-
-        # Remove invalid characters
-        name = re.sub(r"[<>:\"/\\|?*]", "", name)
-        # Replace spaces with hyphens
-        name = name.replace(" ", "-")
-        # Convert to lowercase
-        name = name.lower()
-        # Remove leading/trailing hyphens
-        name = name.strip("-")
-
-        return name

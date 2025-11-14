@@ -1,18 +1,44 @@
 import os
 import re
+import sys
 from typing import Dict, List, Optional
 from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from utils import SimpleCache, get_logger
+
+logger = get_logger(__name__)
+
+# Global cache for style parsing (TTL: 5 minutes)
+_style_cache = SimpleCache(ttl_seconds=300)
 
 
 class StyleParser:
     """Parse CSS variables and design guides from project styles"""
 
-    def __init__(self, project_path: str):
+    def __init__(self, project_path: str, use_cache: bool = True):
         self.project_path = project_path
         self.styles_path = os.path.join(project_path, "styles")
+        self.use_cache = use_cache
+        logger.debug(f"StyleParser initialized for: {project_path}")
 
     def parse_project_style(self) -> Dict:
-        """Parse all style information from a project"""
+        """Parse all style information from a project
+
+        Uses caching to avoid repeated file system operations.
+        Cache key is based on project path.
+        """
+        # Check cache first
+        cache_key = f"style:{self.project_path}"
+        if self.use_cache:
+            cached_result = _style_cache.get(cache_key)
+            if cached_result is not None:
+                logger.debug(f"Cache hit for style: {self.project_path}")
+                return cached_result
+
+        logger.debug(f"Parsing style for project: {self.project_path}")
+
         style_info = {
             "primary_color": "#238636",  # Default GitHub green
             "secondary_colors": [],
@@ -38,6 +64,11 @@ class StyleParser:
         design_guide_file = self._find_design_guide()
         if design_guide_file:
             style_info["design_guide"] = self._read_design_guide(design_guide_file)
+
+        # Cache the result
+        if self.use_cache:
+            _style_cache.set(cache_key, style_info)
+            logger.debug(f"Cached style for: {self.project_path}")
 
         return style_info
 
@@ -81,7 +112,7 @@ class StyleParser:
                 result["spacing_scale"] = sorted([int(s) for s in spacings])
 
         except Exception as e:
-            print(f"Error parsing CSS: {e}")
+            logger.error(f"Error parsing CSS file {css_file}: {e}")
 
         return result
 
@@ -89,9 +120,11 @@ class StyleParser:
         """Read design guide markdown"""
         try:
             with open(guide_file, "r", encoding="utf-8") as f:
-                return f.read()
+                content = f.read()
+                logger.debug(f"Read design guide from: {guide_file}")
+                return content
         except Exception as e:
-            print(f"Error reading design guide: {e}")
+            logger.error(f"Error reading design guide {guide_file}: {e}")
             return ""
 
     def get_component_recommendations(self, content_type: str) -> List[str]:
@@ -103,4 +136,21 @@ class StyleParser:
             "list": ["bullet-list"],
             "mixed": ["heading", "paragraph", "bullet-list", "stat-grid"],
         }
-        return recommendations.get(content_type, ["paragraph", "bullet-list"])
+        result = recommendations.get(content_type, ["paragraph", "bullet-list"])
+        logger.debug(f"Component recommendations for '{content_type}': {result}")
+        return result
+
+    def clear_cache(self) -> None:
+        """Clear the style cache for this project
+
+        Useful when styles have been updated and need to be re-parsed.
+        """
+        cache_key = f"style:{self.project_path}"
+        _style_cache.delete(cache_key)
+        logger.info(f"Cleared style cache for: {self.project_path}")
+
+    @staticmethod
+    def clear_all_cache() -> None:
+        """Clear all cached styles across all projects"""
+        _style_cache.clear()
+        logger.info("Cleared all style caches")

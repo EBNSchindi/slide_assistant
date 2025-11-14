@@ -1,8 +1,14 @@
 import os
-import re
 from pathlib import Path
 from typing import Dict, Tuple
 from datetime import datetime
+import sys
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from utils import sanitize_filename, get_logger
+
+logger = get_logger(__name__)
 
 
 class FileService:
@@ -19,32 +25,38 @@ class FileService:
         os.makedirs(self.markdown_optimized_path, exist_ok=True)
         os.makedirs(self.html_path, exist_ok=True)
 
+        logger.debug(f"FileService initialized for project: {project_path}")
+
     def save_markdown_slide(self, slide_name: str, content: str) -> str:
         """Save markdown slide to optimized folder"""
         # Sanitize slide name
-        slide_name = self._sanitize_filename(slide_name)
+        slide_name = sanitize_filename(slide_name)
 
         filepath = os.path.join(self.markdown_optimized_path, f"{slide_name}.md")
 
         try:
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(content)
+            logger.info(f"Saved markdown slide: {slide_name}.md")
             return filepath
         except Exception as e:
+            logger.error(f"Error saving markdown slide {slide_name}: {e}")
             raise Exception(f"Error saving markdown: {e}")
 
     def save_html_slide(self, slide_name: str, content: str) -> str:
         """Save HTML slide to html folder"""
         # Sanitize slide name
-        slide_name = self._sanitize_filename(slide_name)
+        slide_name = sanitize_filename(slide_name)
 
         filepath = os.path.join(self.html_path, f"{slide_name}.html")
 
         try:
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(content)
+            logger.info(f"Saved HTML slide: {slide_name}.html")
             return filepath
         except Exception as e:
+            logger.error(f"Error saving HTML slide {slide_name}: {e}")
             raise Exception(f"Error saving HTML: {e}")
 
     def save_slides(self, slides: list) -> Dict[str, list]:
@@ -59,22 +71,11 @@ class FileService:
                 results["markdown"].append(md_path)
                 results["html"].append(html_path)
             except Exception as e:
-                print(f"Error saving slide {slide.get('name')}: {e}")
+                logger.error(f"Error saving slide {slide.get('name')}: {e}")
 
+        logger.info(f"Batch saved {len(results['markdown'])} slides")
         return results
 
-    def _sanitize_filename(self, filename: str) -> str:
-        """Sanitize filename to be filesystem safe"""
-        # Remove invalid characters
-        filename = re.sub(r"[<>:\"/\\|?*]", "", filename)
-        # Replace spaces with hyphens
-        filename = filename.replace(" ", "-")
-        # Convert to lowercase
-        filename = filename.lower()
-        # Remove leading/trailing hyphens
-        filename = filename.strip("-")
-
-        return filename
 
     def list_slides(self) -> Dict[str, list]:
         """List all existing slides in markdown and html folders"""
@@ -112,14 +113,14 @@ class FileService:
                 with open(md_path, "r", encoding="utf-8") as f:
                     markdown_content = f.read()
         except Exception as e:
-            print(f"Error reading markdown: {e}")
+            logger.error(f"Error reading markdown for {slide_name}: {e}")
 
         try:
             if os.path.exists(html_path):
                 with open(html_path, "r", encoding="utf-8") as f:
                     html_content = f.read()
         except Exception as e:
-            print(f"Error reading HTML: {e}")
+            logger.error(f"Error reading HTML for {slide_name}: {e}")
 
         return markdown_content, html_content
 
@@ -129,6 +130,8 @@ class FileService:
         backup_dir = os.path.join(self.project_path, "backups", timestamp)
         os.makedirs(backup_dir, exist_ok=True)
 
+        backed_up_files = []
+
         # Backup markdown
         md_path = os.path.join(self.markdown_optimized_path, f"{slide_name}.md")
         if os.path.exists(md_path):
@@ -136,6 +139,7 @@ class FileService:
             with open(md_path, "r", encoding="utf-8") as src:
                 with open(backup_md, "w", encoding="utf-8") as dst:
                     dst.write(src.read())
+            backed_up_files.append("markdown")
 
         # Backup HTML
         html_path = os.path.join(self.html_path, f"{slide_name}.html")
@@ -144,3 +148,7 @@ class FileService:
             with open(html_path, "r", encoding="utf-8") as src:
                 with open(backup_html, "w", encoding="utf-8") as dst:
                     dst.write(src.read())
+            backed_up_files.append("html")
+
+        if backed_up_files:
+            logger.info(f"Backed up {slide_name} ({', '.join(backed_up_files)}) to {backup_dir}")

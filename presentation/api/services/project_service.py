@@ -1,8 +1,15 @@
 import os
 import json
 import shutil
+import sys
 from typing import List, Dict, Optional
 from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from utils import get_logger
+
+logger = get_logger(__name__)
 
 
 class ProjectService:
@@ -10,6 +17,7 @@ class ProjectService:
 
     def __init__(self, projects_base_path: str):
         self.projects_base_path = projects_base_path
+        logger.debug(f"ProjectService initialized with base path: {projects_base_path}")
 
     def list_projects(self) -> List[str]:
         """List all available projects"""
@@ -25,6 +33,7 @@ class ProjectService:
                 if self._is_valid_project(project_path):
                     projects.append(item)
 
+        logger.debug(f"Found {len(projects)} valid projects")
         return sorted(projects)
 
     def _is_valid_project(self, project_path: str) -> bool:
@@ -78,6 +87,7 @@ class ProjectService:
         # Update projects.json
         self._update_projects_json('add', project_name=project_name, initial_style=initial_style)
 
+        logger.info(f"Created new project: {project_name} with style: {initial_style}")
         return project_path
 
     def get_project_info(self, project_name: str) -> Dict:
@@ -136,6 +146,7 @@ class ProjectService:
 
         # Copy style directory
         shutil.copytree(source_path, target_path)
+        logger.info(f"Duplicated style '{source_style}' to '{target_style}' in project {project_name}")
         return target_path
 
     def delete_project(self, project_name: str, force: bool = False) -> bool:
@@ -182,6 +193,7 @@ class ProjectService:
         # Update projects.json
         self._update_projects_json('remove', project_name=project_name)
 
+        logger.info(f"Deleted project: {project_name}")
         return True
 
     def rename_project(self, old_name: str, new_name: str) -> str:
@@ -217,6 +229,7 @@ class ProjectService:
         # Update projects.json
         self._update_projects_json('rename', old_name=old_name, new_name=new_name)
 
+        logger.info(f"Renamed project from '{old_name}' to '{new_name}'")
         return new_path
 
     def get_project_scope(self, project_name: str) -> str:
@@ -238,7 +251,7 @@ class ProjectService:
             with open(scope_path, 'r', encoding='utf-8') as f:
                 return f.read()
         except Exception as e:
-            print(f"Error reading scope file: {e}")
+            logger.error(f"Error reading scope file for {project_name}: {e}")
             return ""
 
     def update_project_scope(self, project_name: str, scope_content: str) -> str:
@@ -257,8 +270,10 @@ class ProjectService:
         try:
             with open(scope_path, 'w', encoding='utf-8') as f:
                 f.write(scope_content)
+            logger.info(f"Updated project scope for: {project_name}")
             return scope_path
         except Exception as e:
+            logger.error(f"Failed to write scope file for {project_name}: {e}")
             raise ValueError(f"Failed to write scope file: {e}")
 
     def _get_default_scope_template(self) -> str:
@@ -327,7 +342,7 @@ Any other information that will help generate better content for this project.
                 with open(projects_json_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
             except Exception as e:
-                print(f"Error reading projects.json: {e}")
+                logger.error(f"Error reading projects.json: {e}")
                 return
 
         # Perform action
@@ -376,5 +391,6 @@ Any other information that will help generate better content for this project.
         try:
             with open(projects_json_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
+            logger.debug(f"Updated projects.json: action={action}")
         except Exception as e:
-            print(f"Error writing projects.json: {e}")
+            logger.error(f"Error writing projects.json: {e}")
