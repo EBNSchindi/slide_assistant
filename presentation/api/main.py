@@ -383,16 +383,17 @@ async def upload_image(project_name: str, file: UploadFile = File(...)):
             )
 
         # Validate image with Pillow (except SVG)
+        # PERFORMANCE: Use context manager to ensure proper resource cleanup
         image_info = {}
         if file.content_type != "image/svg+xml":
             try:
-                img = Image.open(io.BytesIO(content))
-                image_info = {
-                    "width": img.width,
-                    "height": img.height,
-                    "format": img.format,
-                }
-                img.close()
+                with Image.open(io.BytesIO(content)) as img:
+                    image_info = {
+                        "width": img.width,
+                        "height": img.height,
+                        "format": img.format,
+                    }
+                # Image automatically closed by context manager
             except Exception as e:
                 raise HTTPException(status_code=400, detail=f"Invalid image file: {str(e)}")
 

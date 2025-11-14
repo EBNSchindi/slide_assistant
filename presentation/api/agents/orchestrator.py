@@ -35,6 +35,12 @@ class AgentOrchestrator:
         self.presentation_strategist = PresentationStrategistAgent(api_key, model)
         self.content_generator = ContentGeneratorAgent(api_key, model)
 
+        # PERFORMANCE: Cache service instances per project to avoid re-initialization
+        # StyleParser and FileService are expensive to create repeatedly
+        self._style_parser_cache = {}  # {project_path: StyleParser}
+        self._file_service_cache = {}  # {project_path: FileService}
+        self._variant_parser = None  # Singleton for VariantStyleParser
+
     def process(
         self,
         user_input: str,
@@ -86,7 +92,8 @@ class AgentOrchestrator:
             step1["output"] = f"Identified content type: {analysis.get('content_type')}"
 
             # Step 2: Load Style Guide
-            style_parser = StyleParser(project_path)
+            # PERFORMANCE: Use cached StyleParser instance
+            style_parser = self._get_style_parser(project_path)
             style_guide = style_parser.parse_project_style()
 
             # Step 3: Presentation Strategy
@@ -120,8 +127,8 @@ class AgentOrchestrator:
             variant_profiles = None
 
             if generate_variants:
-                # Load variant profiles from style guide
-                variant_parser = VariantStyleParser()
+                # PERFORMANCE: Use cached VariantStyleParser (singleton)
+                variant_parser = self._get_variant_parser()
                 variant_profiles = variant_parser.parse_variant_profiles()
                 print(f"✅ Variant generation enabled! Loaded {len(variant_profiles)} profiles")
 
@@ -144,7 +151,8 @@ class AgentOrchestrator:
                 step3["output"] = f"Generated {generated.get('component_count', 1)} components"
 
             # Step 5: Save Files
-            file_service = FileService(project_path)
+            # PERFORMANCE: Use cached FileService instance
+            file_service = self._get_file_service(project_path)
 
             slide_name = self._sanitize_slide_name(
                 slide_title or f"folie-{len(file_service.list_slides()['markdown']) + 1}"
@@ -223,6 +231,24 @@ class AgentOrchestrator:
                 "message": f"Generation failed: {str(e)}",
                 "error": str(e),
             }
+
+    def _get_style_parser(self, project_path: str) -> StyleParser:
+        """Get cached StyleParser instance for project"""
+        if project_path not in self._style_parser_cache:
+            self._style_parser_cache[project_path] = StyleParser(project_path)
+        return self._style_parser_cache[project_path]
+
+    def _get_file_service(self, project_path: str) -> FileService:
+        """Get cached FileService instance for project"""
+        if project_path not in self._file_service_cache:
+            self._file_service_cache[project_path] = FileService(project_path)
+        return self._file_service_cache[project_path]
+
+    def _get_variant_parser(self) -> VariantStyleParser:
+        """Get singleton VariantStyleParser instance"""
+        if self._variant_parser is None:
+            self._variant_parser = VariantStyleParser()
+        return self._variant_parser
 
     def _sanitize_slide_name(self, name: str) -> str:
         """Sanitize slide name"""

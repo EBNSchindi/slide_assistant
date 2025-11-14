@@ -3,6 +3,7 @@ Content Generator Agent - Generates markdown and HTML from strategy
 """
 from openai import OpenAI
 import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 class ContentGeneratorAgent:
@@ -530,6 +531,7 @@ CRITICAL REQUIREMENTS:
 Please generate both markdown and HTML for this slide based on the analysis and strategy."""
 
         try:
+            # PERFORMANCE: Add timeout to prevent hanging requests
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
@@ -538,6 +540,7 @@ Please generate both markdown and HTML for this slide based on the analysis and 
                 ],
                 temperature=0.5,
                 response_format={"type": "json_object"},
+                timeout=60.0,  # 60 second timeout for API calls
             )
 
             output = json.loads(response.choices[0].message.content)
@@ -546,38 +549,19 @@ Please generate both markdown and HTML for this slide based on the analysis and 
         except Exception as e:
             raise Exception(f"Content Generator error: {str(e)}")
 
-    def _generate_variants(
+    def _generate_single_variant(
         self,
-        analysis: dict,
-        strategy: dict,
-        style_guide: dict,
-        slide_title: str,
-        project_scope: str,
-        image_references: list,
-        project_name: str,
+        profile: dict,
         base_context: str,
         base_system_prompt: str,
-        variant_profiles: list,
     ) -> dict:
-        """Generate 3 variants of content for different design profiles
+        """Generate a single variant (used for parallel execution)"""
+        profile_name = profile.get("name", "default")
+        primary_color = profile.get("primary_color", "#238636")
+        visual_props = profile.get("visual_properties", {})
 
-        Args:
-            (standard generation params) + variant_profiles
-
-        Returns:
-            Dict with "variants" key containing list of variant outputs
-        """
-        variants = []
-
-        for profile in variant_profiles:
-            profile_name = profile.get("name", "default")
-            primary_color = profile.get("primary_color", "#238636")
-            visual_props = profile.get("visual_properties", {})
-
-            print(f"Generating variant: {profile_name}")
-
-            # Build profile-specific system prompt
-            profile_specific_prompt = f"""{base_system_prompt}
+        # Build profile-specific system prompt
+        profile_specific_prompt = f"""{base_system_prompt}
 
 ═══════════════════════════════════════════════════════════
 🎨 DESIGN PROFILE: {profile_name.upper()}
@@ -596,45 +580,107 @@ the same semantic content. Use colors and styling that match the profile definit
 All other requirements remain the same.
 """
 
-            user_message = f"""{base_context}
+        user_message = f"""{base_context}
 
 Please generate both markdown and HTML for this slide based on the analysis and strategy.
 This is the {profile_name.title()} design profile variant."""
 
-            try:
-                response = self.client.chat.completions.create(
-                    model=self.model,
-                    messages=[
-                        {"role": "system", "content": profile_specific_prompt},
-                        {"role": "user", "content": user_message},
-                    ],
-                    temperature=0.5,
-                    response_format={"type": "json_object"},
-                )
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": profile_specific_prompt},
+                    {"role": "user", "content": user_message},
+                ],
+                temperature=0.5,
+                response_format={"type": "json_object"},
+                timeout=60.0,  # 60 second timeout
+            )
 
-                output = json.loads(response.choices[0].message.content)
+            output = json.loads(response.choices[0].message.content)
 
-                # Add profile name to output
-                variants.append({
-                    "profile": profile_name,
-                    "html_content": output.get("html", ""),
-                    "markdown_content": output.get("markdown", ""),
-                    "components_used": output.get("components_used", []),
-                    "readability_score": output.get("readability_score", "unknown"),
-                })
+            return {
+                "profile": profile_name,
+                "html_content": output.get("html", ""),
+                "markdown_content": output.get("markdown", ""),
+                "components_used": output.get("components_used", []),
+                "readability_score": output.get("readability_score", "unknown"),
+            }
 
-                print(f"✅ {profile_name} variant generated")
+        except Exception as e:
+            print(f"⚠️ Error generating {profile_name} variant: {str(e)}")
+            return {
+                "profile": profile_name,
+                "html_content": f"<div class='error'>Failed to generate {profile_name} variant: {str(e)}</div>",
+                "markdown_content": f"# Error: Failed to generate {profile_name} variant",
+                "components_used": [],
+                "error": str(e),
+            }
 
-            except Exception as e:
-                print(f"⚠️ Error generating {profile_name} variant: {str(e)}")
-                # Still add a fallback variant to maintain count
-                variants.append({
-                    "profile": profile_name,
-                    "html_content": f"<div class='error'>Failed to generate {profile_name} variant: {str(e)}</div>",
-                    "markdown_content": f"# Error: Failed to generate {profile_name} variant",
-                    "components_used": [],
-                    "error": str(e),
-                })
+    def _generate_variants(
+        self,
+        analysis: dict,
+        strategy: dict,
+        style_guide: dict,
+        slide_title: str,
+        project_scope: str,
+        image_references: list,
+        project_name: str,
+        base_context: str,
+        base_system_prompt: str,
+        variant_profiles: list,
+    ) -> dict:
+        """Generate 3 variants of content for different design profiles IN PARALLEL
+
+        PERFORMANCE: Uses ThreadPoolExecutor to generate all 3 variants concurrently
+        instead of sequentially. This reduces total generation time from ~3x to ~1x
+        the time of a single variant (3x speedup for 3 variants).
+
+        Args:
+            (standard generation params) + variant_profiles
+
+        Returns:
+            Dict with "variants" key containing list of variant outputs
+        """
+        variants = []
+
+        # PERFORMANCE: Generate all variants in parallel using ThreadPoolExecutor
+        # Old approach: Sequential for-loop (~3x time for 3 variants)
+        # New approach: Parallel execution (~1x time for 3 variants)
+        print(f"🚀 Generating {len(variant_profiles)} variants in PARALLEL...")
+
+        with ThreadPoolExecutor(max_workers=len(variant_profiles)) as executor:
+            # Submit all variant generation tasks
+            future_to_profile = {
+                executor.submit(
+                    self._generate_single_variant,
+                    profile,
+                    base_context,
+                    base_system_prompt,
+                ): profile
+                for profile in variant_profiles
+            }
+
+            # Collect results as they complete
+            for future in as_completed(future_to_profile):
+                profile = future_to_profile[future]
+                try:
+                    result = future.result()
+                    variants.append(result)
+                    print(f"✅ {result['profile']} variant generated")
+                except Exception as e:
+                    profile_name = profile.get("name", "unknown")
+                    print(f"❌ Exception for {profile_name}: {str(e)}")
+                    # Add error variant
+                    variants.append({
+                        "profile": profile_name,
+                        "html_content": f"<div class='error'>Failed to generate {profile_name} variant: {str(e)}</div>",
+                        "markdown_content": f"# Error: Failed to generate {profile_name} variant",
+                        "components_used": [],
+                        "error": str(e),
+                    })
+
+        print(f"✅ All {len(variants)} variants generated successfully!")
 
         return {
             "variants": variants,

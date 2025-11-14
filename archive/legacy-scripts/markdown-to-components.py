@@ -15,6 +15,12 @@ import os
 from pathlib import Path
 from typing import List, Dict, Tuple
 
+# PERFORMANCE: Compile regex patterns once at module level
+_STAT_PATTERN = re.compile(r'^\d+[.,\d]*\s*(Mio|Mrd|%|€|\$|USD)')
+_STAT_SPLIT_PATTERN = re.compile(r'^([\d.,]+\s*(?:Mio|Mrd|%|€|\$|USD|\w+))\s+(.+)$')
+_BOLD_PATTERN = re.compile(r'\*\*(.*?)\*\*')
+_CODE_PATTERN = re.compile(r'`(.*?)`')
+
 class Component:
     def __init__(self, title: str = "", component_type: str = "section"):
         self.title = title
@@ -91,11 +97,12 @@ def parse_markdown(markdown_text: str) -> List[Slide]:
         elif line.startswith('- '):
             if not current_component:
                 current_component = Component()
-            
+
             text = line[2:].strip()
-            
+
+            # PERFORMANCE: Use pre-compiled regex pattern
             # Erkenne Statistiken (Zahl am Anfang)
-            if re.match(r'^\d+[.,\d]*\s*(Mio|Mrd|%|€|\$|USD)', text):
+            if _STAT_PATTERN.match(text):
                 current_component.add_stat(text)
             else:
                 current_component.add_bullet(text)
@@ -123,10 +130,11 @@ def parse_markdown(markdown_text: str) -> List[Slide]:
 
 def format_text(text: str) -> str:
     """Formatiert Markdown-Text zu HTML"""
+    # PERFORMANCE: Use pre-compiled regex patterns
     # **bold** → <strong>
-    text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
+    text = _BOLD_PATTERN.sub(r'<strong>\1</strong>', text)
     # `code` → <code>
-    text = re.sub(r'`(.*?)`', r'<code>\1</code>', text)
+    text = _CODE_PATTERN.sub(r'<code>\1</code>', text)
     return text
 
 def render_component(component: Component, slide_num: int, comp_num: int) -> str:
@@ -146,8 +154,9 @@ def render_component(component: Component, slide_num: int, comp_num: int) -> str
     if stats:
         html += '  <div class="stat-grid">\n'
         for _, text in stats:
+            # PERFORMANCE: Use pre-compiled regex pattern
             # Versuche Zahl und Label zu trennen
-            match = re.match(r'^([\d.,]+\s*(?:Mio|Mrd|%|€|\$|USD|\w+))\s+(.+)$', text)
+            match = _STAT_SPLIT_PATTERN.match(text)
             if match:
                 number, label = match.groups()
                 html += f'    <div class="stat-card">\n'

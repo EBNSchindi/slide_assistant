@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import shutil
 from pathlib import Path
 from typing import Dict, Tuple, List
 from datetime import datetime
@@ -130,21 +131,20 @@ class FileService:
         backup_dir = os.path.join(self.project_path, "backups", timestamp)
         os.makedirs(backup_dir, exist_ok=True)
 
+        # PERFORMANCE: Use shutil.copy2 instead of manual read/write
+        # shutil.copy2 is faster and also preserves metadata (timestamps, permissions)
+
         # Backup markdown
         md_path = os.path.join(self.markdown_optimized_path, f"{slide_name}.md")
         if os.path.exists(md_path):
             backup_md = os.path.join(backup_dir, f"{slide_name}.md")
-            with open(md_path, "r", encoding="utf-8") as src:
-                with open(backup_md, "w", encoding="utf-8") as dst:
-                    dst.write(src.read())
+            shutil.copy2(md_path, backup_md)
 
         # Backup HTML
         html_path = os.path.join(self.html_path, f"{slide_name}.html")
         if os.path.exists(html_path):
             backup_html = os.path.join(backup_dir, f"{slide_name}.html")
-            with open(html_path, "r", encoding="utf-8") as src:
-                with open(backup_html, "w", encoding="utf-8") as dst:
-                    dst.write(src.read())
+            shutil.copy2(html_path, backup_html)
 
     def save_slide_variants(
         self, slide_name: str, variants: List[Dict]

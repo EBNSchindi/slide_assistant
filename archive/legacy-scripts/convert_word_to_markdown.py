@@ -13,6 +13,10 @@ from docx import Document
 from docx.shared import Pt
 from docx.enum.style import WD_STYLE_TYPE
 
+# PERFORMANCE: Compile regex patterns once at module level instead of on every call
+_HEADING_PATTERN = re.compile(r'heading\s*(\d+)', re.IGNORECASE)
+_MULTIPLE_NEWLINES_PATTERN = re.compile(r'\n{3,}')
+
 
 def format_runs(runs):
     """
@@ -74,14 +78,13 @@ def get_heading_level(style_name):
     """
     if not style_name:
         return None
-    
-    style_lower = style_name.lower()
-    if 'heading' in style_lower:
-        # Extrahiere Nummer aus "Heading 1", "Heading 2", etc.
-        match = re.search(r'heading\s*(\d+)', style_lower)
+
+    # PERFORMANCE: Use pre-compiled regex pattern
+    if 'heading' in style_name.lower():
+        match = _HEADING_PATTERN.search(style_name)
         if match:
             return int(match.group(1))
-    
+
     return None
 
 
@@ -166,52 +169,31 @@ def convert_docx_to_markdown(docx_path, output_path=None):
     except Exception as e:
         print(f"Fehler beim Öffnen der Datei {docx_path}: {e}")
         return False
-    
+
     markdown_content = []
-    
-    # Verbesserte Verarbeitung: Absätze und Tabellen in Reihenfolge durchgehen
-    para_index = 0
-    table_index = 0
-    
+
+    # PERFORMANCE: Pre-build element mappings to avoid O(n²) complexity
+    # Old approach: For each element, iterate through all paragraphs/tables (O(n²))
+    # New approach: Create hash map once (O(n)), then lookup in O(1)
+    para_map = {p._element: p for p in doc.paragraphs}
+    table_map = {t._element: t for t in doc.tables}
+
     # Durchlaufe alle Elemente im Dokument in der richtigen Reihenfolge
     for element in doc.element.body:
-        # Absatz
-        if element.tag.endswith('p'):
-            if para_index < len(doc.paragraphs):
-                para = doc.paragraphs[para_index]
-                # Prüfe ob dieser Absatz zum aktuellen Element gehört
-                if para._element == element:
-                    markdown_content.append(process_paragraph(para))
-                    para_index += 1
-                else:
-                    # Suche den passenden Absatz
-                    for p in doc.paragraphs[para_index:]:
-                        if p._element == element:
-                            markdown_content.append(process_paragraph(p))
-                            para_index = doc.paragraphs.index(p) + 1
-                            break
-        
-        # Tabelle
-        elif element.tag.endswith('tbl'):
-            if table_index < len(doc.tables):
-                table = doc.tables[table_index]
-                # Prüfe ob diese Tabelle zum aktuellen Element gehört
-                if table._element == element:
-                    markdown_content.append(process_table(table))
-                    table_index += 1
-                else:
-                    # Suche die passende Tabelle
-                    for t in doc.tables[table_index:]:
-                        if t._element == element:
-                            markdown_content.append(process_table(t))
-                            table_index = doc.tables.index(t) + 1
-                            break
+        # Absatz - O(1) lookup statt O(n) search
+        if element.tag.endswith('p') and element in para_map:
+            markdown_content.append(process_paragraph(para_map[element]))
+
+        # Tabelle - O(1) lookup statt O(n) search
+        elif element.tag.endswith('tbl') and element in table_map:
+            markdown_content.append(process_table(table_map[element]))
     
     # Markdown-Text zusammenfügen
     markdown_text = ''.join(markdown_content)
-    
+
+    # PERFORMANCE: Use pre-compiled regex pattern
     # Überflüssige Leerzeilen reduzieren (max. 2 aufeinanderfolgende)
-    markdown_text = re.sub(r'\n{3,}', '\n\n', markdown_text)
+    markdown_text = _MULTIPLE_NEWLINES_PATTERN.sub('\n\n', markdown_text)
     
     # Whitespace am Ende entfernen
     markdown_text = markdown_text.rstrip() + '\n'
