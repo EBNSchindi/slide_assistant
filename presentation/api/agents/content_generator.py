@@ -138,12 +138,14 @@ ACCESSIBILITY (a11y) REQUIREMENTS:
 
 **IMAGE:**
 - Always use descriptive alt text (describe content, not "screenshot" or "image")
-- Wrap in <figure> for semantic correctness
-- Add <figcaption> when context is needed
-- Use consistent styling (border-radius: 6px, subtle shadow optional)
+- Use structured layout: .image-container > .image-wrapper + .image-content
+- .image-wrapper contains the actual <img> tag
+- .image-content contains <h4> title and <p> description for context
+- Use consistent styling (border-radius: 8px on image)
 - Ensure proper sizing (max-width: 100%, height: auto)
 - Use the EXACT path provided in the context (projects/{project}/images/uploads/{filename})
 - Never use relative paths like "../" or "images/" alone
+- For multiple images, use .image-grid with .image-card components
 
 ═══════════════════════════════════════════════════════════
 📋 HTML COMPONENT TEMPLATES
@@ -192,16 +194,57 @@ ACCESSIBILITY (a11y) REQUIREMENTS:
   <p>Second paragraph builds on the first. Maintains clear flow.</p>
 </div>
 
-5. IMAGE COMPONENT:
+5. IMAGE COMPONENT (Single Image):
 <div class="component" id="slide-X-comp-Y" role="region" aria-label="Visual demonstration">
   <div class="component-label">Component Y</div>
-  <h2>Component Title (optional)</h2>
-  <figure class="image-container">
-    <img src="projects/PROJECT-NAME/images/uploads/FILENAME.png"
-         alt="Descriptive text explaining what's shown in the image"
-         style="max-width: 100%; height: auto; border-radius: 6px;">
-    <figcaption>Brief caption explaining context or key takeaway</figcaption>
-  </figure>
+  <h2>Component Title</h2>
+  <div class="image-container">
+    <div class="image-wrapper">
+      <img src="projects/PROJECT-NAME/images/uploads/FILENAME.png"
+           alt="Descriptive text explaining what's shown in the image"
+           style="max-width: 100%; height: auto; border-radius: 8px;">
+    </div>
+    <div class="image-content">
+      <h4>Image Title or Key Message</h4>
+      <p>Brief description explaining context, significance, or key takeaway. Keep concise but informative.</p>
+    </div>
+  </div>
+</div>
+
+6. IMAGE GRID (Multiple Images):
+<div class="component" id="slide-X-comp-Y" role="region" aria-label="Visual gallery">
+  <div class="component-label">Component Y</div>
+  <h2>Component Title</h2>
+  <div class="image-grid">
+    <div class="image-card">
+      <div class="image-wrapper">
+        <img src="projects/PROJECT-NAME/images/uploads/FILE1.png"
+             alt="Descriptive alt text for first image"
+             style="max-width: 100%; height: auto; border-radius: 8px;">
+        <span class="image-badge">
+          <span class="badge badge-success">Status</span>
+        </span>
+      </div>
+      <div class="image-content">
+        <h4>First Image Title</h4>
+        <p>Brief description of first image</p>
+      </div>
+    </div>
+    <div class="image-card">
+      <div class="image-wrapper">
+        <img src="projects/PROJECT-NAME/images/uploads/FILE2.png"
+             alt="Descriptive alt text for second image"
+             style="max-width: 100%; height: auto; border-radius: 8px;">
+        <span class="image-badge">
+          <span class="badge badge-warning">2026</span>
+        </span>
+      </div>
+      <div class="image-content">
+        <h4>Second Image Title</h4>
+        <p>Brief description of second image</p>
+      </div>
+    </div>
+  </div>
 </div>
 
 CRITICAL IMAGE PATH RULES:
@@ -317,27 +360,33 @@ strong verbs, no filler, quantified impact
 EXAMPLE 3: Image Component - Before/After
 
 ❌ BAD:
-<div class="image-container">
+<figure class="image-container">
   <img src="../images/dashboard.png" alt="Dashboard screenshot">
-</div>
+  <figcaption>Dashboard</figcaption>
+</figure>
 
-Why bad: Relative path (wrong!), generic alt text, no semantic markup,
-no caption, no accessibility attributes
+Why bad: Relative path (wrong!), generic alt text, no structured layout,
+no .image-wrapper/.image-content divs, generic caption
 
 ✓ GOOD:
 <div class="component" id="slide-2-comp-1" role="region" aria-label="Product demonstration">
   <div class="component-label">Component 1</div>
   <h2>Analytics Dashboard</h2>
-  <figure class="image-container">
-    <img src="projects/beispiel-projekt/images/uploads/dashboard-screenshot.png"
-         alt="Analytics dashboard showing real-time metrics with graph visualizations and KPI cards"
-         style="max-width: 100%; height: auto; border-radius: 6px;">
-    <figcaption>Real-time analytics with customizable reporting</figcaption>
-  </figure>
+  <div class="image-container">
+    <div class="image-wrapper">
+      <img src="projects/beispiel-projekt/images/uploads/dashboard-screenshot.png"
+           alt="Analytics dashboard showing real-time metrics with graph visualizations and KPI cards"
+           style="max-width: 100%; height: auto; border-radius: 8px;">
+    </div>
+    <div class="image-content">
+      <h4>Real-Time Analytics Dashboard</h4>
+      <p>Customizable reporting with live data visualization. Track key metrics and generate insights instantly.</p>
+    </div>
+  </div>
 </div>
 
-Why good: Absolute correct path, descriptive alt text, semantic <figure>,
-helpful caption, proper accessibility, proper styling
+Why good: Absolute correct path, descriptive alt text, structured layout
+with .image-wrapper and .image-content, professional styling, informative description
 
 EXAMPLE 4: Mixed Content (Image + Stats) - Before/After
 
@@ -348,7 +397,7 @@ EXAMPLE 4: Mixed Content (Image + Stats) - Before/After
 </div>
 
 Why bad: No components, wrong path, no stat-grid, no semantic structure,
-terrible alt text
+terrible alt text, no structured image layout
 
 ✓ GOOD:
 <div class="component" id="slide-3-comp-1" role="region" aria-label="Performance metrics">
@@ -368,16 +417,22 @@ terrible alt text
 <div class="component" id="slide-3-comp-2" role="region" aria-label="Workflow visualization">
   <div class="component-label">Component 2</div>
   <h2>Automated Workflow</h2>
-  <figure class="image-container">
-    <img src="projects/beispiel-projekt/images/uploads/workflow-diagram.png"
-         alt="Workflow diagram showing automated process flow from invoice receipt to payment processing"
-         style="max-width: 100%; height: auto; border-radius: 6px;">
-    <figcaption>End-to-end automation eliminates manual steps</figcaption>
-  </figure>
+  <div class="image-container">
+    <div class="image-wrapper">
+      <img src="projects/beispiel-projekt/images/uploads/workflow-diagram.png"
+           alt="Workflow diagram showing automated process flow from invoice receipt to payment processing"
+           style="max-width: 100%; height: auto; border-radius: 8px;">
+    </div>
+    <div class="image-content">
+      <h4>End-to-End Automation</h4>
+      <p>Automated workflow eliminates manual steps, reducing processing time from 45 to 12 days. Seamless integration from receipt to payment.</p>
+    </div>
+  </div>
 </div>
 
 Why good: Proper components, correct paths, stat-grid for metrics,
-image for visual proof, descriptive alt text, semantic structure
+structured image layout with .image-wrapper and .image-content, descriptive alt text,
+informative description, semantic structure
 
 ═══════════════════════════════════════════════════════════
 🎯 GENERATION WORKFLOW
@@ -424,7 +479,9 @@ CRITICAL REQUIREMENTS:
 - No buzzwords or filler words
 - Images must have descriptive alt text
 - Image paths must be EXACT (from context, with projects/ prefix)
-- Use <figure> and <figcaption> for images
+- Use structured image layout: .image-container > .image-wrapper + .image-content
+- .image-wrapper contains <img>, .image-content contains <h4> + <p>
+- For multiple images, use .image-grid with .image-card components
 
 ═══════════════════════════════════════════════════════════
 🚨 CRITICAL REMINDERS
@@ -442,6 +499,10 @@ CRITICAL REQUIREMENTS:
 - NEVER use relative image paths
 - Descriptive alt text is mandatory for accessibility
 - Images should enhance the message, not distract
+- ALWAYS use structured image layout: .image-container > .image-wrapper + .image-content
+- NEVER use simple <figure>/<figcaption> for images - use the structured layout
+- Image components must have <h4> title and <p> description in .image-content
+- For multiple images, use .image-grid with .image-card components
 """
 
         user_message = f"""{context}
