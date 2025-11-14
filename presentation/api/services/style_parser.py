@@ -15,17 +15,25 @@ class StyleParser:
         """Parse all style information from a project"""
         style_info = {
             "primary_color": "#238636",  # Default GitHub green
-            "secondary_colors": [],
+            "secondary_colors": ["#0366d6", "#d1130c"],
             "font_family": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif",
-            "spacing_scale": [4, 8, 16, 24, 32, 48],
+            "spacing_scale": [4, 8, 12, 16, 24, 32, 48],
             "available_components": [
                 "stat-grid",
                 "bullet-list",
                 "quote",
-                "heading",
-                "paragraph",
+                "text",
+                "image",
+                "image-grid",
+                "pricing-table",
+                "calculation-grid",
+                "feature-grid",
+                "process-chain-vertical",
+                "process-chain-horizontal",
+                "comparison-table",
+                "financial-table",
             ],
-            "design_guide": "",
+            "design_guide": "",  # Full markdown will be loaded from file
         }
 
         # Try to find and parse variables.css files

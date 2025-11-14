@@ -25,6 +25,91 @@ Your outputs feed into:
 - Content Generator → produces final markdown/HTML
 
 ═══════════════════════════════════════════════════════════
+📚 REFERENCE EXAMPLES (Quality Standard)
+═══════════════════════════════════════════════════════════
+
+When analyzing content, reference these 8 slides from beispiel-projekt to understand
+the patterns that result in high-quality presentations:
+
+📌 Folie 1: Problem & Market Statistics (Multi-stat analysis)
+   Analyze: Multiple statistics that define market size and problem scale
+   Learn: How to extract and group related metrics hierarchically
+
+📌 Folie 2: Solution with Services (Icon-enhanced content + phased structure)
+   Analyze: Service pillars with temporal phases (institutional vs. private market)
+   Learn: Detecting icon-enhanced content and phased/hierarchical structures
+
+📌 Folie 3: Market Research (Statistics WITH sources and timeframes)
+   Analyze: Numbers backed by sources (Bank of America, Morgan Stanley, etc.)
+   Learn: Extracting source attribution and temporal context from stats
+
+📌 Folie 4: Comparison Data (Tables with multiple variants)
+   Analyze: Product models, pricing, and business model comparison
+   Learn: Detecting comparison-type content requiring table layout
+
+📌 Folie 5: Process/Timeline (Sequential steps with temporal markers)
+   Analyze: Deployment phases with dates and milestones
+   Learn: Identifying temporal/sequential content for process chains
+
+📌 Folie 6: Team & Features (Feature lists with consistent structure)
+   Analyze: Service features presented in grid format
+   Learn: Detecting feature-list content and proper grouping
+
+📌 Folie 7: Financial Data (Unit economics, costs, calculations)
+   Analyze: Cost breakdowns, revenue metrics, key financial indicators
+   Learn: Extracting calculation-based content and highlighting key metrics
+
+📌 Folie 8: Visual Content (Images with structured context)
+   Analyze: Screenshots/diagrams with explanatory captions
+   Learn: Detecting when visual content is primary vs. supporting
+
+ANALYSIS PATTERNS FROM REFERENCE SLIDES:
+
+✓ STAT GROUPING (Folie 1, 3, 7):
+  - Group related statistics together (not scattered)
+  - Extract source attribution when present
+  - Identify which stats are primary vs. supporting
+  - Note temporal context ("Stand 2023", "bis 2030")
+
+✓ ICON DETECTION (Folie 2):
+  - 🤖 Hardware → Icon preserved in output
+  - 🎓 Training → Icon enhanced visual hierarchy
+  - 🔧 Service → Icons strengthen list structure
+  Learn: Preserve icons/emojis in analysis
+
+✓ PHASED STRUCTURE (Folie 2):
+  - Phase 1: Institutional Market (2026-2028)
+  - Phase 2: Private Market (ab 2029)
+  Learn: Detect temporal phases and hierarchical sections with h3 markers
+
+✓ SOURCE ATTRIBUTION (Folie 3):
+  - "18,000 units (Bank of America, 2025)" → Extract source + year
+  - "Morgan Stanley" → Identify key sources
+  Learn: Always extract source attribution for credibility
+
+✓ TABLE-SUITABLE CONTENT (Folie 4):
+  - Product comparison (features across rows/columns)
+  - Pricing matrices
+  - Feature support matrices
+  Learn: Flag content that needs table layout vs. bullet lists
+
+✓ PROCESS/TIMELINE CONTENT (Folie 5):
+  - Sequential steps with dates
+  - Milestone-based structure
+  Learn: Detect temporal progression for process-chain layout
+
+✓ FINANCIAL CONTENT (Folie 7):
+  - Cost breakdowns
+  - Revenue streams
+  - Key metrics requiring highlighting
+  Learn: Identify calculation-based content for special handling
+
+✓ VISUAL INTEGRATION (Folie 8):
+  - Screenshots with captions
+  - Diagrams with explanations
+  Learn: Flag content that would benefit from images
+
+═══════════════════════════════════════════════════════════
 🎓 DOMAIN KNOWLEDGE: Presentation Best Practices
 ═══════════════════════════════════════════════════════════
 Effective presentations follow these principles:

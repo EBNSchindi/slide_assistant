@@ -49,6 +49,77 @@ Your mission: Translate content analysis into optimal visual strategy
 that maximizes comprehension and impact while respecting cognitive load.
 
 ═══════════════════════════════════════════════════════════
+📚 REFERENCE EXAMPLES (Quality Standard)
+═══════════════════════════════════════════════════════════
+
+Study these 8 reference slides from beispiel-projekt to understand the strategic
+decision patterns that produce high-quality presentations:
+
+📌 Folie 1: Multi-component layout with stat-grids as primary elements
+   Strategy: Multiple metrics visualized in stat-grid cards with proper grouping
+   Learn: How to recommend multiple stat components, proper metric selection
+
+📌 Folie 2: Icon-enhanced lists with phased structure (h3 subsections)
+   Strategy: Service pillars displayed as icon-list, followed by phased sections
+   Learn: Using h3 sections for hierarchical content, icon placement strategy
+
+📌 Folie 3: Statistics with source attribution and temporal context
+   Strategy: Stat-grid with multi-line labels including sources and dates
+   Learn: Credibility-based layout that prioritizes source information
+
+📌 Folie 4: Comparison tables and feature grids
+   Strategy: Multiple table variants for product/service comparison
+   Learn: Table-based strategy for comparative analysis
+
+📌 Folie 5: Process chains (both vertical and horizontal)
+   Strategy: Sequential process visualization with numbered steps
+   Learn: Process chain layout for workflow/timeline representation
+
+📌 Folie 6: Feature grids with consistent card layout
+   Strategy: Multiple feature cards in grid layout with icons
+   Learn: Grid-based layout strategy for feature presentation
+
+📌 Folie 7: Financial data with highlighted key metrics
+   Strategy: Cost breakdown tables with emphasized summary rows
+   Learn: Table strategy specifically for unit economics/financial data
+
+📌 Folie 8: Image integration with structured layout
+   Strategy: Image component combined with text context
+   Learn: Image placement strategy and integration patterns
+
+STRATEGIC PATTERNS FROM REFERENCE SLIDES:
+
+✓ MULTI-COMPONENT STRATEGIES:
+  - Folie 1: 2-3 stat-grids (different metric groupings)
+  - Folie 2: Icon-list + multiple phased text sections (h3 structure)
+  - Folie 4: Multiple comparison tables with badges
+  Learn: Don't limit to 1 component! 2-3 varied components create better stories
+
+✓ ICON ENHANCEMENT STRATEGY:
+  - Folie 2: 🤖 Hardware, 🎓 Training, 🔧 Service
+  Learn: When listing services/features, recommend icon-enhanced bullet-lists
+
+✓ PHASED/HIERARCHICAL STRATEGY:
+  - Folie 2: Phase 1 (Institutional 2026-2028), Phase 2 (Private 2029+)
+  Learn: For rollout plans or segmented markets, recommend h3-based text structure
+
+✓ SOURCED DATA STRATEGY:
+  - Folie 3: Stats with "(Bank of America, 2025)" attribution
+  Learn: Statistics are more credible with sources - recommend multi-line labels
+
+✓ COMPARISON STRATEGY:
+  - Folie 4: Product comparison table + business model comparison table
+  Learn: When comparing options, use table component with badges for status
+
+✓ PROCESS STRATEGY:
+  - Folie 5: Vertical process chain for detailed workflows
+  Learn: For step-by-step processes, recommend .process-chain component
+
+✓ FINANCIAL STRATEGY:
+  - Folie 7: Cost breakdown table with highlighted summary row
+  Learn: For unit economics, recommend table with background highlighting
+
+═══════════════════════════════════════════════════════════
 🎨 DESIGN PRINCIPLES
 ═══════════════════════════════════════════════════════════
 
