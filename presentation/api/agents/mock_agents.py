@@ -97,6 +97,8 @@ class MockContentGeneratorAgent:
         style_guide: dict,
         slide_title: str = "Folie",
         project_scope: str = "",
+        image_references: list = None,
+        project_name: str = "beispiel-projekt",
     ) -> dict:
         """Mock content generation
 
@@ -106,7 +108,23 @@ class MockContentGeneratorAgent:
             style_guide: Style guide information
             slide_title: Title for the slide
             project_scope: Project scope/context (optional)
+            image_references: List of image filenames to include (optional)
+            project_name: Name of the project for dynamic paths
         """
+        # DEBUG: Log image references in generator
+        print("\n" + "="*50)
+        print("=== DEBUG MOCK AGENT GENERATOR ===")
+        print(f"image_references: {image_references}")
+        print(f"Type: {type(image_references)}")
+        print(f"Has images: {bool(image_references)}")
+        if image_references:
+            print(f"✅ Image count: {len(image_references)}")
+            print(f"✅ Filenames: {image_references}")
+            print("✅ Will generate <img> tags!")
+        else:
+            print("❌ WARNING: No image_references - skipping <img> tags!")
+        print("="*50 + "\n")
+
         # Generate simple markdown
         markdown = f"""# {slide_title}
 
@@ -123,7 +141,7 @@ class MockContentGeneratorAgent:
 """
 
         # Generate simple HTML
-        html = f"""<div class="slide-section">
+        html_parts = [f"""<div class="slide-section">
   <div class="component" id="slide-1-comp-1">
     <div class="component-label">Komponente 1</div>
     <h2>{slide_title}</h2>
@@ -140,13 +158,29 @@ class MockContentGeneratorAgent:
       <li>Detail A</li>
       <li>Detail B</li>
     </ul>
-  </div>
-</div>"""
+  </div>"""]
+
+        # Add images if provided
+        if image_references:
+            for i, img_filename in enumerate(image_references):
+                html_parts.append(f"""
+  <div class="component image-component" id="slide-1-img-{i+1}">
+    <div class="component-label">Image {i+1}</div>
+    <img src="projects/{project_name}/images/uploads/{img_filename}" alt="Slide image {i+1}" class="slide-image" />
+  </div>""")
+
+        html_parts.append("\n</div>")
+        html = "".join(html_parts)
+
+        components_used = ["bullet-list", "text"]
+        if image_references:
+            components_used.append("image")
 
         return {
             "markdown": markdown,
             "html": html,
-            "component_count": 2,
-            "components_used": ["bullet-list", "text"],
+            "component_count": 2 + (len(image_references) if image_references else 0),
+            "components_used": components_used,
             "used_project_scope": bool(project_scope),
+            "images_included": len(image_references) if image_references else 0,
         }

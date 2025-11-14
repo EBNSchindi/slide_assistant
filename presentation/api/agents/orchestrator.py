@@ -39,10 +39,33 @@ class AgentOrchestrator:
         self,
         user_input: str,
         project_path: str,
+        project_name: str,
         slide_title: str = None,
         preferences: dict = None,
+        image_references: list = None,
     ) -> dict:
-        """Process user input through the full agent chain"""
+        """Process user input through the full agent chain
+
+        Args:
+            user_input: User's content description
+            project_path: Path to the project
+            project_name: Name of the project (for dynamic paths)
+            slide_title: Optional slide title
+            preferences: Optional user preferences
+            image_references: Optional list of image filenames to include
+        """
+
+        # DEBUG: Log image references received
+        print("\n" + "="*50)
+        print("=== DEBUG ORCHESTRATOR ===")
+        print(f"image_references received: {image_references}")
+        print(f"Type: {type(image_references)}")
+        if image_references:
+            print(f"Count: {len(image_references)}")
+            print(f"Filenames: {image_references}")
+        else:
+            print("⚠️ WARNING: image_references is None or empty!")
+        print("="*50 + "\n")
 
         steps = []
         slides = []
@@ -93,7 +116,7 @@ class AgentOrchestrator:
             steps.append(step3)
 
             generated = self.content_generator.generate(
-                analysis, strategy, style_guide, slide_title or "Folie"
+                analysis, strategy, style_guide, slide_title or "Folie", "", image_references, project_name
             )
             step3["status"] = "completed"
             step3["output"] = f"Generated {generated.get('component_count', 1)} components"

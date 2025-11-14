@@ -18,8 +18,30 @@ class ContentGeneratorAgent:
         strategy: dict,
         style_guide: dict,
         slide_title: str = "Folie",
+        project_scope: str = "",
+        image_references: list = None,
+        project_name: str = "beispiel-projekt",
     ) -> dict:
-        """Generate markdown and HTML from analysis and strategy"""
+        """Generate markdown and HTML from analysis and strategy
+
+        Args:
+            analysis: Content analysis from ContentAnalyzer
+            strategy: Presentation strategy from PresentationStrategist
+            style_guide: Project style guide
+            slide_title: Title for the slide
+            project_scope: Project scope/context (optional)
+            image_references: List of uploaded image filenames to include
+            project_name: Name of the project for dynamic paths
+        """
+
+        # Build image context if images are provided
+        image_context = ""
+        if image_references and len(image_references) > 0:
+            image_context = f"\n\nAVAILABLE IMAGES TO INCLUDE:\n"
+            for idx, img in enumerate(image_references, 1):
+                image_context += f"- Image {idx}: {img}\n"
+                image_context += f"  Use in HTML as: <img src='projects/{project_name}/images/uploads/{img}' alt='...'>\n"
+            image_context += "\nIMPORTANT: Use the EXACT paths shown above in the <img src='...'> tags. Do NOT use relative paths like 'images/uploads/'"
 
         context = f"""Content Analysis: {json.dumps(analysis)}
 
@@ -30,7 +52,7 @@ Style Guide:
 - Font Family: {style_guide.get('font_family', 'sans-serif')}
 - Available Components: {', '.join(style_guide.get('available_components', []))}
 
-Slide Title: {slide_title}"""
+Slide Title: {slide_title}{image_context}"""
 
         system_prompt = """You are a Content Generator Agent. Generate both markdown and HTML for a presentation slide.
 
@@ -77,6 +99,15 @@ Use these component structures:
   <div class="component-label">Component Y</div>
   <h2>Title</h2>
   <p>Content</p>
+</div>
+
+5. Image Component:
+<div class="component" id="slide-X-comp-Y">
+  <div class="component-label">Component Y</div>
+  <h2>Title</h2>
+  <div class="image-container">
+    <img src="images/uploads/FILENAME.png" alt="Description" style="max-width: 100%; height: auto; border-radius: 6px;">
+  </div>
 </div>
 
 IMPORTANT:

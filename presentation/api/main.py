@@ -1,11 +1,15 @@
 """
 FastAPI Server for Slides Helper AI Content Generation
 """
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
 import sys
+import re
+from PIL import Image
+import io
+from datetime import datetime
 
 # Add parent directory to path for relative imports
 sys.path.insert(0, os.path.dirname(__file__))
@@ -243,8 +247,10 @@ async def generate_content(request: GenerateContentRequest):
         result = orchestrator.process(
             user_input=request.user_input,
             project_path=project_path,
+            project_name=request.project_name,
             slide_title=request.slide_title,
             preferences=request.preferences,
+            image_references=request.image_references,
         )
 
         if result["success"]:
@@ -345,6 +351,160 @@ async def get_project_slides(project_name: str):
 
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Image upload endpoints
+@app.post("/api/projects/{project_name}/upload-image")
+async def upload_image(project_name: str, file: UploadFile = File(...)):
+    """Upload an image to a project"""
+    try:
+        # Validate project exists
+        project_path = project_service.get_project_path(project_name)
+
+        # Validate file type
+        allowed_types = ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/svg+xml"]
+        if file.content_type not in allowed_types:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid file type. Allowed: PNG, JPG, GIF, SVG. Got: {file.content_type}"
+            )
+
+        # Read file content
+        content = await file.read()
+
+        # Validate file size (5MB max)
+        max_size = 5 * 1024 * 1024  # 5MB
+        if len(content) > max_size:
+            raise HTTPException(
+                status_code=400,
+                detail=f"File too large. Max size: 5MB. File size: {len(content) / 1024 / 1024:.2f}MB"
+            )
+
+        # Validate image with Pillow (except SVG)
+        image_info = {}
+        if file.content_type != "image/svg+xml":
+            try:
+                img = Image.open(io.BytesIO(content))
+                image_info = {
+                    "width": img.width,
+                    "height": img.height,
+                    "format": img.format,
+                }
+                img.close()
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=f"Invalid image file: {str(e)}")
+
+        # Sanitize filename
+        original_filename = file.filename
+        safe_filename = re.sub(r"[<>:\"/\\|?*]", "", original_filename)
+        safe_filename = safe_filename.replace(" ", "-").lower()
+
+        # Add timestamp prefix for uniqueness
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        final_filename = f"{timestamp}_{safe_filename}"
+
+        # Create images/uploads directory if it doesn't exist
+        images_dir = os.path.join(project_path, "images", "uploads")
+        os.makedirs(images_dir, exist_ok=True)
+
+        # Save file
+        file_path = os.path.join(images_dir, final_filename)
+        with open(file_path, "wb") as f:
+            f.write(content)
+
+        # Return relative path for use in HTML
+        relative_path = f"images/uploads/{final_filename}"
+
+        return {
+            "success": True,
+            "filename": final_filename,
+            "original_filename": original_filename,
+            "relative_path": relative_path,
+            "file_size": len(content),
+            "content_type": file.content_type,
+            "image_info": image_info,
+            "message": "Image uploaded successfully"
+        }
+
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/projects/{project_name}/images")
+async def list_project_images(project_name: str):
+    """List all images for a project"""
+    try:
+        project_path = project_service.get_project_path(project_name)
+        images_dir = os.path.join(project_path, "images", "uploads")
+
+        if not os.path.exists(images_dir):
+            return {
+                "success": True,
+                "project_name": project_name,
+                "images": [],
+                "count": 0
+            }
+
+        # List all image files
+        images = []
+        for filename in os.listdir(images_dir):
+            file_path = os.path.join(images_dir, filename)
+            if os.path.isfile(file_path):
+                stat = os.stat(file_path)
+                images.append({
+                    "filename": filename,
+                    "relative_path": f"images/uploads/{filename}",
+                    "size": stat.st_size,
+                    "created": datetime.fromtimestamp(stat.st_ctime).isoformat(),
+                })
+
+        # Sort by creation time (newest first)
+        images.sort(key=lambda x: x["created"], reverse=True)
+
+        return {
+            "success": True,
+            "project_name": project_name,
+            "images": images,
+            "count": len(images)
+        }
+
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/projects/{project_name}/images/{filename}")
+async def delete_project_image(project_name: str, filename: str):
+    """Delete an image from a project"""
+    try:
+        project_path = project_service.get_project_path(project_name)
+
+        # Sanitize filename to prevent path traversal
+        safe_filename = os.path.basename(filename)
+        file_path = os.path.join(project_path, "images", "uploads", safe_filename)
+
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail=f"Image not found: {filename}")
+
+        # Delete file
+        os.remove(file_path)
+
+        return {
+            "success": True,
+            "message": f"Image '{filename}' deleted successfully"
+        }
+
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

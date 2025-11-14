@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 
 class GenerateContentRequest(BaseModel):
@@ -9,6 +9,7 @@ class GenerateContentRequest(BaseModel):
     slide_title: Optional[str] = None
     preferences: Optional[dict] = None
     regenerate_feedback: Optional[str] = None
+    image_references: Optional[List[str]] = None  # List of image filenames to include
 
 
 class RegenerateSlideRequest(BaseModel):
