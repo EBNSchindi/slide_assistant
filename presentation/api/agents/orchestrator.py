@@ -35,7 +35,7 @@ class AgentOrchestrator:
         self.presentation_strategist = PresentationStrategistAgent(api_key, model)
         self.content_generator = ContentGeneratorAgent(api_key, model)
 
-    def process(
+    async def process(
         self,
         user_input: str,
         project_path: str,
@@ -55,18 +55,6 @@ class AgentOrchestrator:
             image_references: Optional list of image filenames to include
         """
 
-        # DEBUG: Log image references received
-        print("\n" + "="*50)
-        print("=== DEBUG ORCHESTRATOR ===")
-        print(f"image_references received: {image_references}")
-        print(f"Type: {type(image_references)}")
-        if image_references:
-            print(f"Count: {len(image_references)}")
-            print(f"Filenames: {image_references}")
-        else:
-            print("⚠️ WARNING: image_references is None or empty!")
-        print("="*50 + "\n")
-
         steps = []
         slides = []
 
@@ -81,7 +69,7 @@ class AgentOrchestrator:
             }
             steps.append(step1)
 
-            analysis = self.content_analyzer.analyze(user_input, slide_title)
+            analysis = await self.content_analyzer.analyze(user_input, slide_title)
             step1["status"] = "completed"
             step1["output"] = f"Identified content type: {analysis.get('content_type')}"
 
@@ -98,7 +86,7 @@ class AgentOrchestrator:
             }
             steps.append(step2)
 
-            strategy = self.presentation_strategist.recommend(
+            strategy = await self.presentation_strategist.recommend(
                 analysis, style_guide, preferences
             )
             step2["status"] = "completed"
@@ -115,7 +103,7 @@ class AgentOrchestrator:
             }
             steps.append(step3)
 
-            generated = self.content_generator.generate(
+            generated = await self.content_generator.generate(
                 analysis, strategy, style_guide, slide_title or "Folie", "", image_references, project_name
             )
             step3["status"] = "completed"

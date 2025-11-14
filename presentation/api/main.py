@@ -1,8 +1,11 @@
 """
 FastAPI Server for Slides Helper AI Content Generation
 """
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 import os
 from dotenv import load_dotenv
 import sys
@@ -21,6 +24,10 @@ from config import (
     PORT,
     DEFAULT_MODEL,
     TEST_MODE,
+    ALLOWED_ORIGINS,
+    RATE_LIMIT_ENABLED,
+    RATE_LIMIT_GENERATE,
+    RATE_LIMIT_UPLOAD,
 )
 from models import (
     GenerateContentRequest,
@@ -43,12 +50,17 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Add CORS middleware
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address, enabled=RATE_LIMIT_ENABLED)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Add CORS middleware with proper configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
 
@@ -226,8 +238,10 @@ async def update_project_scope(project_name: str, scope_content: str):
 
 # Main content generation endpoint
 @app.post("/api/generate")
-async def generate_content(request: GenerateContentRequest):
+@limiter.limit(RATE_LIMIT_GENERATE)
+async def generate_content(request: Request, gen_request: GenerateContentRequest):
     """Generate content using AI agents"""
+    request = gen_request  # Rename for backward compatibility
 
     # Validate API key (skip if test mode)
     if not TEST_MODE and not OPENAI_API_KEY:
@@ -244,7 +258,7 @@ async def generate_content(request: GenerateContentRequest):
         orchestrator = AgentOrchestrator(OPENAI_API_KEY, DEFAULT_MODEL)
 
         # Process content through agent chain
-        result = orchestrator.process(
+        result = await orchestrator.process(
             user_input=request.user_input,
             project_path=project_path,
             project_name=request.project_name,
@@ -278,7 +292,8 @@ async def generate_content(request: GenerateContentRequest):
 
 # Regenerate slide endpoint
 @app.post("/api/regenerate")
-async def regenerate_slide(request: RegenerateSlideRequest):
+@limiter.limit(RATE_LIMIT_GENERATE)
+async def regenerate_slide(http_request: Request, request: RegenerateSlideRequest):
     """Regenerate a slide with feedback"""
 
     if not TEST_MODE and not OPENAI_API_KEY:
@@ -303,7 +318,7 @@ async def regenerate_slide(request: RegenerateSlideRequest):
         preferences = {"feedback": request.feedback}
 
         orchestrator = AgentOrchestrator(OPENAI_API_KEY, DEFAULT_MODEL)
-        result = orchestrator.process(
+        result = await orchestrator.process(
             user_input=markdown_content,
             project_path=project_path,
             slide_title=request.slide_name,
@@ -357,7 +372,8 @@ async def get_project_slides(project_name: str):
 
 # Image upload endpoints
 @app.post("/api/projects/{project_name}/upload-image")
-async def upload_image(project_name: str, file: UploadFile = File(...)):
+@limiter.limit(RATE_LIMIT_UPLOAD)
+async def upload_image(request: Request, project_name: str, file: UploadFile = File(...)):
     """Upload an image to a project"""
     try:
         # Validate project exists

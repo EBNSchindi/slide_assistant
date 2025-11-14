@@ -1,7 +1,7 @@
 """
 Content Generator Agent - Generates markdown and HTML from strategy
 """
-from openai import OpenAI
+from openai import AsyncOpenAI
 import json
 
 
@@ -9,10 +9,10 @@ class ContentGeneratorAgent:
     """Generates markdown and HTML based on strategy and style"""
 
     def __init__(self, api_key: str, model: str = "gpt-4o"):
-        self.client = OpenAI(api_key=api_key)
+        self.client = AsyncOpenAI(api_key=api_key)
         self.model = model
 
-    def generate(
+    async def generate(
         self,
         analysis: dict,
         strategy: dict,
@@ -130,7 +130,7 @@ Respond with JSON:
 Please generate both markdown and HTML for this slide based on the analysis and strategy."""
 
         try:
-            response = self.client.chat.completions.create(
+            response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},

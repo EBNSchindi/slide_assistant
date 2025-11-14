@@ -2,6 +2,7 @@ import os
 import re
 from typing import Dict, List, Optional
 from pathlib import Path
+from functools import lru_cache
 
 
 class StyleParser:
@@ -11,8 +12,17 @@ class StyleParser:
         self.project_path = project_path
         self.styles_path = os.path.join(project_path, "styles")
 
+    @lru_cache(maxsize=32)
+    def _cached_parse_style(self, project_path: str) -> Dict:
+        """Cached internal method for parsing project styles"""
+        return self._parse_style_internal(project_path)
+
     def parse_project_style(self) -> Dict:
-        """Parse all style information from a project"""
+        """Parse all style information from a project (uses caching)"""
+        return self._cached_parse_style(self.project_path)
+
+    def _parse_style_internal(self, project_path: str) -> Dict:
+        """Internal method to parse style information"""
         style_info = {
             "primary_color": "#238636",  # Default GitHub green
             "secondary_colors": [],

@@ -1,7 +1,7 @@
 """
 Presentation Strategist Agent - Recommends optimal presentation strategy
 """
-from openai import OpenAI
+from openai import AsyncOpenAI
 import json
 
 
@@ -9,10 +9,10 @@ class PresentationStrategistAgent:
     """Recommends optimal presentation strategy based on content and style"""
 
     def __init__(self, api_key: str, model: str = "gpt-4o"):
-        self.client = OpenAI(api_key=api_key)
+        self.client = AsyncOpenAI(api_key=api_key)
         self.model = model
 
-    def recommend(
+    async def recommend(
         self, analysis: dict, style_guide: dict, preferences: dict = None
     ) -> dict:
         """Recommend optimal presentation strategy"""
@@ -57,7 +57,7 @@ Respond with a JSON object containing:
 Please recommend the optimal presentation strategy for this content."""
 
         try:
-            response = self.client.chat.completions.create(
+            response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},

@@ -1,14 +1,14 @@
 """
 Content Analyzer Agent - Analyzes user input and structures it
 """
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 
 class ContentAnalyzerAgent:
     """Analyzes and structures user input"""
 
     def __init__(self, api_key: str, model: str = "gpt-4o"):
-        self.client = OpenAI(api_key=api_key)
+        self.client = AsyncOpenAI(api_key=api_key)
         self.model = model
         self.system_prompt = """You are a Content Analyzer Agent. Your task is to:
 1. Understand the user's input (can be bullet points, markdown, or structured text)
@@ -27,7 +27,7 @@ Respond with a JSON object containing:
     "formatting_preferences": ["preference1", ...]
 }"""
 
-    def analyze(self, user_input: str, slide_title: str = None) -> dict:
+    async def analyze(self, user_input: str, slide_title: str = None) -> dict:
         """Analyze user input and return structured analysis"""
 
         user_message = f"""Please analyze this content for a slide{f' titled "{slide_title}"' if slide_title else ''}:
@@ -35,7 +35,7 @@ Respond with a JSON object containing:
 {user_input}"""
 
         try:
-            response = self.client.chat.completions.create(
+            response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": self.system_prompt},

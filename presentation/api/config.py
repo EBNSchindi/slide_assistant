@@ -26,3 +26,14 @@ HTML_OUTPUT_PATH = "{project_path}/html"
 # Server Configuration
 HOST = "localhost"
 PORT = 8001
+
+# CORS Configuration
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:8000,http://localhost:8001,http://127.0.0.1:8000,http://127.0.0.1:8001"
+).split(",")
+
+# Rate Limiting Configuration
+RATE_LIMIT_ENABLED = os.getenv("RATE_LIMIT_ENABLED", "true").lower() == "true"
+RATE_LIMIT_GENERATE = os.getenv("RATE_LIMIT_GENERATE", "10/minute")
+RATE_LIMIT_UPLOAD = os.getenv("RATE_LIMIT_UPLOAD", "20/minute")
