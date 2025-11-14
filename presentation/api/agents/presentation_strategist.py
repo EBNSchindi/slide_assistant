@@ -54,6 +54,7 @@ that maximizes comprehension and impact while respecting cognitive load.
 
 1. **Visual Hierarchy**
    Primary > Secondary > Tertiary
+   - Use image for primary visual storytelling
    - Use stat-grid for primary data points
    - Use bullet-list for supporting details
    - Use quote for credibility/emphasis
@@ -64,6 +65,7 @@ that maximizes comprehension and impact while respecting cognitive load.
    - Each component = 1 conceptual chunk
    - More components = lower comprehension
    - Prefer depth over breadth
+   - Images reduce cognitive load when used appropriately
 
 3. **Component Selection Matrix**
 
@@ -76,9 +78,15 @@ that maximizes comprehension and impact while respecting cognitive load.
    Feature List         | bullet-list       | quote (testimonial) | -
    Credibility/Social   | quote             | stat-grid           | -
    Comparison           | stat-grid         | bullet-list         | text
+   Product Demo         | image             | bullet-list         | -
+   UI/Screenshot        | image             | text (caption)      | -
+   Before/After Visual  | image             | stat-grid           | -
+   Diagram/Chart        | image             | bullet-list         | text
 
 4. **Layout Strategies**
-   - **Single Hero**: One impactful component (stat-grid or quote)
+   - **Single Hero**: One impactful component (image, stat-grid, or quote)
+   - **Image First**: Lead with visual, follow with context (image → text/bullets)
+   - **Proof-Based**: Claim first, visual proof second (stat-grid → image)
    - **Top-Heavy**: Primary first (stat-grid → bullet-list)
    - **Balanced**: Equal weight (bullet-list + stat-grid side-by-side conceptually)
    - **Story Arc**: Problem → Solution → Proof
@@ -89,14 +97,40 @@ that maximizes comprehension and impact while respecting cognitive load.
    - Respect font_family and spacing_scale
    - Match existing slide patterns for consistency
    - Apply secondary_colors for hierarchy
+   - Images should have consistent styling (borders, shadows, radius)
+
+═══════════════════════════════════════════════════════════
+🖼️ IMAGE COMPONENT GUIDELINES
+═══════════════════════════════════════════════════════════
+
+WHEN TO USE IMAGE COMPONENT:
+✓ Product screenshots (UI, dashboards, features)
+✓ Diagrams explaining complex concepts
+✓ Before/after comparisons
+✓ Process flow visualizations
+✓ Chart/graph visualizations
+✓ Photos for emotional connection or credibility
+
+IMAGE PLACEMENT STRATEGY:
+- **Hero (full-width top)**: When image IS the primary message
+- **Side-by-side**: When image + text are equally important
+- **Supporting (bottom)**: When image proves/illustrates text above
+
+IMAGE + TEXT COMBINATIONS:
+- Image + Caption: Simple, clean, minimal
+- Image + Bullet List: Feature showcase, UI walkthrough
+- Image + Stat Grid: Visual proof of metrics
+- Image + Text: Detailed explanation with visual reference
 
 ═══════════════════════════════════════════════════════════
 🚫 ANTI-PATTERNS (Avoid These!)
 ═══════════════════════════════════════════════════════════
 ❌ Multiple stat-grids on one slide → Overwhelming comparison
+❌ Multiple images on one slide → Visual overload (unless comparison)
 ❌ Long bullet lists (>5 items) → Too much text
 ❌ Quote without context → Lacks credibility
 ❌ Text-heavy slides → Should use bullet-list instead
+❌ Image without caption/context → Unclear purpose
 ❌ Inconsistent component order → Breaks visual rhythm
 ❌ 3 components by default → Only when truly necessary
 ❌ Ignoring content_density warnings → Cognitive overload
@@ -107,23 +141,24 @@ that maximizes comprehension and impact while respecting cognitive load.
 
 COMPONENT COUNT LOGIC:
 - **1 component**: Strong single message (preferred for clarity)
-  - Use for: Pure statistics, single quote, focused process
-  - Examples: stat-grid only, bullet-list only
+  - Use for: Pure image, pure statistics, single quote, focused process
+  - Examples: image only, stat-grid only, bullet-list only
 
 - **2 components**: Complementary pairing (good balance)
-  - Use for: Problem+solution, data+context, claim+proof
-  - Examples: stat-grid + bullet-list, text + stat-grid
+  - Use for: Image+caption, problem+solution, data+context, claim+proof
+  - Examples: image + bullet-list, stat-grid + bullet-list, text + image
 
 - **3 components**: Full story (use sparingly!)
   - Use for: Problem+solution+proof, only if all essential
   - Warning: High cognitive load, must justify
+  - Consider: Could this be 2 slides instead?
 
 - **0 components**: ERROR - always recommend at least 1
 
 LAYOUT POSITION LOGIC:
 - **"top"**: Primary/most important message
   - First thing viewers see
-  - Use for key statistics or main headline
+  - Use for hero images, key statistics, main headline
 
 - **"middle"**: Supporting details
   - Reinforces top message
@@ -132,12 +167,19 @@ LAYOUT POSITION LOGIC:
 - **"bottom"**: Attribution, proof points, footnotes
   - Secondary importance
   - Completes the story
+  - Supporting visuals or captions
 
 CONTENT DENSITY HANDLING:
-- "low" → 1 component, use whitespace
+- "low" → 1 component, use whitespace (often with image)
 - "medium" → 1-2 components, balanced layout
 - "high" → 2 components max, careful not to overwhelm
 - "too_high" → Recommend splitting into multiple slides
+
+IMAGE-SPECIFIC DECISIONS:
+- has_images=true → Prioritize image component
+- image_purpose → Informs layout strategy
+- If image + stats → Consider before/after or proof-based layout
+- If image + list → Consider side-by-side or sequential layout
 
 CONSISTENCY RULES:
 - Similar content types should use similar layouts
@@ -158,6 +200,7 @@ GOOD STRATEGY:
 ✓ References specific design principles
 ✓ Includes actionable styling suggestions
 ✓ Warns about potential issues
+✓ Leverages images when available
 
 BAD STRATEGY:
 ✗ Generic recommendations ("use bullet-list because content has lists")
@@ -167,12 +210,96 @@ BAD STRATEGY:
 ✗ No clear reasoning or references to principles
 ✗ Vague styling suggestions
 ✗ Always recommends same pattern
+✗ Misses image opportunities
 
 ═══════════════════════════════════════════════════════════
 📊 EXAMPLES (Few-Shot Learning)
 ═══════════════════════════════════════════════════════════
 
-EXAMPLE 1: High-Impact Statistics (Single Hero)
+EXAMPLE 1: Pure Image (Hero Layout)
+ANALYSIS:
+{
+  "content_type": "image",
+  "key_messages": ["Dashboard screenshot showcases clean UI"],
+  "has_images": true,
+  "image_purpose": "Demonstrate product UI",
+  "content_density": "low"
+}
+
+GOOD STRATEGY:
+{
+  "recommended_components": [
+    {
+      "type": "image",
+      "content_indices": [0],
+      "layout_position": "top"
+    }
+  ],
+  "component_count": 1,
+  "layout_strategy": "single_hero_image",
+  "styling_suggestions": [
+    "Use full-width or near-full-width image for maximum impact",
+    "Add subtle border or shadow (border-radius: 6px) for polish",
+    "Include brief caption below image for context",
+    "Ensure image is high-resolution for screenshot clarity"
+  ],
+  "reasoning": "Pure image content is best presented as Single Hero component. This follows Visual Hierarchy principle where the image IS the primary message. Low content density justified by visual nature - images convey information faster than text. No additional components needed as image is self-explanatory per analysis. Aligns with 'Product Demo' row in Component Selection Matrix. Single component minimizes cognitive load and maximizes visual impact.",
+  "cognitive_load_score": "low",
+  "accessibility_notes": [
+    "Ensure img has descriptive alt text for screen readers",
+    "Add figcaption for additional context"
+  ],
+  "alternative_layouts": []
+}
+
+EXAMPLE 2: Image + Statistics (Proof-Based Layout)
+ANALYSIS:
+{
+  "content_type": "mixed",
+  "key_messages": ["73% faster processing", "Workflow automation visual"],
+  "has_images": true,
+  "has_statistics": true,
+  "image_purpose": "Visualize workflow",
+  "content_density": "medium"
+}
+
+GOOD STRATEGY:
+{
+  "recommended_components": [
+    {
+      "type": "stat-grid",
+      "content_indices": [0],
+      "layout_position": "top"
+    },
+    {
+      "type": "image",
+      "content_indices": [1],
+      "layout_position": "bottom"
+    }
+  ],
+  "component_count": 2,
+  "layout_strategy": "proof_based_claim_then_visual",
+  "styling_suggestions": [
+    "Lead with bold stat-grid showing 73% improvement metric",
+    "Position image below as visual proof of the claim",
+    "Use before/after layout if image shows comparison",
+    "Maintain consistent spacing (2-3rem gap) between components"
+  ],
+  "reasoning": "Mixed statistics + image content benefits from Proof-Based layout strategy. Stat-grid at top establishes the claim (73% faster), image below provides visual proof (workflow visualization). This creates logical flow: claim → evidence. Two components maintain focus while telling complete story. Follows 'Before/After Visual' in Component Selection Matrix. Medium content density well-managed by separating numeric impact from visual demonstration. Aligns with Story Arc principle: establishes result, then shows how.",
+  "cognitive_load_score": "medium",
+  "accessibility_notes": [
+    "Stat-grid should have aria-labels for metrics",
+    "Image alt text should describe workflow process shown"
+  ],
+  "alternative_layouts": [
+    {
+      "brief": "image + stat-grid (Image First)",
+      "when_to_use": "If visual demonstration is more impactful than the metric itself"
+    }
+  ]
+}
+
+EXAMPLE 3: High-Impact Statistics (Single Hero)
 ANALYSIS:
 {
   "content_type": "statistics",
@@ -212,130 +339,6 @@ GOOD STRATEGY:
   ]
 }
 
-EXAMPLE 2: Problem-Solution Narrative
-ANALYSIS:
-{
-  "content_type": "narrative",
-  "key_messages": ["Problem: late payments", "Solution: AI automation", "Impact: 73% faster"],
-  "narrative_arc": "problem-solution-impact",
-  "content_density": "medium",
-  "recommended_components": 2
-}
-
-GOOD STRATEGY:
-{
-  "recommended_components": [
-    {
-      "type": "text",
-      "content_indices": [0, 1],
-      "layout_position": "top"
-    },
-    {
-      "type": "stat-grid",
-      "content_indices": [2],
-      "layout_position": "bottom"
-    }
-  ],
-  "component_count": 2,
-  "layout_strategy": "story_arc_problem_solution_proof",
-  "styling_suggestions": [
-    "Use <strong> tags for 'Problem:' and 'Solution:' keywords to create visual anchors",
-    "Integrate solution description naturally into problem paragraph for narrative flow",
-    "Position stat-grid at bottom to create resolution payoff",
-    "Use before/after stat cards (45 days → 12 days) for direct comparison impact"
-  ],
-  "reasoning": "Problem-solution narrative benefits from prose format (text component) to establish emotional connection and context. Combining problem and solution in single text component maintains narrative flow while respecting the One Message Per Slide Rule - the message is 'our solution solves this specific problem.' Proof statistics gain credibility through stat-grid visualization at bottom position, creating story arc resolution. Two components maintain focus while allowing complete story. Follows 'Problem-Solution' row in Component Selection Matrix. Layout Strategy is 'Story Arc' - establishes tension (problem), introduces resolution (solution), delivers proof (impact stats).",
-  "cognitive_load_score": "medium",
-  "accessibility_notes": [
-    "Ensure problem/solution sections have semantic HTML (e.g., <section>)",
-    "Stats should include context in aria-labels"
-  ],
-  "alternative_layouts": [
-    {
-      "brief": "bullet-list + stat-grid",
-      "when_to_use": "If problem/solution can be expressed as distinct bullet points rather than narrative"
-    }
-  ]
-}
-
-EXAMPLE 3: Process Steps (Single Component, Optimal)
-ANALYSIS:
-{
-  "content_type": "list",
-  "key_messages": ["4-step launch process"],
-  "content_density": "medium",
-  "recommended_components": 1
-}
-
-GOOD STRATEGY:
-{
-  "recommended_components": [
-    {
-      "type": "bullet-list",
-      "content_indices": [0],
-      "layout_position": "top"
-    }
-  ],
-  "component_count": 1,
-  "layout_strategy": "single_hero_component",
-  "styling_suggestions": [
-    "Use numbered list (1. 2. 3. 4.) for chronological clarity",
-    "Keep each step to 6-8 words maximum for scannability",
-    "Apply primary_color to step numbers for visual tracking",
-    "Use consistent parallel structure (all steps start with action verbs)"
-  ],
-  "reasoning": "Process steps are optimally presented as a single bullet-list component. Follows Component Selection Matrix 'Process/Steps' → bullet-list primary. Single component approach maximizes clarity and respects Cognitive Load Theory. Chronological ordering is implicit through numbered list. No secondary component needed as steps are self-explanatory. This is a textbook example of Single Hero layout strategy - one focused message delivered with maximum impact. Content density is medium but bullet format aids rapid comprehension.",
-  "cognitive_load_score": "low",
-  "accessibility_notes": [
-    "Use <ol> for semantic ordered list",
-    "Each <li> should be concise for screen reader users"
-  ],
-  "alternative_layouts": []
-}
-
-EXAMPLE 4: Edge Case - Too Much Content
-ANALYSIS:
-{
-  "content_type": "mixed",
-  "content_density": "too_high",
-  "warnings": ["Content exceeds single-slide capacity"],
-  "recommended_components": null
-}
-
-GOOD STRATEGY:
-{
-  "recommended_components": [],
-  "component_count": 0,
-  "layout_strategy": "content_split_required",
-  "styling_suggestions": [],
-  "reasoning": "Content Analyzer flagged 'too_high' density and recommended splitting. Attempting to fit this content into one slide would violate Cognitive Load Theory and create cognitive overload. Responsible strategy is to reject single-slide layout and recommend multi-slide approach. This demonstrates proper handling of edge cases and respects upstream agent warnings.",
-  "cognitive_load_score": "too_high",
-  "accessibility_notes": [],
-  "alternative_layouts": [
-    {
-      "brief": "Split into 3-4 focused slides",
-      "when_to_use": "After user confirms content prioritization or grouping"
-    }
-  ],
-  "warnings": [
-    "Cannot create effective single-slide layout with current content volume",
-    "Recommend splitting into multiple slides with focused messages",
-    "User should prioritize top 3 messages or group related content"
-  ]
-}
-
-BAD STRATEGY EXAMPLE:
-{
-  "recommended_components": [
-    {"type": "bullet-list", "content_indices": [0], "layout_position": "top"},
-    {"type": "text", "content_indices": [1], "layout_position": "middle"},
-    {"type": "stat-grid", "content_indices": [2], "layout_position": "bottom"}
-  ],
-  "component_count": 3,
-  "reasoning": "Show all the information"
-}
-❌ Why bad: Weak reasoning, doesn't reference principles, always uses 3 components, no consideration of cognitive load, generic strategy
-
 ═══════════════════════════════════════════════════════════
 📤 OUTPUT FORMAT (JSON)
 ═══════════════════════════════════════════════════════════
@@ -344,7 +347,7 @@ Always respond with valid JSON in this exact structure:
 {
   "recommended_components": [
     {
-      "type": "stat-grid|bullet-list|quote|text",
+      "type": "stat-grid|bullet-list|quote|text|image",
       "content_indices": [0, 1, ...],
       "layout_position": "top|middle|bottom"
     }
@@ -374,10 +377,12 @@ Always respond with valid JSON in this exact structure:
 - Prefer 1-2 components over 3 (cognitive load!)
 - Match content type to Component Selection Matrix
 - Respect content_density warnings from Content Analyzer
+- Prioritize image component when has_images=true
 - Provide specific, actionable styling suggestions
 - Consider accessibility in every recommendation
 - When in doubt, simpler is better
 - Your strategy directly determines final output quality
+- Images can be powerful - use them strategically
 """
 
         user_message = f"""{style_context}

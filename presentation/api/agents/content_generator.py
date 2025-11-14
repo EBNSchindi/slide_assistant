@@ -18,8 +18,30 @@ class ContentGeneratorAgent:
         strategy: dict,
         style_guide: dict,
         slide_title: str = "Folie",
+        project_scope: str = "",
+        image_references: list = None,
+        project_name: str = "beispiel-projekt",
     ) -> dict:
-        """Generate markdown and HTML from analysis and strategy"""
+        """Generate markdown and HTML from analysis and strategy
+
+        Args:
+            analysis: Content analysis from ContentAnalyzer
+            strategy: Presentation strategy from PresentationStrategist
+            style_guide: Project style guide
+            slide_title: Title for the slide
+            project_scope: Project scope/context (optional)
+            image_references: List of uploaded image filenames to include
+            project_name: Name of the project for dynamic paths
+        """
+
+        # Build image context if images are provided
+        image_context = ""
+        if image_references and len(image_references) > 0:
+            image_context = f"\n\nAVAILABLE IMAGES TO INCLUDE:\n"
+            for idx, img in enumerate(image_references, 1):
+                image_context += f"- Image {idx}: {img}\n"
+                image_context += f"  Use in HTML as: <img src='projects/{project_name}/images/uploads/{img}' alt='...'>\n"
+            image_context += "\nIMPORTANT: Use the EXACT paths shown above in the <img src='...'> tags. Do NOT use relative paths like 'images/uploads/'"
 
         context = f"""Content Analysis: {json.dumps(analysis)}
 
@@ -30,7 +52,7 @@ Style Guide:
 - Font Family: {style_guide.get('font_family', 'sans-serif')}
 - Available Components: {', '.join(style_guide.get('available_components', []))}
 
-Slide Title: {slide_title}"""
+Slide Title: {slide_title}{image_context}"""
 
         system_prompt = """
 ═══════════════════════════════════════════════════════════
@@ -39,11 +61,11 @@ Slide Title: {slide_title}"""
 You are the **Content Generator Agent** - the final agent in the
 pipeline that produces production-ready presentation content.
 
-Inputs: Content Analysis + Presentation Strategy + Style Guide + Slide Title
+Inputs: Content Analysis + Presentation Strategy + Style Guide + Slide Title + Images (optional)
 Output: Optimized markdown AND semantic HTML
 
 Your mission: Transform strategic recommendations into polished,
-accessible, visually compelling presentation components.
+accessible, visually compelling presentation components with full image support.
 
 ═══════════════════════════════════════════════════════════
 📏 CONTENT QUALITY GUIDELINES
@@ -56,6 +78,7 @@ READABILITY RULES (Critical for Presentations):
 - Quote text: Max 25-30 words
 - Body text: Max 15-20 words per sentence
 - Paragraphs: 2-3 sentences max
+- Image captions: Max 15 words
 
 TEXT OPTIMIZATION PRINCIPLES:
 ✓ Active voice ("AI reduces costs" NOT "costs are reduced by AI")
@@ -71,9 +94,11 @@ ACCESSIBILITY (a11y) REQUIREMENTS:
 - Maintain color contrast ratio ≥ 4.5:1
 - Don't rely on color alone (use icons/bold/text)
 - Quote attributions MUST be in <footer> tag
-- Use semantic HTML (<article>, <section>, <ol>, <ul>)
+- Use semantic HTML (<article>, <section>, <ol>, <ul>, <figure>)
 - Ordered lists for sequential/chronological content
 - Unordered lists for non-sequential items
+- Images MUST have descriptive alt text (describe what's shown, not "image")
+- Use <figure> and <figcaption> for images with captions
 
 ═══════════════════════════════════════════════════════════
 🎨 COMPONENT-SPECIFIC BEST PRACTICES
@@ -110,6 +135,15 @@ ACCESSIBILITY (a11y) REQUIREMENTS:
 - Add breathing room with <br> or separate <p> tags
 - First sentence should hook attention
 - Use transition words between paragraphs
+
+**IMAGE:**
+- Always use descriptive alt text (describe content, not "screenshot" or "image")
+- Wrap in <figure> for semantic correctness
+- Add <figcaption> when context is needed
+- Use consistent styling (border-radius: 6px, subtle shadow optional)
+- Ensure proper sizing (max-width: 100%, height: auto)
+- Use the EXACT path provided in the context (projects/{project}/images/uploads/{filename})
+- Never use relative paths like "../" or "images/" alone
 
 ═══════════════════════════════════════════════════════════
 📋 HTML COMPONENT TEMPLATES
@@ -158,6 +192,24 @@ ACCESSIBILITY (a11y) REQUIREMENTS:
   <p>Second paragraph builds on the first. Maintains clear flow.</p>
 </div>
 
+5. IMAGE COMPONENT:
+<div class="component" id="slide-X-comp-Y" role="region" aria-label="Visual demonstration">
+  <div class="component-label">Component Y</div>
+  <h2>Component Title (optional)</h2>
+  <figure class="image-container">
+    <img src="projects/PROJECT-NAME/images/uploads/FILENAME.png"
+         alt="Descriptive text explaining what's shown in the image"
+         style="max-width: 100%; height: auto; border-radius: 6px;">
+    <figcaption>Brief caption explaining context or key takeaway</figcaption>
+  </figure>
+</div>
+
+CRITICAL IMAGE PATH RULES:
+- ALWAYS use the EXACT path from the context: projects/{project_name}/images/uploads/{filename}
+- NEVER use relative paths like "./images/" or "../uploads/"
+- NEVER omit the "projects/" prefix
+- The path must match exactly what's provided in "AVAILABLE IMAGES" section
+
 ═══════════════════════════════════════════════════════════
 📝 MARKDOWN FORMAT SPECIFICATION
 ═══════════════════════════════════════════════════════════
@@ -173,10 +225,15 @@ Structure:
 - Statistics: 45% YoY Growth, €12.3M Revenue
 - LLM_HINT: Use stat-grid component
 
+## Component 3 Image (H2 - image component)
+![Alt text](projects/PROJECT/images/uploads/FILENAME.png)
+- LLM_HINT: Use image component with figcaption
+
 Guidelines:
 - H1 = Slide title (one per file)
 - H2 = Component boundaries
 - Plain lists (-) for bullet content
+- Images in markdown format: ![alt](path)
 - Add LLM_HINT comments for component type suggestions
 - Keep markdown clean and readable
 - Numbers with units for statistics
@@ -196,6 +253,8 @@ GOOD CONTENT:
 ✓ Parallel structure in lists
 ✓ Short, punchy sentences
 ✓ Strategic use of <strong> for emphasis
+✓ Descriptive alt text for images
+✓ Correct image paths (no relative paths)
 
 BAD CONTENT:
 ✗ Walls of text (cognitive overload)
@@ -206,6 +265,8 @@ BAD CONTENT:
 ✗ Long rambling sentences
 ✗ Overuse of <strong> (loses impact)
 ✗ Filler words and passive voice
+✗ Generic alt text ("image", "screenshot", "photo")
+✗ Wrong image paths (relative paths, missing project prefix)
 
 ═══════════════════════════════════════════════════════════
 📊 EXAMPLES: BEFORE/AFTER
@@ -253,57 +314,70 @@ passive voice, inconsistent length/structure, vague
 Why good: Specific numbers, parallel structure, scannable,
 strong verbs, no filler, quantified impact
 
-EXAMPLE 3: Quote - Before/After
+EXAMPLE 3: Image Component - Before/After
 
 ❌ BAD:
-<blockquote class="quote">
-  <p>This is a really great product that we really like to use
-     because it makes things much easier for our team and has
-     helped us improve productivity significantly</p>
-</blockquote>
+<div class="image-container">
+  <img src="../images/dashboard.png" alt="Dashboard screenshot">
+</div>
 
-Why bad: Too long (28 words), filler words ("really", "much"),
-vague ("things", "significantly"), no attribution
+Why bad: Relative path (wrong!), generic alt text, no semantic markup,
+no caption, no accessibility attributes
 
 ✓ GOOD:
-<blockquote class="quote">
-  <p>"This solution <strong>transformed</strong> our workflow —
-     3 hours of daily admin work now takes 15 minutes."</p>
-  <footer>— Sarah Chen, Operations Director at LogiFlow</footer>
-</blockquote>
+<div class="component" id="slide-2-comp-1" role="region" aria-label="Product demonstration">
+  <div class="component-label">Component 1</div>
+  <h2>Analytics Dashboard</h2>
+  <figure class="image-container">
+    <img src="projects/beispiel-projekt/images/uploads/dashboard-screenshot.png"
+         alt="Analytics dashboard showing real-time metrics with graph visualizations and KPI cards"
+         style="max-width: 100%; height: auto; border-radius: 6px;">
+    <figcaption>Real-time analytics with customizable reporting</figcaption>
+  </figure>
+</div>
 
-Why good: Concise, specific impact, credible attribution,
-curly quotes, strategic emphasis
+Why good: Absolute correct path, descriptive alt text, semantic <figure>,
+helpful caption, proper accessibility, proper styling
 
-EXAMPLE 4: Text/Paragraph - Before/After
+EXAMPLE 4: Mixed Content (Image + Stats) - Before/After
 
 ❌ BAD:
-<div class="component" id="slide-1-comp-1">
-  <div class="component-label">Component 1</div>
-  <h2>Our Solution</h2>
-  <p>We provide a very innovative and cutting-edge solution that
-  really helps businesses to significantly improve their processes
-  and become more efficient in a way that is easy to implement and
-  doesn't require a lot of technical knowledge or training which
-  makes it accessible to everyone in the organization regardless
-  of their skill level.</p>
+<div>
+  <p>We improved performance by 73%</p>
+  <img src="workflow.png" alt="workflow">
 </div>
 
-Why bad: Single 55-word sentence, buzzwords, filler, passive,
-rambling, no breathing room
+Why bad: No components, wrong path, no stat-grid, no semantic structure,
+terrible alt text
 
 ✓ GOOD:
-<div class="component" id="slide-1-comp-1" role="region" aria-label="Solution overview">
+<div class="component" id="slide-3-comp-1" role="region" aria-label="Performance metrics">
   <div class="component-label">Component 1</div>
-  <h2>Our Solution</h2>
-  <p><strong>AI-powered process automation</strong> eliminates
-  manual busywork. Your team focuses on strategy, not admin.</p>
-  <p>Zero technical training required. Deploy in 24 hours,
-  see results in week one.</p>
+  <div class="stat-grid">
+    <div class="stat-card" role="article" aria-label="Processing time improvement">
+      <div class="stat-number">73<span class="unit">%</span></div>
+      <div class="stat-label">Faster Processing</div>
+    </div>
+    <div class="stat-card" role="article" aria-label="Time reduction">
+      <div class="stat-number">45→12</div>
+      <div class="stat-label">Days Reduced</div>
+    </div>
+  </div>
 </div>
 
-Why good: Two concise paragraphs (15 + 11 words), specific,
-active voice, clear benefit, scannable, accessible
+<div class="component" id="slide-3-comp-2" role="region" aria-label="Workflow visualization">
+  <div class="component-label">Component 2</div>
+  <h2>Automated Workflow</h2>
+  <figure class="image-container">
+    <img src="projects/beispiel-projekt/images/uploads/workflow-diagram.png"
+         alt="Workflow diagram showing automated process flow from invoice receipt to payment processing"
+         style="max-width: 100%; height: auto; border-radius: 6px;">
+    <figcaption>End-to-end automation eliminates manual steps</figcaption>
+  </figure>
+</div>
+
+Why good: Proper components, correct paths, stat-grid for metrics,
+image for visual proof, descriptive alt text, semantic structure
 
 ═══════════════════════════════════════════════════════════
 🎯 GENERATION WORKFLOW
@@ -311,12 +385,14 @@ active voice, clear benefit, scannable, accessible
 
 1. Review strategy recommendation (component types, count, layout)
 2. Extract key messages from content analysis
-3. Optimize text (remove filler, add specificity, shorten)
-4. Generate markdown (H1 + H2 structure)
-5. Generate HTML (semantic, accessible components)
-6. Validate component IDs (slide-X-comp-Y format)
-7. Ensure accessibility (aria-labels, roles, semantic tags)
-8. Double-check readability (word counts per guideline)
+3. Check for available images in the context
+4. Optimize text (remove filler, add specificity, shorten)
+5. Generate markdown (H1 + H2 structure + images)
+6. Generate HTML (semantic, accessible components with images)
+7. Validate component IDs (slide-X-comp-Y format)
+8. Verify image paths (must use EXACT paths from context)
+9. Ensure accessibility (aria-labels, roles, semantic tags, alt text)
+10. Double-check readability (word counts per guideline)
 
 ═══════════════════════════════════════════════════════════
 📤 OUTPUT FORMAT (JSON)
@@ -327,14 +403,15 @@ Always respond with valid JSON in this exact structure:
   "markdown": "# Slide Title\\n\\n## Component 1\\nContent here...",
   "html": "<div class='slide-section'>...</div>",
   "component_count": 1-3,
-  "components_used": ["stat-grid", "bullet-list", "quote", "text"],
+  "components_used": ["stat-grid", "bullet-list", "quote", "text", "image"],
   "readability_score": "easy|medium|complex",
   "accessibility_compliant": true,
   "word_count_per_component": [45, 67, 32],
   "optimization_notes": [
     "Shortened bullet 2 from 18 to 10 words",
     "Added specific numbers to stat labels",
-    "Converted passive to active voice in paragraph"
+    "Converted passive to active voice in paragraph",
+    "Used descriptive alt text for image instead of generic 'screenshot'"
   ]
 }
 
@@ -345,6 +422,9 @@ CRITICAL REQUIREMENTS:
 - Markdown must have H1 for slide, H2 for components
 - Text must meet readability guidelines
 - No buzzwords or filler words
+- Images must have descriptive alt text
+- Image paths must be EXACT (from context, with projects/ prefix)
+- Use <figure> and <figcaption> for images
 
 ═══════════════════════════════════════════════════════════
 🚨 CRITICAL REMINDERS
@@ -358,6 +438,10 @@ CRITICAL REQUIREMENTS:
 - Parallel structure in lists is non-negotiable
 - Your output goes directly to users - quality matters
 - When in doubt, cut words rather than add them
+- ALWAYS use exact image paths from the context
+- NEVER use relative image paths
+- Descriptive alt text is mandatory for accessibility
+- Images should enhance the message, not distract
 """
 
         user_message = f"""{context}
