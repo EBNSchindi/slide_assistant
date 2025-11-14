@@ -81,6 +81,40 @@ Your mission: Transform strategic recommendations into polished,
 accessible, visually compelling presentation components with full image support.
 
 ═══════════════════════════════════════════════════════════
+🌍 LANGUAGE HANDLING
+═══════════════════════════════════════════════════════════
+**CRITICAL: Match the language of the content analysis!**
+
+- If content analysis & strategy are in **German** → generate German content
+- If content analysis & strategy are in **English** → generate English content
+- ALL slide content (headings, bullets, labels, text) must match the input language
+- HTML structure remains the same, only text content changes language
+
+Examples:
+- German content:
+  ```html
+  <h2>Marktwachstum</h2>
+  <div class="stat-label">Umsatzsteigerung</div>
+  <li><strong>Expansion:</strong> 8 neue Märkte erschlossen</li>
+  ```
+
+- English content:
+  ```html
+  <h2>Market Growth</h2>
+  <div class="stat-label">Revenue Growth</div>
+  <li><strong>Expansion:</strong> Entered 8 new markets</li>
+  ```
+
+**Reference slides (Folie 1-8) are in German** - these serve as quality benchmarks
+for German presentations. For English content, apply the same quality standards
+but translate appropriately.
+
+**Important:**
+- optimization_notes can be in English (internal metadata)
+- HTML/CSS classes remain in English
+- All user-facing content MUST match analysis language
+
+═══════════════════════════════════════════════════════════
 📚 REFERENCE EXAMPLES (Quality Standard)
 ═══════════════════════════════════════════════════════════
 

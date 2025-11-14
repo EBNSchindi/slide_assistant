@@ -6,8 +6,9 @@ This document describes the advanced features available in the multi-agent prese
 
 1. [GPT-5 Support](#gpt-5-support)
 2. [Pydantic Structured Outputs](#pydantic-structured-outputs)
-3. [Usage Examples](#usage-examples)
-4. [Migration Guide](#migration-guide)
+3. [Language Support](#language-support)
+4. [Usage Examples](#usage-examples)
+5. [Migration Guide](#migration-guide)
 
 ---
 
@@ -148,6 +149,102 @@ class ContentAnalysis(BaseModel):
 
 ---
 
+## Language Support
+
+All agents automatically detect and match the language of your input.
+
+### Automatic Language Detection
+
+The system supports **German** and **English** content seamlessly:
+
+**German Input → German Output:**
+```python
+result = orchestrator.process(
+    user_input="Wir haben den Umsatz um 45% YoY auf €12,3M gesteigert und 8 neue Märkte erschlossen",
+    project_name="mein-projekt",
+    slide_title="Wachstum & Expansion"
+)
+
+# Generated content will be in German:
+# - Headings: "Marktwachstum", "Umsatzentwicklung"
+# - Labels: "Umsatzsteigerung", "Neue Märkte"
+# - Bullets: "45% Umsatzwachstum zeigt starke Traktion"
+```
+
+**English Input → English Output:**
+```python
+result = orchestrator.process(
+    user_input="We grew revenue 45% YoY to €12.3M and expanded to 8 new markets",
+    project_name="my-project",
+    slide_title="Growth & Expansion"
+)
+
+# Generated content will be in English:
+# - Headings: "Market Growth", "Revenue Development"
+# - Labels: "Revenue Growth", "New Markets"
+# - Bullets: "45% revenue growth demonstrates strong traction"
+```
+
+### How It Works
+
+Each agent includes language handling instructions:
+
+1. **ContentAnalyzerAgent**: Analyzes input language, preserves it in key_messages
+2. **PresentationStrategistAgent**: Matches language from analysis in reasoning/suggestions
+3. **ContentGeneratorAgent**: Generates all slide content in the detected language
+
+### Language Consistency
+
+- **JSON field names**: Always in English (`content_type`, `key_messages`, `html`, etc.)
+- **Content values**: Match input language (headings, bullets, labels, text)
+- **CSS/HTML classes**: Always in English (`stat-grid`, `bullet-list`, etc.)
+- **Internal metadata**: Can be in English (`optimization_notes`, etc.)
+
+### Reference Examples
+
+The system includes 8 reference slides (Folie 1-8) in **German**, which serve as quality benchmarks:
+- For German content: Direct quality standards
+- For English content: Same quality, appropriately translated
+
+### Mixed Language Scenarios
+
+If you mix languages in input, the agent will:
+1. Detect the **primary language** (most frequent)
+2. Generate output in that language
+3. Preserve technical terms/proper nouns as-is
+
+Example:
+```python
+# Mixed input (German + English term)
+user_input = "Unser SaaS-Produkt erreichte 45% YoY Growth"
+
+# Output will be primarily German:
+# "SaaS-Produkt erreichte 45% Umsatzwachstum"
+# (preserves "SaaS" as technical term)
+```
+
+### Best Practices
+
+✅ **Do:**
+- Use consistent language in your input
+- Let the system auto-detect (don't force language)
+- Provide slide_title in the target language for better context
+
+❌ **Don't:**
+- Mix languages unnecessarily
+- Assume English-only (German works equally well!)
+- Worry about translation - the system handles it
+
+### Supported Languages
+
+Currently optimized for:
+- 🇩🇪 **German** (primary use case, reference examples in German)
+- 🇬🇧 **English** (fully supported)
+
+The prompts are flexible enough to handle other languages, but quality may vary without language-specific reference examples.
+
+---
+
 ## Usage Examples
 
 ### Example 1: Cost-Optimized GPT-5-mini
@@ -216,10 +313,43 @@ print(analysis["has_statistics"])  # True
 print(analysis["confidence_score"])  # 0.95
 ```
 
-### Example 4: Combining Features
+### Example 4: German Language Input
 
 ```python
-# GPT-5 + Structured Outputs + Custom Controls
+# German content generation
+orchestrator = AgentOrchestrator(
+    api_key=API_KEY,
+    model="gpt-5",
+    use_structured_outputs=True
+)
+
+result = orchestrator.process(
+    user_input="""
+    Phase 1: Institutioneller Markt (2026-2028)
+    - Pflegeheime: 16.500 Einrichtungen in Deutschland
+    - Bibliotheken: 8.800 öffentliche Bibliotheken
+    - Schulen: 32.000 allgemeinbildende Schulen
+
+    Phase 2: Privater Markt (ab 2029)
+    - Haushalte: ~15 Mio Zielgruppe (Sandwich-Generation)
+    - Konservatives Szenario: 1% Penetration = 150.000 Haushalte
+    """,
+    project_path="./presentation/projects/robotik-pitch",
+    project_name="robotik-pitch",
+    slide_title="Zielgruppen & Go-to-Market",
+    project_scope="Robotik-as-a-Service für den deutschen Markt"
+)
+
+# Output will be in German:
+# - Headings: "Zielgruppen", "Go-to-Market Strategie"
+# - Phased structure with German labels
+# - All bullets and descriptions in German
+```
+
+### Example 5: Combining All Features
+
+```python
+# GPT-5 + Structured Outputs + German + Custom Controls
 orchestrator = AgentOrchestrator(
     api_key=API_KEY,
     model="gpt-5",
@@ -229,16 +359,17 @@ orchestrator = AgentOrchestrator(
 )
 
 result = orchestrator.process(
-    user_input="Phase 1: Institutional market (2026-2028)...",
-    project_path="./presentation/projects/startup-deck",
-    project_name="startup-deck",
-    slide_title="Go-to-Market Strategy",
-    project_scope="B2B SaaS startup targeting enterprise clients",
+    user_input="Unser Umsatz stieg um 45% auf €12,3M, wir expandierten in 8 neue Märkte",
+    project_path="./presentation/projects/investor-pitch",
+    project_name="investor-pitch",
+    slide_title="Wachstum & Erfolge",
+    project_scope="Series-A Pitch Deck für deutsche VCs",
     preferences={"generate_variants": True}  # Generate 3 design variants
 )
 
 # result["generated_slides"][0] contains slide data
 # result["agent_steps"] shows all agent execution steps
+# All content will be in German
 ```
 
 ---
@@ -404,6 +535,9 @@ orchestrator = AgentOrchestrator(
 3. **Enable structured_outputs for production** - Type safety prevents bugs
 4. **Set project_scope** - Helps LLM understand context
 5. **Monitor costs** - Use `verbosity="low"` for cost control
+6. **Use consistent language in input** - German OR English, not mixed (system auto-detects)
+7. **Provide slide_title in target language** - Helps with context and language detection
+8. **Trust the language auto-detection** - No manual configuration needed
 
 ---
 

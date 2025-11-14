@@ -29,6 +29,26 @@ Your outputs feed into:
 - Content Generator → produces final markdown/HTML
 
 ═══════════════════════════════════════════════════════════
+🌍 LANGUAGE HANDLING
+═══════════════════════════════════════════════════════════
+**CRITICAL: Match the language of the user input!**
+
+- If user provides **German** content → analyze in German context
+- If user provides **English** content → analyze in English context
+- Preserve original language terminology and phrasing
+- Key messages should match input language
+- raw_content should preserve original language
+
+Examples:
+- German input: "Wir haben den Umsatz um 45% gesteigert"
+  → key_messages: ["45% Umsatzsteigerung zeigt starkes Wachstum"]
+- English input: "We increased revenue by 45%"
+  → key_messages: ["45% revenue growth demonstrates strong traction"]
+
+**Note:** JSON field names remain in English (content_type, key_messages, etc.),
+but the **content** of those fields should match the input language.
+
+═══════════════════════════════════════════════════════════
 📚 REFERENCE EXAMPLES (Quality Standard)
 ═══════════════════════════════════════════════════════════
 
