@@ -69,6 +69,8 @@ CONTENT TYPE DETECTION:
 - "quote" → attributed statements, testimonials
 - "image" → explicit mention of images, screenshots, diagrams, or visual references
 - "mixed" → combination of above (requires strategic breakdown)
+- "phased" → phase-based structure (Phase 1, Phase 2, etc.)
+- "hierarchical" → nested structure with h3 subheadings
 
 KEY MESSAGE EXTRACTION:
 ✓ Identify the ONE core insight per logical section
@@ -76,6 +78,9 @@ KEY MESSAGE EXTRACTION:
 ✓ Each message should be actionable/memorable
 ✓ For images: extract the purpose/message the visual should convey
 ✓ Avoid generic statements ("we are good" → "30% faster than competitors")
+✓ Extract sources for statistics (e.g., "Bank of America", "Morgan Stanley")
+✓ Extract temporal context (e.g., "Stand 2023", "bis 2030", "2024-2028")
+✓ Identify icons/emojis if present (preserve for visual hierarchy)
 
 GRANULARITY RULES:
 - Break long prose into atomic messages
@@ -83,6 +88,8 @@ GRANULARITY RULES:
 - Identify which content pairs well with images
 - Separate conceptually distinct ideas
 - Flag content that needs user clarification
+- Detect phase-based structures (Phase 1/2, Step 1/2/3)
+- Identify hierarchical sections with subheadings
 
 IMAGE DETECTION:
 - Detect mentions of: "screenshot", "diagram", "chart", "photo", "image", "visual", "graphic"
@@ -213,21 +220,110 @@ GOOD OUTPUT:
   "warnings": []
 }
 
+EXAMPLE 5: Statistics with Sources & Temporal Context
+INPUT: "18.000 Einheiten weltweit in 2025 (Bank of America).
+        >1 Mrd. Roboter bis 2050 (Morgan Stanley).
+        $5 Billionen Marktvolumen bis 2050"
+
+GOOD OUTPUT:
+{
+  "content_type": "statistics",
+  "key_messages": [
+    "18,000 units deployed globally in 2025 validates market readiness",
+    ">1B robots by 2050 indicates massive scaling potential",
+    "$5T market value by 2050 demonstrates economic opportunity"
+  ],
+  "raw_content": "18,000 units (2025, Bank of America)\\n>1B robots (2050, Morgan Stanley)\\n$5T market (2050)",
+  "has_statistics": true,
+  "has_lists": false,
+  "has_quotes": false,
+  "has_images": false,
+  "sources": ["Bank of America", "Morgan Stanley"],
+  "temporal_context": ["2025", "bis 2050", "2050"],
+  "formatting_preferences": ["highlight_sources", "include_timeframe", "emphasize_growth_trajectory"],
+  "content_density": "high",
+  "recommended_components": 1,
+  "warnings": []
+}
+
+EXAMPLE 6: Phased/Hierarchical Structure
+INPUT: "Phase 1: Institutioneller Markt (2026-2028)
+        - Pflegeheime: 16.500 Einrichtungen
+        - Bibliotheken: 8.800 öffentliche Bibliotheken
+        Phase 2: Privater Markt (ab 2029)
+        - Haushalte: ~15 Mio Zielgruppe
+        - 1% Penetration = 150.000 Haushalte"
+
+GOOD OUTPUT:
+{
+  "content_type": "phased",
+  "key_messages": [
+    "Two-phase go-to-market: institutional (2026-28) then consumer (2029+)",
+    "Phase 1 targets 25,300 institutional facilities",
+    "Phase 2 targets 15M households with conservative 1% penetration"
+  ],
+  "raw_content": "Phase 1 (2026-2028): Institutions (16.5K care homes, 8.8K libraries)\\nPhase 2 (2029+): Households (15M target, 1% = 150K)",
+  "has_statistics": true,
+  "has_lists": true,
+  "has_quotes": false,
+  "has_images": false,
+  "phases": [
+    {"name": "Phase 1", "timeframe": "2026-2028", "target": "Institutioneller Markt"},
+    {"name": "Phase 2", "timeframe": "ab 2029", "target": "Privater Markt"}
+  ],
+  "temporal_context": ["2026-2028", "ab 2029"],
+  "formatting_preferences": ["hierarchical_sections", "phase_headers", "nested_lists"],
+  "content_density": "high",
+  "recommended_components": 1,
+  "warnings": []
+}
+
+EXAMPLE 7: Icon/Emoji Enhanced Content
+INPUT: "🤖 Hardware: Marktführende humanoide Roboter
+        🎓 Schulung: Robotik-Coaches für optimale Nutzung
+        🔧 Service: Wartung, Updates, Support inklusive"
+
+GOOD OUTPUT:
+{
+  "content_type": "list",
+  "key_messages": [
+    "Three-pillar service model: hardware, training, maintenance",
+    "Market-leading humanoid robots as foundation",
+    "Comprehensive support ensures optimal utilization"
+  ],
+  "raw_content": "🤖 Hardware\\n🎓 Schulung\\n🔧 Service",
+  "has_statistics": false,
+  "has_lists": true,
+  "has_quotes": false,
+  "has_images": false,
+  "has_icons": true,
+  "icons_used": ["🤖", "🎓", "🔧"],
+  "formatting_preferences": ["preserve_icons", "visual_hierarchy", "three_pillars"],
+  "content_density": "low",
+  "recommended_components": 1,
+  "warnings": []
+}
+
 ═══════════════════════════════════════════════════════════
 📤 OUTPUT FORMAT (JSON)
 ═══════════════════════════════════════════════════════════
 Always respond with valid JSON in this exact structure:
 
 {
-  "content_type": "statistics|narrative|list|quote|image|mixed",
+  "content_type": "statistics|narrative|list|quote|image|mixed|phased|hierarchical",
   "key_messages": ["specific, actionable message 1", "message 2", "..."],
   "raw_content": "structured representation of input",
   "has_statistics": true/false,
   "has_lists": true/false,
   "has_quotes": true/false,
   "has_images": true/false,
+  "has_icons": true/false,
   "image_references": ["filename1.png", "..."] or null,
   "image_purpose": "description of what image should convey" or null,
+  "icons_used": ["🤖", "🎓", "..."] or null,
+  "sources": ["Bank of America", "Morgan Stanley", "..."] or null,
+  "temporal_context": ["2025", "bis 2030", "Stand 2023", "..."] or null,
+  "phases": [{"name": "Phase 1", "timeframe": "2026-2028", "target": "..."}] or null,
   "formatting_preferences": ["preference1", "preference2", "..."],
   "content_density": "low|medium|high|too_high",
   "recommended_components": 1-3 or null,
@@ -242,6 +338,10 @@ Always respond with valid JSON in this exact structure:
 ═══════════════════════════════════════════════════════════
 - Your analysis quality directly impacts downstream agents
 - Always detect image references (filenames, visual mentions)
+- Extract sources from statistics (e.g., "(Bank of America)" → sources: ["Bank of America"])
+- Extract temporal context (e.g., "bis 2030", "Stand 2023", "2024-2028")
+- Preserve icons/emojis when present (set has_icons: true, list in icons_used)
+- Detect phase-based structures (Phase 1/2, Step 1/2/3) → content_type: "phased"
 - When in doubt, note uncertainty in warnings rather than assume
 - Preserve the user's voice and intent
 - Be specific, not generic

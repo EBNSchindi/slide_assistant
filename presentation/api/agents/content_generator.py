@@ -112,6 +112,9 @@ ACCESSIBILITY (a11y) REQUIREMENTS:
 - Optimal: 2-4 cards (1=weak impact, 5+=overwhelming)
 - Numbers: Use appropriate units (K, M, B) or symbols (%, €, $)
 - Labels: Provide context ("45% YoY Growth" NOT just "Growth")
+- Multi-line labels: Use <br> for complex labels (e.g., "Unitree H1<br>High-End, Industrie")
+- Sources: Add source attribution on second line (e.g., "18,000 units<br>(Bank of America, 2025)")
+- Temporal context: Include timeframes ("Stand 2023", "bis 2030", "2024-2028")
 - Include trend if relevant ("+", "↑", growth indicators)
 - Group related metrics together
 - Use consistent number formatting within grid
@@ -124,6 +127,8 @@ ACCESSIBILITY (a11y) REQUIREMENTS:
 - For sub-points: use em-dash (—) NOT nested <ul>
 - Numbered <ol> for chronological/sequential steps
 - Unordered <ul> for features/benefits/non-sequential
+- Icons/Emojis: Preserve at start of items (e.g., "🤖 Hardware: ...")
+- Maintain icon consistency throughout list
 
 **QUOTE:**
 - Attribution ALWAYS required (<footer>Author, Role/Company</footer>)
@@ -139,6 +144,9 @@ ACCESSIBILITY (a11y) REQUIREMENTS:
 - Add breathing room with <br> or separate <p> tags
 - First sentence should hook attention
 - Use transition words between paragraphs
+- Hierarchical sections: Use <h3> for subsections (e.g., "Phase 1:", "Phase 2:")
+- Nest bullet-lists under <h3> headings for phased/hierarchical content
+- Maintain proper heading hierarchy (h2 → h3)
 
 **IMAGE:**
 - Always use descriptive alt text (describe content, not "screenshot" or "image")
@@ -155,7 +163,7 @@ ACCESSIBILITY (a11y) REQUIREMENTS:
 📋 HTML COMPONENT TEMPLATES
 ═══════════════════════════════════════════════════════════
 
-1. STAT-GRID:
+1. STAT-GRID (Simple):
 <div class="component" id="slide-X-comp-Y" role="region" aria-label="Statistics">
   <div class="component-label">Component Y</div>
   <div class="stat-grid">
@@ -170,7 +178,37 @@ ACCESSIBILITY (a11y) REQUIREMENTS:
   </div>
 </div>
 
-2. BULLET-LIST:
+1b. STAT-GRID (With Sources & Multi-line Labels):
+<div class="component" id="slide-X-comp-Y" role="region" aria-label="Statistics">
+  <div class="component-label">Component Y</div>
+  <div class="stat-grid">
+    <div class="stat-card" role="article" aria-label="Market forecast from Bank of America">
+      <div class="stat-number">18,000</div>
+      <div class="stat-label">Einheiten weltweit<br>(Bank of America, 2025)</div>
+    </div>
+    <div class="stat-card" role="article" aria-label="Long-term robot projection from Morgan Stanley">
+      <div class="stat-number">>1<span class="unit">Mrd</span></div>
+      <div class="stat-label">Roboter bis 2050<br>(Morgan Stanley)</div>
+    </div>
+  </div>
+</div>
+
+1c. STAT-GRID (With Complex Multi-line Labels):
+<div class="component" id="slide-X-comp-Y" role="region" aria-label="Product models and pricing">
+  <div class="component-label">Component Y</div>
+  <div class="stat-grid">
+    <div class="stat-card" role="article" aria-label="Unitree H1 pricing">
+      <div class="stat-number">~84.000<span class="unit">€</span></div>
+      <div class="stat-label">Unitree H1<br>High-End, Industrie</div>
+    </div>
+    <div class="stat-card" role="article" aria-label="1X NEO pricing">
+      <div class="stat-number">~18.500<span class="unit">€</span></div>
+      <div class="stat-label">1X NEO<br>Service-Roboter</div>
+    </div>
+  </div>
+</div>
+
+2. BULLET-LIST (Simple):
 <div class="component" id="slide-X-comp-Y" role="region" aria-label="Key points">
   <div class="component-label">Component Y</div>
   <h2>Component Title</h2>
@@ -178,6 +216,17 @@ ACCESSIBILITY (a11y) REQUIREMENTS:
     <li><strong>Key term</strong> — supporting detail in 8-10 words max</li>
     <li>Another concise point with strong opening</li>
     <li>Third point maintaining parallel structure</li>
+  </ul>
+</div>
+
+2b. BULLET-LIST (With Icons/Emojis):
+<div class="component" id="slide-X-comp-Y" role="region" aria-label="Service pillars">
+  <div class="component-label">Component Y</div>
+  <h2>Die drei Säulen</h2>
+  <ul class="bullet-list">
+    <li>🤖 <strong>Hardware:</strong> Marktführende humanoide Roboter</li>
+    <li>🎓 <strong>Schulung:</strong> Robotik-Coaches für optimale Nutzung</li>
+    <li>🔧 <strong>Service:</strong> Wartung, Updates, Support inklusive</li>
   </ul>
 </div>
 
@@ -196,6 +245,25 @@ ACCESSIBILITY (a11y) REQUIREMENTS:
   <h2>Component Title</h2>
   <p>First paragraph with <strong>key concept</strong> highlighted. Keep sentences short and punchy.</p>
   <p>Second paragraph builds on the first. Maintains clear flow.</p>
+</div>
+
+4b. TEXT/PARAGRAPH (Phased/Hierarchical Structure):
+<div class="component" id="slide-X-comp-Y" role="region" aria-label="Phased rollout plan">
+  <div class="component-label">Component Y</div>
+  <h2>Zielgruppen</h2>
+
+  <h3>Phase 1: Institutioneller Markt (2026-2028)</h3>
+  <ul class="bullet-list">
+    <li><strong>Pflegeheime:</strong> 16.500 Einrichtungen</li>
+    <li><strong>Bibliotheken:</strong> 8.800 öffentliche Bibliotheken</li>
+    <li><strong>Schulen:</strong> 32.000 allgemeinbildende Schulen</li>
+  </ul>
+
+  <h3>Phase 2: Privater Markt (ab 2029)</h3>
+  <ul class="bullet-list">
+    <li><strong>Haushalte:</strong> ~15 Mio Zielgruppe (Sandwich-Generation)</li>
+    <li>Konservatives Szenario: 1% Penetration = 150.000 Haushalte</li>
+  </ul>
 </div>
 
 5. IMAGE COMPONENT (Single Image):
@@ -438,6 +506,77 @@ Why good: Proper components, correct paths, stat-grid for metrics,
 structured image layout with .image-wrapper and .image-content, descriptive alt text,
 informative description, semantic structure
 
+EXAMPLE 5: Statistics with Sources - Before/After
+
+❌ BAD:
+<div class="stat-card">
+  <div class="stat-number">18,000</div>
+  <div class="stat-label">Units Worldwide 2025</div>
+</div>
+
+Why bad: Missing source attribution, no credibility, generic label
+
+✓ GOOD:
+<div class="stat-card" role="article" aria-label="Market forecast from Bank of America">
+  <div class="stat-number">18,000</div>
+  <div class="stat-label">Einheiten weltweit<br>(Bank of America, 2025)</div>
+</div>
+
+Why good: Multi-line label with <br>, source attribution builds credibility,
+temporal context (2025), proper aria-label includes source
+
+EXAMPLE 6: Phased Content - Before/After
+
+❌ BAD:
+<ul class="bullet-list">
+  <li>Phase 1: Institutions - care homes, libraries, schools</li>
+  <li>Phase 2: Consumer - 15M households</li>
+</ul>
+
+Why bad: No hierarchical structure, phases buried in list items,
+no visual separation, loses narrative flow
+
+✓ GOOD:
+<div class="component" id="slide-2-comp-3" role="region" aria-label="Phased rollout">
+  <div class="component-label">Component 3</div>
+  <h2>Zielgruppen</h2>
+
+  <h3>Phase 1: Institutioneller Markt (2026-2028)</h3>
+  <ul class="bullet-list">
+    <li><strong>Pflegeheime:</strong> 16.500 Einrichtungen</li>
+    <li><strong>Bibliotheken:</strong> 8.800 öffentliche Bibliotheken</li>
+  </ul>
+
+  <h3>Phase 2: Privater Markt (ab 2029)</h3>
+  <ul class="bullet-list">
+    <li><strong>Haushalte:</strong> ~15 Mio Zielgruppe</li>
+  </ul>
+</div>
+
+Why good: Proper heading hierarchy (h2 → h3), phases as structural elements,
+nested lists maintain association, timeframes in phase headers, clear visual separation
+
+EXAMPLE 7: Icon/Emoji Enhanced List - Before/After
+
+❌ BAD:
+<ul class="bullet-list">
+  <li><strong>Hardware:</strong> Leading humanoid robots</li>
+  <li><strong>Training:</strong> Robotics coaches for optimal use</li>
+  <li><strong>Service:</strong> Maintenance and support included</li>
+</ul>
+
+Why bad: Missing icons that enhance visual hierarchy and memorability
+
+✓ GOOD:
+<ul class="bullet-list">
+  <li>🤖 <strong>Hardware:</strong> Marktführende humanoide Roboter</li>
+  <li>🎓 <strong>Schulung:</strong> Robotik-Coaches für optimale Nutzung</li>
+  <li>🔧 <strong>Service:</strong> Wartung, Updates, Support inklusive</li>
+</ul>
+
+Why good: Icons preserved at start, provides visual mnemonic anchors,
+enhances scannability, maintains consistent icon placement, icons strengthen structure
+
 ═══════════════════════════════════════════════════════════
 🎯 GENERATION WORKFLOW
 ═══════════════════════════════════════════════════════════
@@ -445,13 +584,17 @@ informative description, semantic structure
 1. Review strategy recommendation (component types, count, layout)
 2. Extract key messages from content analysis
 3. Check for available images in the context
-4. Optimize text (remove filler, add specificity, shorten)
-5. Generate markdown (H1 + H2 structure + images)
-6. Generate HTML (semantic, accessible components with images)
-7. Validate component IDs (slide-X-comp-Y format)
-8. Verify image paths (must use EXACT paths from context)
-9. Ensure accessibility (aria-labels, roles, semantic tags, alt text)
-10. Double-check readability (word counts per guideline)
+4. Check for sources, temporal context, phases, icons in analysis
+5. Optimize text (remove filler, add specificity, shorten)
+6. Generate markdown (H1 + H2 structure + images)
+7. Generate HTML (semantic, accessible components with images)
+8. Apply multi-line stat-labels with <br> for sources/descriptions
+9. Preserve icons/emojis at start of list items
+10. Use <h3> sections for phased/hierarchical content
+11. Validate component IDs (slide-X-comp-Y format)
+12. Verify image paths (must use EXACT paths from context)
+13. Ensure accessibility (aria-labels, roles, semantic tags, alt text)
+14. Double-check readability (word counts per guideline)
 
 ═══════════════════════════════════════════════════════════
 📤 OUTPUT FORMAT (JSON)
@@ -486,6 +629,10 @@ CRITICAL REQUIREMENTS:
 - Use structured image layout: .image-container > .image-wrapper + .image-content
 - .image-wrapper contains <img>, .image-content contains <h4> + <p>
 - For multiple images, use .image-grid with .image-card components
+- For stats with sources: Use multi-line labels with <br> (e.g., "Metric<br>(Source, Year)")
+- For phased content: Use <h3> subsections within component (h2 → h3)
+- For icon/emoji content: Preserve icons at start of list items
+- Include temporal context in stat-labels when available ("Stand 2023", "bis 2030")
 
 ═══════════════════════════════════════════════════════════
 🚨 CRITICAL REMINDERS
@@ -499,6 +646,8 @@ CRITICAL REQUIREMENTS:
 - Parallel structure in lists is non-negotiable
 - Your output goes directly to users - quality matters
 - When in doubt, cut words rather than add them
+
+IMAGE REMINDERS:
 - ALWAYS use exact image paths from the context
 - NEVER use relative image paths
 - Descriptive alt text is mandatory for accessibility
@@ -507,6 +656,27 @@ CRITICAL REQUIREMENTS:
 - NEVER use simple <figure>/<figcaption> for images - use the structured layout
 - Image components must have <h4> title and <p> description in .image-content
 - For multiple images, use .image-grid with .image-card components
+
+STATISTICS REMINDERS:
+- Use multi-line stat-labels with <br> for sources and descriptions
+- Include source attribution: "Metric<br>(Bank of America, 2025)"
+- Include temporal context: "Stand 2023", "bis 2030", "2024-2028"
+- Complex labels: "Unitree H1<br>High-End, Industrie"
+- Sources build credibility - always include them when available
+
+PHASED/HIERARCHICAL REMINDERS:
+- Use <h3> subsections for phases within single component
+- Maintain heading hierarchy: h2 → h3
+- Nest bullet-lists under <h3> headers
+- Include timeframes in phase headers: "Phase 1: (2026-2028)"
+- Visual separation between phases with proper spacing
+
+ICON/EMOJI REMINDERS:
+- Preserve icons/emojis at start of list items
+- Icons enhance visual hierarchy and memorability
+- Format: "🤖 <strong>Term:</strong> Description"
+- Maintain consistent icon placement throughout
+- Icons should strengthen, not replace, text meaning
 """
 
         # If variant generation is requested, generate for each profile
