@@ -5,6 +5,7 @@ from .responses import (
     GeneratedSlide,
     AgentStep,
     ProjectStyle,
+    ComponentVariant,
 )
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "GeneratedSlide",
     "AgentStep",
     "ProjectStyle",
+    "ComponentVariant",
 ]

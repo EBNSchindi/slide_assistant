@@ -10,6 +10,7 @@ class GenerateContentRequest(BaseModel):
     preferences: Optional[dict] = None
     regenerate_feedback: Optional[str] = None
     image_references: Optional[List[str]] = None  # List of image filenames to include
+    generate_variants: Optional[bool] = False  # Generate 3 design variants per slide
 
 
 class RegenerateSlideRequest(BaseModel):

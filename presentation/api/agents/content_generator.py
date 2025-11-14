@@ -21,6 +21,8 @@ class ContentGeneratorAgent:
         project_scope: str = "",
         image_references: list = None,
         project_name: str = "beispiel-projekt",
+        generate_variants: bool = False,
+        variant_profiles: list = None,
     ) -> dict:
         """Generate markdown and HTML from analysis and strategy
 
@@ -32,6 +34,8 @@ class ContentGeneratorAgent:
             project_scope: Project scope/context (optional)
             image_references: List of uploaded image filenames to include
             project_name: Name of the project for dynamic paths
+            generate_variants: Whether to generate 3 design variants
+            variant_profiles: List of variant profile dicts
         """
 
         # Build image context if images are provided
@@ -444,6 +448,22 @@ CRITICAL REQUIREMENTS:
 - Images should enhance the message, not distract
 """
 
+        # If variant generation is requested, generate for each profile
+        if generate_variants and variant_profiles:
+            return self._generate_variants(
+                analysis,
+                strategy,
+                style_guide,
+                slide_title,
+                project_scope,
+                image_references,
+                project_name,
+                context,
+                system_prompt,
+                variant_profiles,
+            )
+
+        # Standard single-variant generation
         user_message = f"""{context}
 
 Please generate both markdown and HTML for this slide based on the analysis and strategy."""
@@ -464,3 +484,99 @@ Please generate both markdown and HTML for this slide based on the analysis and 
 
         except Exception as e:
             raise Exception(f"Content Generator error: {str(e)}")
+
+    def _generate_variants(
+        self,
+        analysis: dict,
+        strategy: dict,
+        style_guide: dict,
+        slide_title: str,
+        project_scope: str,
+        image_references: list,
+        project_name: str,
+        base_context: str,
+        base_system_prompt: str,
+        variant_profiles: list,
+    ) -> dict:
+        """Generate 3 variants of content for different design profiles
+
+        Args:
+            (standard generation params) + variant_profiles
+
+        Returns:
+            Dict with "variants" key containing list of variant outputs
+        """
+        variants = []
+
+        for profile in variant_profiles:
+            profile_name = profile.get("name", "default")
+            primary_color = profile.get("primary_color", "#238636")
+            visual_props = profile.get("visual_properties", {})
+
+            print(f"Generating variant: {profile_name}")
+
+            # Build profile-specific system prompt
+            profile_specific_prompt = f"""{base_system_prompt}
+
+═══════════════════════════════════════════════════════════
+🎨 DESIGN PROFILE: {profile_name.upper()}
+═══════════════════════════════════════════════════════════
+
+This variant should follow the {profile_name.title()} design profile:
+- Primary Color: {primary_color}
+- Character: {profile.get('character', 'N/A')}
+- Typography: {visual_props.get('typography', {}).get('font_family', 'Default')}
+- Border Style: {visual_props.get('borders_effects', {}).get('border_width', '1px')} borders
+- Shadows: {visual_props.get('borders_effects', {}).get('shadow', 'none')}
+
+Design this variant to visually align with the {profile_name} profile while maintaining
+the same semantic content. Use colors and styling that match the profile definition.
+
+All other requirements remain the same.
+"""
+
+            user_message = f"""{base_context}
+
+Please generate both markdown and HTML for this slide based on the analysis and strategy.
+This is the {profile_name.title()} design profile variant."""
+
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {"role": "system", "content": profile_specific_prompt},
+                        {"role": "user", "content": user_message},
+                    ],
+                    temperature=0.5,
+                    response_format={"type": "json_object"},
+                )
+
+                output = json.loads(response.choices[0].message.content)
+
+                # Add profile name to output
+                variants.append({
+                    "profile": profile_name,
+                    "html_content": output.get("html", ""),
+                    "markdown_content": output.get("markdown", ""),
+                    "components_used": output.get("components_used", []),
+                    "readability_score": output.get("readability_score", "unknown"),
+                })
+
+                print(f"✅ {profile_name} variant generated")
+
+            except Exception as e:
+                print(f"⚠️ Error generating {profile_name} variant: {str(e)}")
+                # Still add a fallback variant to maintain count
+                variants.append({
+                    "profile": profile_name,
+                    "html_content": f"<div class='error'>Failed to generate {profile_name} variant: {str(e)}</div>",
+                    "markdown_content": f"# Error: Failed to generate {profile_name} variant",
+                    "components_used": [],
+                    "error": str(e),
+                })
+
+        return {
+            "variants": variants,
+            "component_count": len(variants),
+            "components_used": ["variant"],
+        }
