@@ -3,14 +3,18 @@ Content Generator Agent - Generates markdown and HTML from strategy
 """
 from openai import OpenAI
 import json
+from .schemas import GeneratedContent, VariantGeneration
 
 
 class ContentGeneratorAgent:
     """Generates markdown and HTML based on strategy and style"""
 
-    def __init__(self, api_key: str, model: str = "gpt-4o"):
+    def __init__(self, api_key: str, model: str = "gpt-4o", reasoning_effort: str = "medium", verbosity: str = "medium", use_structured_outputs: bool = False):
         self.client = OpenAI(api_key=api_key)
         self.model = model
+        self.reasoning_effort = reasoning_effort  # For GPT-5: minimal|low|medium|high
+        self.verbosity = verbosity  # For GPT-5: minimal|low|medium|high
+        self.use_structured_outputs = use_structured_outputs  # Use Pydantic schemas for type safety
 
     def generate(
         self,
@@ -51,10 +55,15 @@ class ContentGeneratorAgent:
 
 Presentation Strategy: {json.dumps(strategy)}
 
+Project Scope / Context:
+{project_scope or "General presentation slide"}
+
 Style Guide:
 - Primary Color: {style_guide.get('primary_color', '#238636')}
 - Font Family: {style_guide.get('font_family', 'sans-serif')}
 - Available Components: {', '.join(style_guide.get('available_components', []))}
+- Spacing Scale: {style_guide.get('spacing_scale', ['16px', '24px', '32px', '48px'])}
+- Badge Colors: {style_guide.get('badge_colors', {})}
 
 Slide Title: {slide_title}{image_context}"""
 
@@ -70,6 +79,40 @@ Output: Optimized markdown AND semantic HTML
 
 Your mission: Transform strategic recommendations into polished,
 accessible, visually compelling presentation components with full image support.
+
+═══════════════════════════════════════════════════════════
+🌍 LANGUAGE HANDLING
+═══════════════════════════════════════════════════════════
+**CRITICAL: Match the language of the content analysis!**
+
+- If content analysis & strategy are in **German** → generate German content
+- If content analysis & strategy are in **English** → generate English content
+- ALL slide content (headings, bullets, labels, text) must match the input language
+- HTML structure remains the same, only text content changes language
+
+Examples:
+- German content:
+  ```html
+  <h2>Marktwachstum</h2>
+  <div class="stat-label">Umsatzsteigerung</div>
+  <li><strong>Expansion:</strong> 8 neue Märkte erschlossen</li>
+  ```
+
+- English content:
+  ```html
+  <h2>Market Growth</h2>
+  <div class="stat-label">Revenue Growth</div>
+  <li><strong>Expansion:</strong> Entered 8 new markets</li>
+  ```
+
+**Reference slides (Folie 1-8) are in German** - these serve as quality benchmarks
+for German presentations. For English content, apply the same quality standards
+but translate appropriately.
+
+**Important:**
+- optimization_notes can be in English (internal metadata)
+- HTML/CSS classes remain in English
+- All user-facing content MUST match analysis language
 
 ═══════════════════════════════════════════════════════════
 📚 REFERENCE EXAMPLES (Quality Standard)
@@ -1147,18 +1190,54 @@ ICON/EMOJI REMINDERS:
 Please generate both markdown and HTML for this slide based on the analysis and strategy."""
 
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_message},
-                ],
-                temperature=0.5,
-                response_format={"type": "json_object"},
-            )
+            # Use Pydantic Structured Outputs if enabled (type-safe)
+            if self.use_structured_outputs:
+                api_params = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message},
+                    ],
+                    "temperature": 0.5,
+                }
 
-            output = json.loads(response.choices[0].message.content)
-            return output
+                # Add GPT-5 specific controls if using GPT-5 models
+                if "gpt-5" in self.model.lower():
+                    api_params["extra_body"] = {
+                        "reasoning_effort": self.reasoning_effort,
+                        "verbosity": self.verbosity,
+                    }
+
+                completion = self.client.beta.chat.completions.parse(
+                    **api_params,
+                    response_format=GeneratedContent,
+                )
+                output = completion.choices[0].message.parsed
+                return output.model_dump()
+
+            # Fallback: JSON mode (backwards compatible)
+            else:
+                api_params = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message},
+                    ],
+                    "temperature": 0.5,
+                    "response_format": {"type": "json_object"},
+                }
+
+                # Add GPT-5 specific controls if using GPT-5 models
+                if "gpt-5" in self.model.lower():
+                    api_params["extra_body"] = {
+                        "reasoning_effort": self.reasoning_effort,
+                        "verbosity": self.verbosity,
+                    }
+
+                response = self.client.chat.completions.create(**api_params)
+
+                output = json.loads(response.choices[0].message.content)
+                return output
 
         except Exception as e:
             raise Exception(f"Content Generator error: {str(e)}")
@@ -1219,15 +1298,25 @@ Please generate both markdown and HTML for this slide based on the analysis and 
 This is the {profile_name.title()} design profile variant."""
 
             try:
-                response = self.client.chat.completions.create(
-                    model=self.model,
-                    messages=[
+                # Build API call parameters for variant
+                api_params = {
+                    "model": self.model,
+                    "messages": [
                         {"role": "system", "content": profile_specific_prompt},
                         {"role": "user", "content": user_message},
                     ],
-                    temperature=0.5,
-                    response_format={"type": "json_object"},
-                )
+                    "temperature": 0.5,
+                    "response_format": {"type": "json_object"},
+                }
+
+                # Add GPT-5 specific controls if using GPT-5 models
+                if "gpt-5" in self.model.lower():
+                    api_params["extra_body"] = {
+                        "reasoning_effort": self.reasoning_effort,
+                        "verbosity": self.verbosity,
+                    }
+
+                response = self.client.chat.completions.create(**api_params)
 
                 output = json.loads(response.choices[0].message.content)
 
@@ -1255,6 +1344,6 @@ This is the {profile_name.title()} design profile variant."""
 
         return {
             "variants": variants,
-            "component_count": len(variants),
-            "components_used": ["variant"],
+            "variant_count": len(variants),
+            "components_used": [v.get("components_used", []) for v in variants],
         }

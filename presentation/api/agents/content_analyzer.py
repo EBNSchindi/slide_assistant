@@ -2,14 +2,18 @@
 Content Analyzer Agent - Analyzes user input and structures it
 """
 from openai import OpenAI
+from .schemas import ContentAnalysis
 
 
 class ContentAnalyzerAgent:
     """Analyzes and structures user input"""
 
-    def __init__(self, api_key: str, model: str = "gpt-4o"):
+    def __init__(self, api_key: str, model: str = "gpt-4o", reasoning_effort: str = "medium", verbosity: str = "medium", use_structured_outputs: bool = False):
         self.client = OpenAI(api_key=api_key)
         self.model = model
+        self.reasoning_effort = reasoning_effort  # For GPT-5: minimal|low|medium|high
+        self.verbosity = verbosity  # For GPT-5: minimal|low|medium|high
+        self.use_structured_outputs = use_structured_outputs  # Use Pydantic schemas for type safety
         self.system_prompt = """
 ═══════════════════════════════════════════════════════════
 🎯 AGENT IDENTITY & ROLE
@@ -23,6 +27,26 @@ presentation-ready analysis that enables optimal slide design.
 Your outputs feed into:
 - Presentation Strategist → recommends component strategy
 - Content Generator → produces final markdown/HTML
+
+═══════════════════════════════════════════════════════════
+🌍 LANGUAGE HANDLING
+═══════════════════════════════════════════════════════════
+**CRITICAL: Match the language of the user input!**
+
+- If user provides **German** content → analyze in German context
+- If user provides **English** content → analyze in English context
+- Preserve original language terminology and phrasing
+- Key messages should match input language
+- raw_content should preserve original language
+
+Examples:
+- German input: "Wir haben den Umsatz um 45% gesteigert"
+  → key_messages: ["45% Umsatzsteigerung zeigt starkes Wachstum"]
+- English input: "We increased revenue by 45%"
+  → key_messages: ["45% revenue growth demonstrates strong traction"]
+
+**Note:** JSON field names remain in English (content_type, key_messages, etc.),
+but the **content** of those fields should match the input language.
 
 ═══════════════════════════════════════════════════════════
 📚 REFERENCE EXAMPLES (Quality Standard)
@@ -443,19 +467,55 @@ Always respond with valid JSON in this exact structure:
 {user_input}"""
 
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": self.system_prompt},
-                    {"role": "user", "content": user_message},
-                ],
-                temperature=0.7,
-                response_format={"type": "json_object"},
-            )
+            # Use Pydantic Structured Outputs if enabled (type-safe)
+            if self.use_structured_outputs:
+                api_params = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": self.system_prompt},
+                        {"role": "user", "content": user_message},
+                    ],
+                    "temperature": 0.7,
+                }
 
-            import json
-            analysis = json.loads(response.choices[0].message.content)
-            return analysis
+                # Add GPT-5 specific controls if using GPT-5 models
+                if "gpt-5" in self.model.lower():
+                    api_params["extra_body"] = {
+                        "reasoning_effort": self.reasoning_effort,
+                        "verbosity": self.verbosity,
+                    }
+
+                completion = self.client.beta.chat.completions.parse(
+                    **api_params,
+                    response_format=ContentAnalysis,
+                )
+                analysis = completion.choices[0].message.parsed
+                return analysis.model_dump()
+
+            # Fallback: JSON mode (backwards compatible)
+            else:
+                api_params = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": self.system_prompt},
+                        {"role": "user", "content": user_message},
+                    ],
+                    "temperature": 0.7,
+                    "response_format": {"type": "json_object"},
+                }
+
+                # Add GPT-5 specific controls if using GPT-5 models
+                if "gpt-5" in self.model.lower():
+                    api_params["extra_body"] = {
+                        "reasoning_effort": self.reasoning_effort,
+                        "verbosity": self.verbosity,
+                    }
+
+                response = self.client.chat.completions.create(**api_params)
+
+                import json
+                analysis = json.loads(response.choices[0].message.content)
+                return analysis
 
         except Exception as e:
             raise Exception(f"Content Analyzer error: {str(e)}")

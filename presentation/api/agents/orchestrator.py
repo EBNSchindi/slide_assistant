@@ -25,15 +25,37 @@ from services import StyleParser, FileService, ProjectService, VariantStyleParse
 class AgentOrchestrator:
     """Orchestrates the multi-agent content generation pipeline"""
 
-    def __init__(self, api_key: str = None, model: str = "gpt-4o", test_mode: bool = False):
+    def __init__(self, api_key: str = None, model: str = "gpt-4o", test_mode: bool = False, reasoning_effort: str = None, verbosity: str = None, use_structured_outputs: bool = False):
         self.api_key = api_key
         self.model = model
         self.test_mode = test_mode or TEST_MODE
 
-        # Initialize agents
-        self.content_analyzer = ContentAnalyzerAgent(api_key, model)
-        self.presentation_strategist = PresentationStrategistAgent(api_key, model)
-        self.content_generator = ContentGeneratorAgent(api_key, model)
+        # Set default reasoning_effort and verbosity based on model
+        # GPT-5 benefits from explicit controls, GPT-4o uses defaults
+        if reasoning_effort is None:
+            reasoning_effort = "high" if "gpt-5" in model.lower() else "medium"
+        if verbosity is None:
+            verbosity = "medium"
+
+        # Initialize agents with GPT-5 controls and optional Pydantic schemas
+        self.content_analyzer = ContentAnalyzerAgent(
+            api_key, model,
+            reasoning_effort=reasoning_effort,
+            verbosity=verbosity,
+            use_structured_outputs=use_structured_outputs
+        )
+        self.presentation_strategist = PresentationStrategistAgent(
+            api_key, model,
+            reasoning_effort="high",  # Strategy needs high reasoning
+            verbosity=verbosity,
+            use_structured_outputs=use_structured_outputs
+        )
+        self.content_generator = ContentGeneratorAgent(
+            api_key, model,
+            reasoning_effort=reasoning_effort,
+            verbosity=verbosity,
+            use_structured_outputs=use_structured_outputs
+        )
 
     def process(
         self,
@@ -43,6 +65,7 @@ class AgentOrchestrator:
         slide_title: str = None,
         preferences: dict = None,
         image_references: list = None,
+        project_scope: str = None,
     ) -> dict:
         """Process user input through the full agent chain
 
@@ -53,6 +76,7 @@ class AgentOrchestrator:
             slide_title: Optional slide title
             preferences: Optional user preferences
             image_references: Optional list of image filenames to include
+            project_scope: Optional project context/scope for better content generation
         """
 
         # DEBUG: Log image references received
@@ -130,7 +154,7 @@ class AgentOrchestrator:
                 strategy,
                 style_guide,
                 slide_title or "Folie",
-                "",
+                project_scope or f"Project: {project_name}",
                 image_references,
                 project_name,
                 generate_variants=generate_variants,
