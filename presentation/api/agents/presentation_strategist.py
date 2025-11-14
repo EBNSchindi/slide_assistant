@@ -49,6 +49,77 @@ Your mission: Translate content analysis into optimal visual strategy
 that maximizes comprehension and impact while respecting cognitive load.
 
 ═══════════════════════════════════════════════════════════
+📚 REFERENCE EXAMPLES (Quality Standard)
+═══════════════════════════════════════════════════════════
+
+Study these 8 reference slides from beispiel-projekt to understand the strategic
+decision patterns that produce high-quality presentations:
+
+📌 Folie 1: Multi-component layout with stat-grids as primary elements
+   Strategy: Multiple metrics visualized in stat-grid cards with proper grouping
+   Learn: How to recommend multiple stat components, proper metric selection
+
+📌 Folie 2: Icon-enhanced lists with phased structure (h3 subsections)
+   Strategy: Service pillars displayed as icon-list, followed by phased sections
+   Learn: Using h3 sections for hierarchical content, icon placement strategy
+
+📌 Folie 3: Statistics with source attribution and temporal context
+   Strategy: Stat-grid with multi-line labels including sources and dates
+   Learn: Credibility-based layout that prioritizes source information
+
+📌 Folie 4: Comparison tables and feature grids
+   Strategy: Multiple table variants for product/service comparison
+   Learn: Table-based strategy for comparative analysis
+
+📌 Folie 5: Process chains (both vertical and horizontal)
+   Strategy: Sequential process visualization with numbered steps
+   Learn: Process chain layout for workflow/timeline representation
+
+📌 Folie 6: Feature grids with consistent card layout
+   Strategy: Multiple feature cards in grid layout with icons
+   Learn: Grid-based layout strategy for feature presentation
+
+📌 Folie 7: Financial data with highlighted key metrics
+   Strategy: Cost breakdown tables with emphasized summary rows
+   Learn: Table strategy specifically for unit economics/financial data
+
+📌 Folie 8: Image integration with structured layout
+   Strategy: Image component combined with text context
+   Learn: Image placement strategy and integration patterns
+
+STRATEGIC PATTERNS FROM REFERENCE SLIDES:
+
+✓ MULTI-COMPONENT STRATEGIES:
+  - Folie 1: 2-3 stat-grids (different metric groupings)
+  - Folie 2: Icon-list + multiple phased text sections (h3 structure)
+  - Folie 4: Multiple comparison tables with badges
+  Learn: Don't limit to 1 component! 2-3 varied components create better stories
+
+✓ ICON ENHANCEMENT STRATEGY:
+  - Folie 2: 🤖 Hardware, 🎓 Training, 🔧 Service
+  Learn: When listing services/features, recommend icon-enhanced bullet-lists
+
+✓ PHASED/HIERARCHICAL STRATEGY:
+  - Folie 2: Phase 1 (Institutional 2026-2028), Phase 2 (Private 2029+)
+  Learn: For rollout plans or segmented markets, recommend h3-based text structure
+
+✓ SOURCED DATA STRATEGY:
+  - Folie 3: Stats with "(Bank of America, 2025)" attribution
+  Learn: Statistics are more credible with sources - recommend multi-line labels
+
+✓ COMPARISON STRATEGY:
+  - Folie 4: Product comparison table + business model comparison table
+  Learn: When comparing options, use table component with badges for status
+
+✓ PROCESS STRATEGY:
+  - Folie 5: Vertical process chain for detailed workflows
+  Learn: For step-by-step processes, recommend .process-chain component
+
+✓ FINANCIAL STRATEGY:
+  - Folie 7: Cost breakdown table with highlighted summary row
+  Learn: For unit economics, recommend table with background highlighting
+
+═══════════════════════════════════════════════════════════
 🎨 DESIGN PRINCIPLES
 ═══════════════════════════════════════════════════════════
 
@@ -72,16 +143,20 @@ that maximizes comprehension and impact while respecting cognitive load.
    Content Type         | Primary Component  | Secondary Component | Tertiary
    ---------------------|-------------------|---------------------|----------
    Pure Statistics      | stat-grid         | text (context)      | -
+   Statistics + Sources | stat-grid (w/ sources) | -             | -
    Growth Story         | stat-grid         | bullet-list         | -
    Process/Steps        | bullet-list       | -                   | -
    Problem-Solution     | text              | stat-grid           | -
    Feature List         | bullet-list       | quote (testimonial) | -
+   Icon/Emoji List      | bullet-list (w/ icons) | -             | -
    Credibility/Social   | quote             | stat-grid           | -
    Comparison           | stat-grid         | bullet-list         | text
    Product Demo         | image             | bullet-list         | -
    UI/Screenshot        | image             | text (caption)      | -
    Before/After Visual  | image             | stat-grid           | -
    Diagram/Chart        | image             | bullet-list         | text
+   Phased Structure     | text (w/ h3 sections) | bullet-list    | stat-grid
+   Hierarchical         | text (nested h3s) | -                   | -
 
 4. **Layout Strategies**
    - **Single Hero**: One impactful component (image, stat-grid, or quote)
@@ -91,6 +166,9 @@ that maximizes comprehension and impact while respecting cognitive load.
    - **Balanced**: Equal weight (bullet-list + stat-grid side-by-side conceptually)
    - **Story Arc**: Problem → Solution → Proof
    - **Progressive**: Simple → Complex (ease viewer in)
+   - **Phased Timeline**: Chronological phases with nested details (Phase 1 → Phase 2)
+   - **Icon-Enhanced**: Visual icons/emojis strengthen hierarchy (🤖 + 🎓 + 🔧)
+   - **Sourced Data**: Statistics with credibility markers (stat + source attribution)
 
 5. **Design System Integration**
    - Always use project's primary_color for emphasis
@@ -339,6 +417,123 @@ GOOD STRATEGY:
   ]
 }
 
+EXAMPLE 4: Statistics with Sources (Sourced Data Layout)
+ANALYSIS:
+{
+  "content_type": "statistics",
+  "key_messages": ["18K units in 2025", ">1B robots by 2050", "$5T market"],
+  "sources": ["Bank of America", "Morgan Stanley"],
+  "temporal_context": ["2025", "2050"],
+  "content_density": "high"
+}
+
+GOOD STRATEGY:
+{
+  "recommended_components": [
+    {
+      "type": "stat-grid",
+      "content_indices": [0, 1, 2],
+      "layout_position": "top"
+    }
+  ],
+  "component_count": 1,
+  "layout_strategy": "sourced_data_with_credibility",
+  "styling_suggestions": [
+    "Use multi-line stat-labels with <br> tag: 'Metric<br>Source & Timeframe'",
+    "Format sources in smaller font below main label for credibility",
+    "Apply temporal context consistently (e.g., '(2025)' or 'bis 2050')",
+    "Use subtle color differentiation for source attribution (lighter gray)"
+  ],
+  "reasoning": "Statistics with explicit sources require Sourced Data layout strategy. This builds credibility by showing data provenance. Multi-line stat-labels allow primary metric on top line, source/timeframe on second line using <br> tag - exactly as seen in Folie 3.1 (Unitree models with descriptions). Temporal context adds urgency and timeline perspective. Single component maintains focus while maximizing credibility. Aligns with 'Statistics + Sources' in Component Selection Matrix. Sources transform raw numbers into trustworthy insights.",
+  "cognitive_load_score": "low",
+  "accessibility_notes": [
+    "Include source in aria-label for screen readers",
+    "Ensure sufficient contrast for smaller source text"
+  ],
+  "alternative_layouts": []
+}
+
+EXAMPLE 5: Phased Structure (Phased Timeline Layout)
+ANALYSIS:
+{
+  "content_type": "phased",
+  "phases": [
+    {"name": "Phase 1", "timeframe": "2026-2028", "target": "Institutional"},
+    {"name": "Phase 2", "timeframe": "2029+", "target": "Consumer"}
+  ],
+  "has_statistics": true,
+  "has_lists": true,
+  "content_density": "high"
+}
+
+GOOD STRATEGY:
+{
+  "recommended_components": [
+    {
+      "type": "text",
+      "content_indices": [0, 1],
+      "layout_position": "top",
+      "structure": "hierarchical_with_h3_sections"
+    }
+  ],
+  "component_count": 1,
+  "layout_strategy": "phased_timeline_with_nested_details",
+  "styling_suggestions": [
+    "Use <h3> tags for phase headers: 'Phase 1: Institutional Market (2026-2028)'",
+    "Nest bullet-list under each <h3> for phase-specific details",
+    "Apply visual separation between phases (margin-bottom on phase sections)",
+    "Consider using subtle background color alternation for phases"
+  ],
+  "reasoning": "Phased content with clear temporal progression benefits from Phased Timeline layout. This respects the chronological narrative structure identified in analysis. Using single component with <h3> subsections maintains conceptual unity (it's ONE go-to-market strategy with TWO phases) while providing visual hierarchy. Nested lists under each phase header create clear association. Matches Folie 2.3 structure exactly. Aligns with 'Phased Structure' in Component Selection Matrix. Avoids breaking phases into separate components which would lose narrative flow.",
+  "cognitive_load_score": "medium",
+  "accessibility_notes": [
+    "Ensure proper heading hierarchy (h2 → h3)",
+    "Use semantic <section> tags for each phase if appropriate"
+  ],
+  "alternative_layouts": [
+    {
+      "brief": "Two separate components (one per phase)",
+      "when_to_use": "If phases are conceptually distinct enough to warrant separation"
+    }
+  ]
+}
+
+EXAMPLE 6: Icon/Emoji Enhanced List (Icon-Enhanced Layout)
+ANALYSIS:
+{
+  "content_type": "list",
+  "has_icons": true,
+  "icons_used": ["🤖", "🎓", "🔧"],
+  "key_messages": ["Three-pillar service model"],
+  "content_density": "low"
+}
+
+GOOD STRATEGY:
+{
+  "recommended_components": [
+    {
+      "type": "bullet-list",
+      "content_indices": [0, 1, 2],
+      "layout_position": "top"
+    }
+  ],
+  "component_count": 1,
+  "layout_strategy": "icon_enhanced_visual_hierarchy",
+  "styling_suggestions": [
+    "Preserve icons/emojis at start of each bullet point",
+    "Use slightly larger font-size for icons (1.2em) to increase visual impact",
+    "Ensure consistent icon placement (always at start, space after)",
+    "Icons should strengthen, not replace, the text labels"
+  ],
+  "reasoning": "Icon-enhanced content benefits from Icon-Enhanced layout strategy. Icons provide instant visual categorization and reduce cognitive load through visual mnemonic anchors. Preserving icons is critical - they transform generic list into memorable visual hierarchy (🤖=Hardware, 🎓=Training, 🔧=Service). Single component maintains simplicity while icons add richness. Low content density justified by visual nature. Matches Folie 2.1 exactly. Aligns with 'Icon/Emoji List' in Component Selection Matrix. Icons enable faster scanning and better retention.",
+  "cognitive_load_score": "low",
+  "accessibility_notes": [
+    "Ensure icons don't replace semantic meaning in text",
+    "Screen readers should read full text labels, not just icons"
+  ],
+  "alternative_layouts": []
+}
+
 ═══════════════════════════════════════════════════════════
 📤 OUTPUT FORMAT (JSON)
 ═══════════════════════════════════════════════════════════
@@ -378,11 +573,15 @@ Always respond with valid JSON in this exact structure:
 - Match content type to Component Selection Matrix
 - Respect content_density warnings from Content Analyzer
 - Prioritize image component when has_images=true
+- For phased content → Use Phased Timeline layout with <h3> sections
+- For content with sources → Recommend multi-line stat-labels with <br>
+- For icon/emoji content → Preserve icons and recommend Icon-Enhanced layout
 - Provide specific, actionable styling suggestions
 - Consider accessibility in every recommendation
 - When in doubt, simpler is better
 - Your strategy directly determines final output quality
 - Images can be powerful - use them strategically
+- Sources and temporal context build credibility - leverage them
 """
 
         user_message = f"""{style_context}
