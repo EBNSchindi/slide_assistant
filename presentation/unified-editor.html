@@ -960,6 +960,92 @@
             color: #238636;
         }
 
+        /* Variant Selector Styles */
+        .variant-selector-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .variant-main-preview {
+            width: 100%;
+            height: 500px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #30363d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8b949e;
+            font-size: 13px;
+            transition: border-color 0.2s;
+            position: relative;
+        }
+
+        .variant-main-preview.active {
+            border-color: #238636;
+            box-shadow: 0 0 0 3px rgba(35, 134, 54, 0.1);
+        }
+
+        .variant-thumbnails {
+            display: flex;
+            gap: 12px;
+        }
+
+        .variant-thumbnail {
+            flex: 1;
+            height: 200px;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 2px solid #30363d;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #8b949e;
+            position: relative;
+        }
+
+        .variant-thumbnail:hover {
+            border-color: #8b949e;
+            transform: translateY(-2px);
+        }
+
+        .variant-thumbnail.active {
+            border-color: #238636;
+            box-shadow: 0 0 0 2px rgba(35, 134, 54, 0.3);
+        }
+
+        .variant-thumbnail-label {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            z-index: 10;
+        }
+
+        .variant-inner-content {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            padding: 12px;
+        }
+
+        .variant-inner-content .slide-content {
+            padding: 16px;
+            font-size: 11px;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .editor-container {
@@ -1073,6 +1159,17 @@ Or markdown:
                         <input type="file" id="imageFileInput" accept="image/png,image/jpeg,image/jpg,image/gif,image/svg+xml" multiple style="display: none;">
                     </div>
                     <div class="image-preview-list" id="imagePreviewList"></div>
+                </div>
+
+                <!-- Generate Variants Checkbox -->
+                <div class="input-section">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="generateVariantsCheckbox" />
+                        <span>🎨 Generate Variants (3 design alternatives)</span>
+                    </label>
+                    <div style="font-size: 11px; color: #8b949e; margin-top: 6px; margin-left: 28px;">
+                        Creates 3 distinct design variants: Corporate, Modern, and Minimal
+                    </div>
                 </div>
 
                 <button class="btn primary" id="generateBtn">Generate Content</button>
@@ -1752,6 +1849,9 @@ Any specific requirements or limitations?
                         user_input: userInput.value,
                         slide_title: slideTitle.value || null,
                         image_references: imageReferences.length > 0 ? imageReferences : null,
+                        preferences: {
+                            generate_variants: document.getElementById('generateVariantsCheckbox').checked
+                        }
                     }),
                 });
 
@@ -1798,27 +1898,100 @@ Any specific requirements or limitations?
         function displayPreviews(slides) {
             let html = '';
             slides.forEach((slide, index) => {
-                html += `
-                    <div class="slide-wrapper" id="slide-${index}">
-                        <div class="slide-content">
-                            ${slide.html_content || '<p>No content generated</p>'}
+                // Check if this slide has variants
+                const hasVariants = slide.variants && slide.variants.length > 0;
+
+                if (hasVariants) {
+                    // Display variants layout
+                    html += `
+                        <div class="slide-wrapper" id="slide-${index}">
+                            <div class="slide-meta" style="background: #238636; color: white;">
+                                <strong>${slide.slide_title}</strong> | File: ${slide.slide_name} | 🎨 ${slide.variants.length} Variants
+                            </div>
+                            <div class="variant-selector-container" style="padding: 20px;">
+                                <!-- Main preview -->
+                                <div class="variant-main-preview active" id="variant-main-${index}">
+                                    <div class="variant-inner-content">
+                                        ${slide.variants[0].html_content || '<p>No content</p>'}
+                                    </div>
+                                </div>
+                                <!-- Thumbnails -->
+                                <div class="variant-thumbnails">
+                                    ${slide.variants.map((variant, vIndex) => `
+                                        <div class="variant-thumbnail ${vIndex === 0 ? 'active' : ''}"
+                                             id="variant-thumb-${index}-${vIndex}"
+                                             data-slide="${index}"
+                                             data-variant="${vIndex}"
+                                             onclick="swapVariant(${index}, ${vIndex})">
+                                            <div class="variant-thumbnail-label">${variant.profile}</div>
+                                            <div class="variant-inner-content">
+                                                ${variant.html_content || '<p>No content</p>'}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <!-- Active variant info -->
+                                <div style="text-align: center; font-size: 11px; color: #8b949e; margin-top: 8px;">
+                                    Click thumbnails to preview different variants
+                                </div>
+                            </div>
+                            <div class="slide-feedback">
+                                <input type="text"
+                                       class="feedback-input"
+                                       id="feedback-${index}"
+                                       placeholder="Feedback to regenerate (e.g., 'Make it more concise')...">
+                                <button class="regen-btn" onclick="regenerateSlide('${slide.slide_name}', ${index})">
+                                    🔄 Regenerate
+                                </button>
+                            </div>
                         </div>
-                        <div class="slide-meta">
-                            <strong>${slide.slide_title}</strong> | File: ${slide.slide_name} | Components: ${slide.components.join(', ') || 'Text'}
+                    `;
+                } else {
+                    // Display regular slide
+                    html += `
+                        <div class="slide-wrapper" id="slide-${index}">
+                            <div class="slide-content">
+                                ${slide.html_content || '<p>No content generated</p>'}
+                            </div>
+                            <div class="slide-meta">
+                                <strong>${slide.slide_title}</strong> | File: ${slide.slide_name} | Components: ${slide.components.join(', ') || 'Text'}
+                            </div>
+                            <div class="slide-feedback">
+                                <input type="text"
+                                       class="feedback-input"
+                                       id="feedback-${index}"
+                                       placeholder="Feedback to regenerate (e.g., 'Make it more concise')...">
+                                <button class="regen-btn" onclick="regenerateSlide('${slide.slide_name}', ${index})">
+                                    🔄 Regenerate
+                                </button>
+                            </div>
                         </div>
-                        <div class="slide-feedback">
-                            <input type="text"
-                                   class="feedback-input"
-                                   id="feedback-${index}"
-                                   placeholder="Feedback to regenerate (e.g., 'Make it more concise')...">
-                            <button class="regen-btn" onclick="regenerateSlide('${slide.slide_name}', ${index})">
-                                🔄 Regenerate
-                            </button>
-                        </div>
-                    </div>
-                `;
+                    `;
+                }
             });
             previewContent.innerHTML = html;
+        }
+
+        // Swap variant in main preview
+        function swapVariant(slideIndex, variantIndex) {
+            const slide = currentSlides[slideIndex];
+            if (!slide.variants || !slide.variants[variantIndex]) return;
+
+            const mainPreview = document.getElementById(`variant-main-${slideIndex}`);
+            const selectedVariant = slide.variants[variantIndex];
+
+            // Update main preview content
+            mainPreview.innerHTML = `
+                <div class="variant-inner-content">
+                    ${selectedVariant.html_content || '<p>No content</p>'}
+                </div>
+            `;
+
+            // Update active thumbnail indicators
+            document.querySelectorAll(`[data-slide="${slideIndex}"]`).forEach(thumb => {
+                thumb.classList.remove('active');
+            });
+            document.getElementById(`variant-thumb-${slideIndex}-${variantIndex}`).classList.add('active');
         }
 
         // Initialize resize handle

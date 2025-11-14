@@ -1,0 +1,33 @@
+{
+  "slide_name": "test-variant-slide",
+  "created_at": "2025-11-14T14:22:03.930463",
+  "variants": [
+    {
+      "profile": "corporate",
+      "components_used": [
+        "bullet-list",
+        "text"
+      ],
+      "html_path": "html/test-variant-slide_corporate.html",
+      "markdown_path": "markdown/optimized/test-variant-slide_corporate.md"
+    },
+    {
+      "profile": "modern",
+      "components_used": [
+        "bullet-list",
+        "text"
+      ],
+      "html_path": "html/test-variant-slide_modern.html",
+      "markdown_path": "markdown/optimized/test-variant-slide_modern.md"
+    },
+    {
+      "profile": "minimal",
+      "components_used": [
+        "bullet-list",
+        "text"
+      ],
+      "html_path": "html/test-variant-slide_minimal.html",
+      "markdown_path": "markdown/optimized/test-variant-slide_minimal.md"
+    }
+  ]
+}

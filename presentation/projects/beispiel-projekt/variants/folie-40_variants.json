@@ -1,0 +1,30 @@
+{
+  "slide_name": "folie-40",
+  "created_at": "2025-11-14T14:48:44.314583",
+  "variants": [
+    {
+      "profile": "corporate",
+      "components_used": [
+        "image"
+      ],
+      "html_path": "html/folie-40_corporate.html",
+      "markdown_path": "markdown/optimized/folie-40_corporate.md"
+    },
+    {
+      "profile": "modern",
+      "components_used": [
+        "image"
+      ],
+      "html_path": "html/folie-40_modern.html",
+      "markdown_path": "markdown/optimized/folie-40_modern.md"
+    },
+    {
+      "profile": "minimal",
+      "components_used": [
+        "image"
+      ],
+      "html_path": "html/folie-40_minimal.html",
+      "markdown_path": "markdown/optimized/folie-40_minimal.md"
+    }
+  ]
+}
