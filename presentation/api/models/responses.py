@@ -10,6 +10,14 @@ class AgentStep(BaseModel):
     error: Optional[str] = None
 
 
+class ComponentVariant(BaseModel):
+    """Single variant of a component"""
+    profile: str  # "corporate", "modern", "minimal"
+    html_content: str
+    markdown_content: str
+    components_used: List[str] = []
+
+
 class GeneratedSlide(BaseModel):
     """Generated slide with markdown and HTML"""
     slide_name: str
@@ -19,6 +27,7 @@ class GeneratedSlide(BaseModel):
     components: List[str] = []
     html_content: Optional[str] = None
     markdown_content: Optional[str] = None
+    variants: Optional[List[ComponentVariant]] = None  # List of 3 variants if generated
 
 
 class GenerateContentResponse(BaseModel):

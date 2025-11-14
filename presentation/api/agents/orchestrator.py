@@ -19,7 +19,7 @@ else:
     from .presentation_strategist import PresentationStrategistAgent
     from .content_generator import ContentGeneratorAgent
 
-from services import StyleParser, FileService, ProjectService
+from services import StyleParser, FileService, ProjectService, VariantStyleParser
 
 
 class AgentOrchestrator:
@@ -115,11 +115,33 @@ class AgentOrchestrator:
             }
             steps.append(step3)
 
+            # Check if variant generation is requested
+            generate_variants = preferences.get("generate_variants", False) if preferences else False
+            variant_profiles = None
+
+            if generate_variants:
+                # Load variant profiles from style guide
+                variant_parser = VariantStyleParser()
+                variant_profiles = variant_parser.parse_variant_profiles()
+                print(f"✅ Variant generation enabled! Loaded {len(variant_profiles)} profiles")
+
             generated = self.content_generator.generate(
-                analysis, strategy, style_guide, slide_title or "Folie", "", image_references, project_name
+                analysis,
+                strategy,
+                style_guide,
+                slide_title or "Folie",
+                "",
+                image_references,
+                project_name,
+                generate_variants=generate_variants,
+                variant_profiles=variant_profiles,
             )
             step3["status"] = "completed"
-            step3["output"] = f"Generated {generated.get('component_count', 1)} components"
+
+            if generate_variants and "variants" in generated:
+                step3["output"] = f"Generated {len(generated.get('variants', []))} design variants"
+            else:
+                step3["output"] = f"Generated {generated.get('component_count', 1)} components"
 
             # Step 5: Save Files
             file_service = FileService(project_path)
@@ -128,22 +150,54 @@ class AgentOrchestrator:
                 slide_title or f"folie-{len(file_service.list_slides()['markdown']) + 1}"
             )
 
-            markdown_path = file_service.save_markdown_slide(
-                slide_name, generated.get("markdown", "")
-            )
-            html_path = file_service.save_html_slide(
-                slide_name, generated.get("html", "")
-            )
+            # Handle variant generation differently
+            if generate_variants and "variants" in generated:
+                # Save all 3 variants
+                variants_data = generated.get("variants", [])
+                save_result = file_service.save_slide_variants(slide_name, variants_data)
 
-            slide_result = {
-                "slide_name": slide_name,
-                "slide_title": slide_title or slide_name,
-                "markdown_path": markdown_path,
-                "html_path": html_path,
-                "components": generated.get("components_used", []),
-                "html_content": generated.get("html", ""),
-                "markdown_content": generated.get("markdown", ""),
-            }
+                # Use first variant as the "default" for paths
+                first_variant = variants_data[0] if variants_data else {}
+                markdown_path = save_result["markdown_paths"][0] if save_result["markdown_paths"] else ""
+                html_path = save_result["html_paths"][0] if save_result["html_paths"] else ""
+
+                slide_result = {
+                    "slide_name": slide_name,
+                    "slide_title": slide_title or slide_name,
+                    "markdown_path": markdown_path,
+                    "html_path": html_path,
+                    "components": first_variant.get("components_used", []),
+                    "html_content": first_variant.get("html_content", ""),
+                    "markdown_content": first_variant.get("markdown_content", ""),
+                    "variants": [
+                        {
+                            "profile": v.get("profile"),
+                            "html_content": v.get("html_content"),
+                            "markdown_content": v.get("markdown_content"),
+                            "components_used": v.get("components_used", []),
+                        }
+                        for v in variants_data
+                    ],
+                }
+            else:
+                # Standard single-version save
+                markdown_path = file_service.save_markdown_slide(
+                    slide_name, generated.get("markdown", "")
+                )
+                html_path = file_service.save_html_slide(
+                    slide_name, generated.get("html", "")
+                )
+
+                slide_result = {
+                    "slide_name": slide_name,
+                    "slide_title": slide_title or slide_name,
+                    "markdown_path": markdown_path,
+                    "html_path": html_path,
+                    "components": generated.get("components_used", []),
+                    "html_content": generated.get("html", ""),
+                    "markdown_content": generated.get("markdown", ""),
+                }
+
             slides.append(slide_result)
 
             return {
