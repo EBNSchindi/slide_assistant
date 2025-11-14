@@ -2,16 +2,18 @@
 Content Analyzer Agent - Analyzes user input and structures it
 """
 from openai import OpenAI
+from .schemas import ContentAnalysis
 
 
 class ContentAnalyzerAgent:
     """Analyzes and structures user input"""
 
-    def __init__(self, api_key: str, model: str = "gpt-4o", reasoning_effort: str = "medium", verbosity: str = "medium"):
+    def __init__(self, api_key: str, model: str = "gpt-4o", reasoning_effort: str = "medium", verbosity: str = "medium", use_structured_outputs: bool = False):
         self.client = OpenAI(api_key=api_key)
         self.model = model
         self.reasoning_effort = reasoning_effort  # For GPT-5: minimal|low|medium|high
         self.verbosity = verbosity  # For GPT-5: minimal|low|medium|high
+        self.use_structured_outputs = use_structured_outputs  # Use Pydantic schemas for type safety
         self.system_prompt = """
 ═══════════════════════════════════════════════════════════
 🎯 AGENT IDENTITY & ROLE
@@ -445,29 +447,55 @@ Always respond with valid JSON in this exact structure:
 {user_input}"""
 
         try:
-            # Build API call parameters
-            api_params = {
-                "model": self.model,
-                "messages": [
-                    {"role": "system", "content": self.system_prompt},
-                    {"role": "user", "content": user_message},
-                ],
-                "temperature": 0.7,
-                "response_format": {"type": "json_object"},
-            }
-
-            # Add GPT-5 specific controls if using GPT-5 models
-            if "gpt-5" in self.model.lower():
-                api_params["extra_body"] = {
-                    "reasoning_effort": self.reasoning_effort,
-                    "verbosity": self.verbosity,
+            # Use Pydantic Structured Outputs if enabled (type-safe)
+            if self.use_structured_outputs:
+                api_params = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": self.system_prompt},
+                        {"role": "user", "content": user_message},
+                    ],
+                    "temperature": 0.7,
                 }
 
-            response = self.client.chat.completions.create(**api_params)
+                # Add GPT-5 specific controls if using GPT-5 models
+                if "gpt-5" in self.model.lower():
+                    api_params["extra_body"] = {
+                        "reasoning_effort": self.reasoning_effort,
+                        "verbosity": self.verbosity,
+                    }
 
-            import json
-            analysis = json.loads(response.choices[0].message.content)
-            return analysis
+                completion = self.client.beta.chat.completions.parse(
+                    **api_params,
+                    response_format=ContentAnalysis,
+                )
+                analysis = completion.choices[0].message.parsed
+                return analysis.model_dump()
+
+            # Fallback: JSON mode (backwards compatible)
+            else:
+                api_params = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": self.system_prompt},
+                        {"role": "user", "content": user_message},
+                    ],
+                    "temperature": 0.7,
+                    "response_format": {"type": "json_object"},
+                }
+
+                # Add GPT-5 specific controls if using GPT-5 models
+                if "gpt-5" in self.model.lower():
+                    api_params["extra_body"] = {
+                        "reasoning_effort": self.reasoning_effort,
+                        "verbosity": self.verbosity,
+                    }
+
+                response = self.client.chat.completions.create(**api_params)
+
+                import json
+                analysis = json.loads(response.choices[0].message.content)
+                return analysis
 
         except Exception as e:
             raise Exception(f"Content Analyzer error: {str(e)}")

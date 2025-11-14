@@ -3,16 +3,18 @@ Presentation Strategist Agent - Recommends optimal presentation strategy
 """
 from openai import OpenAI
 import json
+from .schemas import PresentationStrategy
 
 
 class PresentationStrategistAgent:
     """Recommends optimal presentation strategy based on content and style"""
 
-    def __init__(self, api_key: str, model: str = "gpt-4o", reasoning_effort: str = "high", verbosity: str = "medium"):
+    def __init__(self, api_key: str, model: str = "gpt-4o", reasoning_effort: str = "high", verbosity: str = "medium", use_structured_outputs: bool = False):
         self.client = OpenAI(api_key=api_key)
         self.model = model
         self.reasoning_effort = reasoning_effort  # For GPT-5: minimal|low|medium|high (default high for strategy)
         self.verbosity = verbosity  # For GPT-5: minimal|low|medium|high
+        self.use_structured_outputs = use_structured_outputs  # Use Pydantic schemas for type safety
 
     def recommend(
         self, analysis: dict, style_guide: dict, preferences: dict = None
@@ -597,28 +599,54 @@ Always respond with valid JSON in this exact structure:
 Please recommend the optimal presentation strategy for this content."""
 
         try:
-            # Build API call parameters
-            api_params = {
-                "model": self.model,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_message},
-                ],
-                "temperature": 0.6,
-                "response_format": {"type": "json_object"},
-            }
-
-            # Add GPT-5 specific controls if using GPT-5 models
-            if "gpt-5" in self.model.lower():
-                api_params["extra_body"] = {
-                    "reasoning_effort": self.reasoning_effort,
-                    "verbosity": self.verbosity,
+            # Use Pydantic Structured Outputs if enabled (type-safe)
+            if self.use_structured_outputs:
+                api_params = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message},
+                    ],
+                    "temperature": 0.6,
                 }
 
-            response = self.client.chat.completions.create(**api_params)
+                # Add GPT-5 specific controls if using GPT-5 models
+                if "gpt-5" in self.model.lower():
+                    api_params["extra_body"] = {
+                        "reasoning_effort": self.reasoning_effort,
+                        "verbosity": self.verbosity,
+                    }
 
-            strategy = json.loads(response.choices[0].message.content)
-            return strategy
+                completion = self.client.beta.chat.completions.parse(
+                    **api_params,
+                    response_format=PresentationStrategy,
+                )
+                strategy = completion.choices[0].message.parsed
+                return strategy.model_dump()
+
+            # Fallback: JSON mode (backwards compatible)
+            else:
+                api_params = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message},
+                    ],
+                    "temperature": 0.6,
+                    "response_format": {"type": "json_object"},
+                }
+
+                # Add GPT-5 specific controls if using GPT-5 models
+                if "gpt-5" in self.model.lower():
+                    api_params["extra_body"] = {
+                        "reasoning_effort": self.reasoning_effort,
+                        "verbosity": self.verbosity,
+                    }
+
+                response = self.client.chat.completions.create(**api_params)
+
+                strategy = json.loads(response.choices[0].message.content)
+                return strategy
 
         except Exception as e:
             raise Exception(f"Presentation Strategist error: {str(e)}")

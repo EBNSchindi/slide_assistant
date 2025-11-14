@@ -25,7 +25,7 @@ from services import StyleParser, FileService, ProjectService, VariantStyleParse
 class AgentOrchestrator:
     """Orchestrates the multi-agent content generation pipeline"""
 
-    def __init__(self, api_key: str = None, model: str = "gpt-4o", test_mode: bool = False, reasoning_effort: str = None, verbosity: str = None):
+    def __init__(self, api_key: str = None, model: str = "gpt-4o", test_mode: bool = False, reasoning_effort: str = None, verbosity: str = None, use_structured_outputs: bool = False):
         self.api_key = api_key
         self.model = model
         self.test_mode = test_mode or TEST_MODE
@@ -37,10 +37,25 @@ class AgentOrchestrator:
         if verbosity is None:
             verbosity = "medium"
 
-        # Initialize agents with GPT-5 controls
-        self.content_analyzer = ContentAnalyzerAgent(api_key, model, reasoning_effort=reasoning_effort, verbosity=verbosity)
-        self.presentation_strategist = PresentationStrategistAgent(api_key, model, reasoning_effort="high", verbosity=verbosity)  # Strategy needs high reasoning
-        self.content_generator = ContentGeneratorAgent(api_key, model, reasoning_effort=reasoning_effort, verbosity=verbosity)
+        # Initialize agents with GPT-5 controls and optional Pydantic schemas
+        self.content_analyzer = ContentAnalyzerAgent(
+            api_key, model,
+            reasoning_effort=reasoning_effort,
+            verbosity=verbosity,
+            use_structured_outputs=use_structured_outputs
+        )
+        self.presentation_strategist = PresentationStrategistAgent(
+            api_key, model,
+            reasoning_effort="high",  # Strategy needs high reasoning
+            verbosity=verbosity,
+            use_structured_outputs=use_structured_outputs
+        )
+        self.content_generator = ContentGeneratorAgent(
+            api_key, model,
+            reasoning_effort=reasoning_effort,
+            verbosity=verbosity,
+            use_structured_outputs=use_structured_outputs
+        )
 
     def process(
         self,
