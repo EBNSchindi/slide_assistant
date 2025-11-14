@@ -677,6 +677,113 @@
             border-color: #f85149;
         }
 
+        /* Image Upload Styles */
+        .image-upload-zone {
+            border: 2px dashed #30363d;
+            border-radius: 6px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #0d1117;
+        }
+
+        .image-upload-zone:hover {
+            border-color: #238636;
+            background: #161b22;
+        }
+
+        .image-upload-zone.drag-over {
+            border-color: #238636;
+            background: rgba(35, 134, 54, 0.1);
+        }
+
+        .upload-zone-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .upload-zone-text {
+            font-size: 13px;
+            color: #c9d1d9;
+            margin-bottom: 4px;
+        }
+
+        .upload-zone-subtext {
+            font-size: 11px;
+            color: #8b949e;
+        }
+
+        .image-preview-list {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .image-preview-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .image-preview-item:hover {
+            background: #161b22;
+            border-color: #8b949e;
+        }
+
+        .image-preview-thumb {
+            width: 48px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: #21262d;
+        }
+
+        .image-preview-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .image-preview-name {
+            font-size: 12px;
+            color: #c9d1d9;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .image-preview-meta {
+            font-size: 10px;
+            color: #8b949e;
+            margin-top: 2px;
+        }
+
+        .image-preview-remove {
+            background: #da3633;
+            border: none;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .image-preview-remove:hover {
+            background: #f85149;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .editor-container {
@@ -757,6 +864,18 @@ Or markdown:
 # Team
 - Expert 1
 - Expert 2"></textarea>
+                </div>
+
+                <!-- Image Upload Section -->
+                <div class="input-section">
+                    <label class="input-label">Images (Optional)</label>
+                    <div class="image-upload-zone" id="imageUploadZone">
+                        <div class="upload-zone-icon">📁</div>
+                        <div class="upload-zone-text">Drag & drop images here</div>
+                        <div class="upload-zone-subtext">or click to browse</div>
+                        <input type="file" id="imageFileInput" accept="image/png,image/jpeg,image/jpg,image/gif,image/svg+xml" multiple style="display: none;">
+                    </div>
+                    <div class="image-preview-list" id="imagePreviewList"></div>
                 </div>
 
                 <button class="btn primary" id="generateBtn">Generate Content</button>
@@ -940,6 +1059,7 @@ Any specific requirements or limitations?
         let currentStyle = DEFAULT_STYLE;
         let isGenerating = false;
         let currentSlides = [];
+        let uploadedImages = []; // Tracks uploaded images for the current session
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
@@ -1005,6 +1125,9 @@ Any specific requirements or limitations?
                 currentProject = e.target.value;
                 if (currentProject) {
                     loadProjectStyles(currentProject);
+                    // Clear images when switching projects
+                    uploadedImages = [];
+                    renderImagePreviews();
                 }
             });
 
@@ -1080,6 +1203,187 @@ Any specific requirements or limitations?
                     });
                 }
             });
+
+            // Setup image upload handlers
+            setupImageUploadHandlers();
+        }
+
+        // === Image Upload Functions ===
+        function setupImageUploadHandlers() {
+            const uploadZone = document.getElementById('imageUploadZone');
+            const fileInput = document.getElementById('imageFileInput');
+
+            // Click to browse
+            uploadZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // File selection
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(Array.from(e.target.files));
+                fileInput.value = ''; // Reset for re-upload
+            });
+
+            // Drag & drop events
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('drag-over');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('drag-over');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('drag-over');
+
+                const files = Array.from(e.dataTransfer.files).filter(file =>
+                    file.type.startsWith('image/')
+                );
+
+                if (files.length > 0) {
+                    handleFiles(files);
+                }
+            });
+        }
+
+        // Handle selected files
+        async function handleFiles(files) {
+            if (!currentProject) {
+                alert('Please select a project first');
+                return;
+            }
+
+            for (const file of files) {
+                await uploadImage(file);
+            }
+        }
+
+        // Upload a single image
+        async function uploadImage(file) {
+            // Validate file size (5MB)
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert(`File "${file.name}" is too large. Max size: 5MB`);
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/svg+xml'];
+            if (!allowedTypes.includes(file.type)) {
+                alert(`File "${file.name}" has invalid type. Allowed: PNG, JPG, GIF, SVG`);
+                return;
+            }
+
+            // Add temporary preview
+            const tempId = Date.now();
+            addImagePreview({
+                id: tempId,
+                filename: file.name,
+                size: file.size,
+                uploading: true,
+                url: URL.createObjectURL(file)
+            });
+
+            try {
+                // Upload to server
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch(`${API_BASE}/projects/${currentProject}/upload-image`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Upload failed');
+                }
+
+                // Update preview with server data
+                const tempIndex = uploadedImages.findIndex(img => img.id === tempId);
+                if (tempIndex !== -1) {
+                    uploadedImages[tempIndex] = {
+                        id: tempId,
+                        filename: data.filename,
+                        original_filename: data.original_filename,
+                        relative_path: data.relative_path,
+                        size: data.file_size,
+                        content_type: data.content_type,
+                        url: `projects/${currentProject}/${data.relative_path}`,
+                        uploading: false
+                    };
+                }
+
+                renderImagePreviews();
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert(`Failed to upload "${file.name}": ${error.message}`);
+
+                // Remove temporary preview
+                uploadedImages = uploadedImages.filter(img => img.id !== tempId);
+                renderImagePreviews();
+            }
+        }
+
+        // Add image preview (temporary)
+        function addImagePreview(imageData) {
+            uploadedImages.push(imageData);
+            renderImagePreviews();
+        }
+
+        // Render all image previews
+        function renderImagePreviews() {
+            const previewList = document.getElementById('imagePreviewList');
+
+            if (uploadedImages.length === 0) {
+                previewList.innerHTML = '';
+                return;
+            }
+
+            previewList.innerHTML = uploadedImages.map(img => {
+                const sizeMB = (img.size / 1024 / 1024).toFixed(2);
+                const displayName = img.original_filename || img.filename;
+
+                return `
+                    <div class="image-preview-item" data-id="${img.id}">
+                        <img src="${img.url}" alt="${displayName}" class="image-preview-thumb" />
+                        <div class="image-preview-info">
+                            <div class="image-preview-name">${displayName}</div>
+                            <div class="image-preview-meta">
+                                ${sizeMB} MB${img.uploading ? ' • Uploading...' : ' • Ready'}
+                            </div>
+                        </div>
+                        ${!img.uploading ? `<button class="image-preview-remove" onclick="removeImage(${img.id})" title="Remove">×</button>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Remove an image
+        async function removeImage(imageId) {
+            const image = uploadedImages.find(img => img.id === imageId);
+            if (!image) return;
+
+            try {
+                // Delete from server
+                if (image.filename) {
+                    await fetch(`${API_BASE}/projects/${currentProject}/images/${image.filename}`, {
+                        method: 'DELETE'
+                    });
+                }
+
+                // Remove from local list
+                uploadedImages = uploadedImages.filter(img => img.id !== imageId);
+                renderImagePreviews();
+
+            } catch (error) {
+                console.error('Failed to delete image:', error);
+                alert('Failed to delete image');
+            }
         }
 
         // Generate content
@@ -1100,6 +1404,11 @@ Any specific requirements or limitations?
             agentStepsPanel.innerHTML = '';
 
             try {
+                // Prepare image references
+                const imageReferences = uploadedImages
+                    .filter(img => !img.uploading)
+                    .map(img => img.filename);
+
                 const response = await fetch(`${API_BASE}/generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1107,6 +1416,7 @@ Any specific requirements or limitations?
                         project_name: currentProject,
                         user_input: userInput.value,
                         slide_title: slideTitle.value || null,
+                        image_references: imageReferences.length > 0 ? imageReferences : null,
                     }),
                 });
 
