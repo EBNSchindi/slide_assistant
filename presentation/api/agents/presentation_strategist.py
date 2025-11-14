@@ -8,9 +8,11 @@ import json
 class PresentationStrategistAgent:
     """Recommends optimal presentation strategy based on content and style"""
 
-    def __init__(self, api_key: str, model: str = "gpt-4o"):
+    def __init__(self, api_key: str, model: str = "gpt-4o", reasoning_effort: str = "high", verbosity: str = "medium"):
         self.client = OpenAI(api_key=api_key)
         self.model = model
+        self.reasoning_effort = reasoning_effort  # For GPT-5: minimal|low|medium|high (default high for strategy)
+        self.verbosity = verbosity  # For GPT-5: minimal|low|medium|high
 
     def recommend(
         self, analysis: dict, style_guide: dict, preferences: dict = None
@@ -22,10 +24,14 @@ class PresentationStrategistAgent:
 - Secondary Colors: {style_guide.get('secondary_colors', [])}
 - Font Family: {style_guide.get('font_family', 'sans-serif')}
 - Available Components: {', '.join(style_guide.get('available_components', []))}
-- Spacing Scale: {style_guide.get('spacing_scale', [])}
+- Spacing Scale: {style_guide.get('spacing_scale', ['16px', '24px', '32px', '48px'])}
+- Border Radius: {style_guide.get('border_radius', '6px')}
+- Badge Colors: {style_guide.get('badge_colors', {'success': '#238636', 'warning': '#bf8700', 'danger': '#d1242f'})}
 
 Design Guide Context:
-{style_guide.get('design_guide', 'No specific design guide available')}"""
+{style_guide.get('design_guide', 'No specific design guide available')}
+
+IMPORTANT: Use the values from this style guide consistently. Do not hardcode design values that should come from the style guide."""
 
         content_context = f"""Content Analysis:
 - Type: {analysis.get('content_type', 'mixed')}
@@ -591,15 +597,25 @@ Always respond with valid JSON in this exact structure:
 Please recommend the optimal presentation strategy for this content."""
 
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
+            # Build API call parameters
+            api_params = {
+                "model": self.model,
+                "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_message},
                 ],
-                temperature=0.6,
-                response_format={"type": "json_object"},
-            )
+                "temperature": 0.6,
+                "response_format": {"type": "json_object"},
+            }
+
+            # Add GPT-5 specific controls if using GPT-5 models
+            if "gpt-5" in self.model.lower():
+                api_params["extra_body"] = {
+                    "reasoning_effort": self.reasoning_effort,
+                    "verbosity": self.verbosity,
+                }
+
+            response = self.client.chat.completions.create(**api_params)
 
             strategy = json.loads(response.choices[0].message.content)
             return strategy

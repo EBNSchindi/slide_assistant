@@ -7,9 +7,11 @@ from openai import OpenAI
 class ContentAnalyzerAgent:
     """Analyzes and structures user input"""
 
-    def __init__(self, api_key: str, model: str = "gpt-4o"):
+    def __init__(self, api_key: str, model: str = "gpt-4o", reasoning_effort: str = "medium", verbosity: str = "medium"):
         self.client = OpenAI(api_key=api_key)
         self.model = model
+        self.reasoning_effort = reasoning_effort  # For GPT-5: minimal|low|medium|high
+        self.verbosity = verbosity  # For GPT-5: minimal|low|medium|high
         self.system_prompt = """
 ═══════════════════════════════════════════════════════════
 🎯 AGENT IDENTITY & ROLE
@@ -443,15 +445,25 @@ Always respond with valid JSON in this exact structure:
 {user_input}"""
 
         try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
+            # Build API call parameters
+            api_params = {
+                "model": self.model,
+                "messages": [
                     {"role": "system", "content": self.system_prompt},
                     {"role": "user", "content": user_message},
                 ],
-                temperature=0.7,
-                response_format={"type": "json_object"},
-            )
+                "temperature": 0.7,
+                "response_format": {"type": "json_object"},
+            }
+
+            # Add GPT-5 specific controls if using GPT-5 models
+            if "gpt-5" in self.model.lower():
+                api_params["extra_body"] = {
+                    "reasoning_effort": self.reasoning_effort,
+                    "verbosity": self.verbosity,
+                }
+
+            response = self.client.chat.completions.create(**api_params)
 
             import json
             analysis = json.loads(response.choices[0].message.content)
