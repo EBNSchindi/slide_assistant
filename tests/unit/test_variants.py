@@ -3,15 +3,16 @@ Quick test script to verify variant generation works
 """
 import sys
 import os
+from pathlib import Path
 
 # Set TEST_MODE before any imports
 os.environ["TEST_MODE"] = "true"
 
-# Add parent directory to path
-sys.path.insert(0, os.path.dirname(__file__))
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from agents import AgentOrchestrator
-from services import VariantStyleParser
+from presentation.api.agents import AgentOrchestrator
+from presentation.api.services import VariantStyleParser
 
 # Test 1: Verify VariantStyleParser works
 print("=" * 50)
@@ -32,9 +33,13 @@ print("=" * 50)
 # Test 2: Test variant generation
 orchestrator = AgentOrchestrator(api_key="test", model="mock", test_mode=True)
 
+# Get project root directory dynamically
+project_root = Path(__file__).parent.parent.parent
+test_project_path = project_root / "presentation" / "projects" / "beispiel-projekt"
+
 result = orchestrator.process(
     user_input="Test content for variant generation",
-    project_path="/home/ubuntudani/Projects/slides_helper/presentation/projects/beispiel-projekt",
+    project_path=str(test_project_path),
     project_name="beispiel-projekt",
     slide_title="test-variant-slide",
     preferences={"generate_variants": True},
