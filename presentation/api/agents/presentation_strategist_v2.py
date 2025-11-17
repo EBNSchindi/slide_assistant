@@ -91,8 +91,10 @@ DO NOT: Generate text, HTML, or styling details. Just plan structure.
 
 7. table
    Purpose: Comparison or structured data
-   Best for: Complex structured data
+   Best for: ContentBlock type MARKDOWN_TABLE (pipe-separated markdown tables)
    Constraints: Max 5 rows × 5 columns
+   **CRITICAL**: When ContentBlock has type "markdown_table", ALWAYS use "table" component type
+   Do NOT convert markdown tables to stat-grid or other types
 
 ═══════════════════════════════════════════════════════════
 📐 LAYOUT PATTERNS
@@ -158,8 +160,15 @@ If no images: ImageSlot is null for all components
 💡 DECISION RULES
 ═══════════════════════════════════════════════════════════
 
+**🔴 MARKDOWN_TABLE (CRITICAL RULE):**
+→ If ANY ContentBlock has type "markdown_table":
+→ ALWAYS use "table" component type
+→ NEVER convert to stat-grid or other types
+→ Single table layout or multiple tables in two_row/three_component
+
 STATISTICS (2-6 metrics):
 → Use stat-grid in single component layout
+→ Do NOT use for markdown tables (use "table" component instead)
 
 MANY BULLETS (5+):
 → Use bullet-list, max 5-6 per component

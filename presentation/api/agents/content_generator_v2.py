@@ -92,6 +92,12 @@ table:
 - Use for: Product comparisons, feature matrices, pricing, specs, roadmaps
 - Include table_headers (array of column names)
 - Include table_rows (2D array: [[row1_col1, row1_col2], [row2_col1, row2_col2]])
+
+- **🔴 CRITICAL - ContentBlock type "markdown_table":**
+  * Agent 1 (ContentAnalyzer) detects markdown tables and marks them as type: "markdown_table"
+  * When you see content_block type = "markdown_table", the content field contains the FULL raw markdown
+  * ALWAYS output component type: "table" (not stat-grid, not bullets)
+
 - MARKDOWN TABLE PARSING (CRITICAL):
   * If input contains markdown table (with pipes |), PARSE it:
     - Extract headers from first row: | Header 1 | Header 2 |
