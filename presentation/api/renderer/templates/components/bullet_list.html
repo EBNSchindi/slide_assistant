@@ -1,0 +1,17 @@
+{# Bullet List Component Template #}
+<div class="component bullet-list bullet-style-{{ component.content.style }}" id="{{ component.component_id }}">
+  {% if component.content.title %}
+  <h3 class="bullet-list-title">{{ component.content.title }}</h3>
+  {% endif %}
+
+  <ul class="bullet-items">
+    {% for item in component.content.items %}
+    <li class="bullet-item level-{{ item.level }} {% if item.emphasis %}bullet-emphasis{% endif %}">
+      {% if item.icon %}
+      <span class="bullet-icon">{{ item.icon }}</span>
+      {% endif %}
+      <span class="bullet-text">{{ item.text }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+</div>

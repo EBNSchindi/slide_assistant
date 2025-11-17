@@ -1,0 +1,20 @@
+{# Stat Grid Component Template #}
+<div class="component stat-grid" id="{{ component.component_id }}">
+  {% if component.content.title %}
+  <h3 class="stat-grid-title">{{ component.content.title }}</h3>
+  {% endif %}
+
+  <div class="stat-grid-items layout-{{ component.content.layout }}">
+    {% for item in component.content.items %}
+    <div class="stat-item {% if item.emphasis %}stat-item-emphasis{% endif %}">
+      <div class="stat-value">
+        {{ item.value }}{% if item.unit %}<span class="stat-unit">{{ item.unit }}</span>{% endif %}
+      </div>
+      <div class="stat-label">{{ item.label }}</div>
+      {% if item.sublabel %}
+      <div class="stat-sublabel">{{ item.sublabel }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>

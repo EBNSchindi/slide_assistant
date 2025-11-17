@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block layout %}
+<div class="layout-two-column">
+  <div class="layout-header">
+    <h1 class="slide-title">{{ title }}</h1>
+    {% if subtitle %}
+    <h2 class="slide-subtitle">{{ subtitle }}</h2>
+    {% endif %}
+  </div>
+
+  <div class="layout-content">
+    <div class="column column-left">
+      {{ components[0] | safe }}
+    </div>
+
+    <div class="column column-right">
+      {{ components[1] | safe }}
+    </div>
+  </div>
+</div>
+{% endblock %}

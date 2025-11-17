@@ -1,0 +1,23 @@
+{# Text Block Component Template #}
+<div class="component text-block text-align-{{ component.content.text_align }}" id="{{ component.component_id }}">
+  {% if component.content.title %}
+  <h3 class="text-block-title">{{ component.content.title }}</h3>
+  {% endif %}
+
+  <div class="text-block-content">
+    {% for paragraph in component.content.paragraphs %}
+    <p class="text-paragraph">
+      {% if component.content.emphasis_phrases %}
+        {# Apply emphasis to specific phrases #}
+        {% set para = paragraph %}
+        {% for phrase in component.content.emphasis_phrases %}
+          {% set para = para.replace(phrase, '<strong>' + phrase + '</strong>') %}
+        {% endfor %}
+        {{ para | safe }}
+      {% else %}
+        {{ paragraph }}
+      {% endif %}
+    </p>
+    {% endfor %}
+  </div>
+</div>

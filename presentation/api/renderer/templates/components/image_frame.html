@@ -1,0 +1,89 @@
+{# Image Frame Component Template #}
+<div class="component image-frame frame-variant-{{ component.content.frame_variant }}" id="{{ component.component_id }}">
+
+  {# Title (if not overlay) #}
+  {% if component.content.title and not component.content.overlay_text %}
+  <h3 class="image-title">{{ component.content.title }}</h3>
+  {% endif %}
+
+  {# Single Image Variant #}
+  {% if component.content.frame_variant == 'single' %}
+  <div class="image-container aspect-ratio-{{ component.content.aspect_ratio | replace(':', '-') }}">
+    <img
+      src="{{ component.content.image_path }}"
+      alt="{{ component.content.alt_text }}"
+      class="frame-image"
+      loading="lazy"
+    />
+    {% if component.content.overlay_text and component.content.title %}
+    <div class="image-overlay">
+      <h3 class="overlay-title">{{ component.content.title }}</h3>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if component.content.caption %}
+  <p class="image-caption">{{ component.content.caption }}</p>
+  {% endif %}
+  {% endif %}
+
+  {# Gallery 2 Variant #}
+  {% if component.content.frame_variant == 'gallery_2' %}
+  <div class="gallery-grid gallery-2">
+    {% for img in component.content.images %}
+    <div class="gallery-item">
+      <div class="image-container aspect-ratio-{{ component.content.aspect_ratio | replace(':', '-') }}">
+        <img
+          src="{{ img.image_path }}"
+          alt="{{ img.alt_text }}"
+          class="frame-image"
+          loading="lazy"
+        />
+      </div>
+      {% if img.caption %}
+      <p class="image-caption">{{ img.caption }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Gallery 3 Variant #}
+  {% if component.content.frame_variant == 'gallery_3' %}
+  <div class="gallery-grid gallery-3">
+    {% for img in component.content.images %}
+    <div class="gallery-item">
+      <div class="image-container aspect-ratio-{{ component.content.aspect_ratio | replace(':', '-') }}">
+        <img
+          src="{{ img.image_path }}"
+          alt="{{ img.alt_text }}"
+          class="frame-image"
+          loading="lazy"
+        />
+      </div>
+      {% if img.caption %}
+      <p class="image-caption">{{ img.caption }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Fullwidth Variant #}
+  {% if component.content.frame_variant == 'fullwidth' %}
+  <div class="image-container fullwidth aspect-ratio-{{ component.content.aspect_ratio | replace(':', '-') }}">
+    <img
+      src="{{ component.content.image_path }}"
+      alt="{{ component.content.alt_text }}"
+      class="frame-image"
+      loading="lazy"
+    />
+    {% if component.content.overlay_text and component.content.title %}
+    <div class="image-overlay">
+      <h3 class="overlay-title">{{ component.content.title }}</h3>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }}</title>
+
+  {# Theme CSS - relative path from project root #}
+  <link rel="stylesheet" href="../../styles/{{ theme }}/style.css">
+
+  {# Additional CSS can be added here #}
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="slide-view theme-{{ theme }}">
+  <div class="slide-container" id="{{ slide_id }}">
+    {% block layout %}
+    {# Layout templates extend this block #}
+    {% endblock %}
+  </div>
+
+  {# Optional metadata footer for debugging #}
+  {% if metadata and metadata.notes %}
+  <!--
+  Blueprint Metadata:
+  Created: {{ metadata.created_at }}
+  Method: {{ metadata.created_by }}
+  Density: {{ metadata.content_density }}
+  Schema: v{{ schema_version }}
+  -->
+  {% endif %}
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

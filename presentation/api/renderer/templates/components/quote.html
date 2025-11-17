@@ -1,0 +1,23 @@
+{# Quote Component Template #}
+<div class="component quote quote-style-{{ component.content.style }}" id="{{ component.component_id }}">
+  <blockquote class="quote-text">
+    "{{ component.content.quote_text }}"
+  </blockquote>
+
+  {% if component.content.author or component.content.author_title or component.content.source %}
+  <div class="quote-attribution">
+    {% if component.content.author %}
+    <p class="quote-author">
+      — {{ component.content.author }}
+      {% if component.content.author_title %}
+      <span class="author-title">, {{ component.content.author_title }}</span>
+      {% endif %}
+    </p>
+    {% endif %}
+
+    {% if component.content.source %}
+    <p class="quote-source">{{ component.content.source }}</p>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>

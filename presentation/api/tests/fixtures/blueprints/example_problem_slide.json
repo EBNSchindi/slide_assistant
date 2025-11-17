@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "slide_id": "slide-01-problem",
+  "slide_title": "Das Problem",
+  "slide_subtitle": null,
+  "layout_type": "single_column",
+  "language": "de",
+  "components": [
+    {
+      "component_id": "comp-1",
+      "type": "bullet_list",
+      "position": "full_width",
+      "content": {
+        "title": "Aktuelle Herausforderungen in der Industrie",
+        "items": [
+          {
+            "text": "Manuelle Prozesse kosten bis zu 40% der Arbeitszeit",
+            "level": 1,
+            "icon": "⏱️",
+            "emphasis": true
+          },
+          {
+            "text": "Fehlerquote bei repetitiven Aufgaben über 15%",
+            "level": 1,
+            "icon": "⚠️",
+            "emphasis": false
+          },
+          {
+            "text": "Bestehende Lösungen zu teuer oder zu komplex",
+            "level": 1,
+            "icon": "💰",
+            "emphasis": false
+          }
+        ],
+        "style": "default"
+      },
+      "styling": null
+    }
+  ],
+  "metadata": {
+    "created_by": "ai",
+    "created_at": "2025-11-17T10:25:00Z",
+    "agent_versions": {
+      "analyzer": "1.0",
+      "strategist": "1.0",
+      "generator": "1.0"
+    },
+    "content_density": "medium",
+    "tags": ["problem", "challenges"],
+    "notes": null
+  }
+}

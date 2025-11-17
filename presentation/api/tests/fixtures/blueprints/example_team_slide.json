@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "slide_id": "slide-03-team",
+  "slide_title": "Unser Team",
+  "slide_subtitle": "Expertise trifft Innovation",
+  "layout_type": "two_column",
+  "language": "de",
+  "components": [
+    {
+      "component_id": "comp-1",
+      "type": "stat_grid",
+      "position": "left",
+      "content": {
+        "title": null,
+        "items": [
+          {
+            "value": "5",
+            "label": "Robotik-Experten",
+            "unit": null,
+            "sublabel": null,
+            "emphasis": true
+          },
+          {
+            "value": "20+",
+            "label": "Jahre Branchenerfahrung",
+            "unit": "Jahre",
+            "sublabel": null,
+            "emphasis": false
+          }
+        ],
+        "layout": "2x1"
+      },
+      "styling": null
+    },
+    {
+      "component_id": "comp-2",
+      "type": "image_frame",
+      "position": "right",
+      "content": {
+        "image_id": "teamfoto.png",
+        "image_path": "projects/robo4you/images/uploads/teamfoto.png",
+        "alt_text": "Gruppenfoto von fünf Teammitgliedern vor dem Robo4you Bürogebäude in Berlin",
+        "images": null,
+        "title": "Unser Kernteam",
+        "caption": "Führende Experten für Robotik, KI und Automatisierung mit kombiniert über 100 Jahren Erfahrung",
+        "frame_variant": "single",
+        "aspect_ratio": "16:9",
+        "overlay_text": false
+      },
+      "styling": null
+    }
+  ],
+  "metadata": {
+    "created_by": "ai",
+    "created_at": "2025-11-17T10:35:00Z",
+    "agent_versions": {
+      "analyzer": "1.0",
+      "strategist": "1.0",
+      "generator": "1.0"
+    },
+    "content_density": "medium",
+    "tags": ["team", "expertise", "about-us"],
+    "notes": "Formal tone for investor audience"
+  }
+}
