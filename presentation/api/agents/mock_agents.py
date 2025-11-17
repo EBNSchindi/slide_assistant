@@ -8,8 +8,11 @@ import random
 class MockContentAnalyzerAgent:
     """Mock Content Analyzer for testing"""
 
-    def __init__(self, api_key: str = None, model: str = "mock"):
+    def __init__(self, api_key: str = None, model: str = "mock", reasoning_effort: str = "medium", verbosity: str = "medium", use_structured_outputs: bool = False):
         self.model = model
+        self.reasoning_effort = reasoning_effort
+        self.verbosity = verbosity
+        self.use_structured_outputs = use_structured_outputs
 
     def analyze(self, user_input: str, slide_title: str = None, project_scope: str = "") -> dict:
         """Mock analysis of user input
@@ -45,8 +48,11 @@ class MockContentAnalyzerAgent:
 class MockPresentationStrategistAgent:
     """Mock Presentation Strategist for testing"""
 
-    def __init__(self, api_key: str = None, model: str = "mock"):
+    def __init__(self, api_key: str = None, model: str = "mock", reasoning_effort: str = "high", verbosity: str = "medium", use_structured_outputs: bool = False):
         self.model = model
+        self.reasoning_effort = reasoning_effort
+        self.verbosity = verbosity
+        self.use_structured_outputs = use_structured_outputs
 
     def recommend(
         self, analysis: dict, style_guide: dict, preferences: dict = None, project_scope: str = ""
@@ -87,8 +93,11 @@ class MockPresentationStrategistAgent:
 class MockContentGeneratorAgent:
     """Mock Content Generator for testing"""
 
-    def __init__(self, api_key: str = None, model: str = "mock"):
+    def __init__(self, api_key: str = None, model: str = "mock", reasoning_effort: str = "medium", verbosity: str = "medium", use_structured_outputs: bool = False):
         self.model = model
+        self.reasoning_effort = reasoning_effort
+        self.verbosity = verbosity
+        self.use_structured_outputs = use_structured_outputs
 
     def generate(
         self,
