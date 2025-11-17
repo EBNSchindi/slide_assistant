@@ -83,7 +83,12 @@ DO NOT: Recommend layouts, HTML, or components. Just understand & structure.
    Example: {"type": "image_ref", "content": "Team photo showing 5 experts"}
    Use when: User mentions images, screenshots, photos
 
-8. TITLE - Slide title
+8. MARKDOWN_TABLE - **CRITICAL:** Markdown table (with | pipes)
+   Example: {"type": "markdown_table", "content": "| Modell | Preis |\\n|---|---|\\n| Model A | €100 |"}
+   Use when: Input contains pipe-separated table syntax (| Header | Header |)
+   **PRESERVE the raw markdown table syntax - do NOT convert to other formats!**
+
+9. TITLE - Slide title
    Example: {"type": "title", "content": "Unser Team"}
    Use when: There's a clear heading
 
@@ -136,7 +141,7 @@ For each ContentBlock, assign a priority:
   },
   "content_blocks": [
     {
-      "type": "statistic|statistics|statement|bullet|bullets|quote|image_ref|title",
+      "type": "statistic|statistics|statement|bullet|bullets|quote|image_ref|markdown_table|title",
       "content": "Actual content text",
       "priority": "must_have|should_have|nice_to_have",
       "image_hint": "ref to image file if applicable" (optional),
@@ -144,6 +149,16 @@ For each ContentBlock, assign a priority:
     }
   ]
 }
+
+⚠️ **CRITICAL MARKDOWN TABLE HANDLING:**
+If input contains markdown table syntax (pipes | separating columns):
+- Detect it immediately: Look for pattern like "| Header1 | Header2 |"
+- Create content_block with type: "markdown_table"
+- content: Include the COMPLETE raw markdown table (headers + separator + all rows)
+- priority: "must_have" (tables are always critical)
+- DO NOT convert to statistics, bullets, or any other format
+- Example input: "| Product | Price |\\n|---|---|\\n| A | $100 |"
+- Example output: {{"type": "markdown_table", "content": "| Product | Price |\\n|---|---|\\n| A | $100 |", "priority": "must_have"}}
 
 ═══════════════════════════════════════════════════════════
 📝 EXAMPLES
