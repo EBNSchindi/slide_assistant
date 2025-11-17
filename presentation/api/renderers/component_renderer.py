@@ -1,13 +1,19 @@
 """
 HTML Component Renderer - Deterministic, template-based HTML generation
 
-Converts FormattedSlide (pure text) into HTML using fixed templates.
+Converts FormattedSlide (pure text) into HTML using Jinja2 templates.
 NO LLM involved - pure deterministic rendering with theme support.
 """
 
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from html import escape
+import sys
+import os
+
+# Add services directory to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+from services.template_loader import TemplateLoader
 
 
 @dataclass
@@ -24,52 +30,58 @@ class Theme:
 
 
 class HTMLComponentRenderer:
-    """Renders FormattedSlide components into HTML"""
+    """Renders FormattedSlide components into HTML using Jinja2 templates"""
 
     def __init__(self, theme: Optional[Theme] = None):
-        """Initialize renderer with optional theme"""
+        """Initialize renderer with optional theme and template loader"""
         self.theme = theme or Theme(name="github")
-        self.templates = self._load_templates()
+        self.template_loader = TemplateLoader()
 
-    def _load_templates(self) -> Dict[str, str]:
-        """Load component templates"""
-        return {
-            "stat-grid": self._stat_grid_template,
-            "bullet-list": self._bullet_list_template,
-            "quote": self._quote_template,
-            "text": self._text_template,
-            "image-frame": self._image_frame_template,
-            "process": self._process_template,
-            "table": self._table_template,
+        # Map component types to template names
+        self.component_type_map = {
+            "stat-grid": "stat-grid",
+            "bullet-list": "bullet-list",
+            "quote": "quote",
+            "text": "text",
+            "image-frame": "image-frame",
+            "process": "process",
+            "table": "table",
+            "feature-grid": "feature-grid",
+            "image-grid": "image-grid",
+            "process-horizontal": "process-horizontal",
         }
 
-    def render_component(self, component_data: Dict[str, Any]) -> str:
+    def render_component(self, component_data: Dict[str, Any], slide_num: int = 1, comp_num: int = 1) -> str:
         """
-        Render a single formatted component to HTML
+        Render a single formatted component to HTML using Jinja2 templates
 
         Args:
             component_data: FormattedComponentData as dict
+            slide_num: Slide number for ID generation
+            comp_num: Component number for ID generation
 
         Returns:
             HTML string for the component
         """
         component_type = component_data.get("type", "text")
-        component_id = component_data.get("component_id", "unknown")
 
-        if component_type not in self.templates:
+        if component_type not in self.component_type_map:
             raise ValueError(f"Unknown component type: {component_type}")
 
-        template_fn = self.templates[component_type]
-        html = template_fn(component_data)
+        # Prepare data for template (extract fields from component_data)
+        template_data = self._prepare_template_data(component_type, component_data)
 
-        # Wrap in component container
-        return f'''<div class="slide-component slide-{component_type}" id="{escape(component_id)}" data-type="{escape(component_type)}">
-{html}
-</div>'''
+        # Render using TemplateLoader
+        return self.template_loader.render_component(
+            component_type=self.component_type_map[component_type],
+            data=template_data,
+            slide_num=slide_num,
+            comp_num=comp_num,
+        )
 
     def render_slide(self, formatted_slide: Dict[str, Any]) -> str:
         """
-        Render complete slide with all components
+        Render complete slide with all components using TemplateLoader
 
         Args:
             formatted_slide: FormattedSlide as dict
@@ -79,28 +91,92 @@ class HTMLComponentRenderer:
         """
         slide_id = formatted_slide.get("slide_id", "slide-1")
         slide_title = formatted_slide.get("slide_title", "Untitled")
-        slide_subtitle = formatted_slide.get("slide_subtitle")
         components = formatted_slide.get("components", [])
-        theme_name = formatted_slide.get("theme", "github")
 
-        # Render all components
-        components_html = "\n".join([self.render_component(comp) for comp in components])
+        # Extract slide number from slide_id (format: "slide-N")
+        try:
+            slide_num = int(slide_id.split("-")[1]) if "-" in slide_id else 1
+        except (IndexError, ValueError):
+            slide_num = 1
 
-        # Build slide HTML
-        subtitle_html = f'<h2 class="slide-subtitle">{escape(slide_subtitle)}</h2>' if slide_subtitle else ""
+        # Prepare data for TemplateLoader
+        slide_data = {
+            "slide_num": slide_num,
+            "slide_title": slide_title,
+            "components": [],
+        }
 
-        html = f'''<section class="slide slide-theme-{escape(theme_name)}" id="{escape(slide_id)}" data-slide-title="{escape(slide_title)}">
-  <div class="slide-header">
-    <h1 class="slide-title">{escape(slide_title)}</h1>
-    {subtitle_html}
-  </div>
+        # Convert components to TemplateLoader format
+        for comp in components:
+            comp_type = comp.get("type", "text")
+            template_data = self._prepare_template_data(comp_type, comp)
 
-  <div class="slide-content">
-{components_html}
-  </div>
-</section>'''
+            slide_data["components"].append({
+                "type": self.component_type_map.get(comp_type, "text"),
+                "data": template_data,
+            })
 
-        return html
+        # Render using TemplateLoader
+        return self.template_loader.render_slide(slide_data)
+
+    def _prepare_template_data(self, component_type: str, component_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Prepare component data for Jinja2 templates
+
+        Args:
+            component_type: Type of component
+            component_data: Raw component data from FormattedSlide
+
+        Returns:
+            Data dict formatted for template
+        """
+        # Extract common fields
+        data = {
+            "title": component_data.get("title"),
+            "subtitle": component_data.get("subtitle"),
+        }
+
+        # Type-specific data extraction
+        if component_type == "stat-grid":
+            data["stats"] = component_data.get("statistics", [])
+
+        elif component_type == "bullet-list":
+            data["bullets"] = component_data.get("bullets", [])
+
+        elif component_type == "quote":
+            data["quote_text"] = component_data.get("quote_text", "")
+            data["quote_author"] = component_data.get("quote_author")
+
+        elif component_type == "text":
+            data["paragraphs"] = component_data.get("paragraphs", [])
+
+        elif component_type == "image-frame":
+            data["image_path"] = component_data.get("image_path", "")
+            data["image_caption"] = component_data.get("image_caption")
+            data["image_alt_text"] = component_data.get("image_alt_text", "Image")
+
+        elif component_type == "process":
+            data["steps"] = component_data.get("bullets", [])  # Process uses bullets field
+
+        elif component_type == "table":
+            data["headers"] = component_data.get("table_headers", [])
+            data["rows"] = component_data.get("table_rows", [])
+            data["table_class"] = component_data.get("table_class")
+            data["cell_badges"] = component_data.get("cell_badges")
+            data["emphasis_rows"] = component_data.get("emphasis_rows", [])
+
+        elif component_type == "feature-grid":
+            data["features"] = component_data.get("features", [])
+
+        elif component_type == "image-grid":
+            data["images"] = component_data.get("images", [])
+            data["grid_layout"] = component_data.get("grid_layout", "2x2")
+
+        elif component_type == "process-horizontal":
+            data["steps"] = component_data.get("steps", [])
+            data["show_arrows"] = component_data.get("show_arrows", True)
+
+        return data
 
     # ═══════════════════════════════════════════════════════════
     # Component Templates
@@ -112,28 +188,25 @@ class HTMLComponentRenderer:
         subtitle = data.get("subtitle")
         statistics = data.get("statistics", [])
 
-        title_html = f'<h3 class="component-title">{escape(title)}</h3>' if title else ""
-        subtitle_html = f'<p class="component-subtitle">{escape(subtitle)}</p>' if subtitle else ""
+        title_html = f'  <h2>{escape(title)}</h2>\n' if title else ""
+        subtitle_html = f'  <p>{escape(subtitle)}</p>\n' if subtitle else ""
 
-        # Generate stat items
-        stat_items = []
+        # Generate stat cards (reference structure)
+        stat_cards = []
         for stat in statistics:
             label = stat.get("label", "")
             value = stat.get("value", "")
-            stat_items.append(f'''    <div class="stat-item">
-      <div class="stat-value" style="font-size: {self.theme.stat_size}; color: {self.theme.primary_color};">
-        {escape(value)}
-      </div>
-      <div class="stat-label">{escape(label)}</div>
-    </div>''')
+            stat_cards.append(f'''            <div class="stat-card">
+                <span class="stat-number">{escape(value)}</span>
+                <span class="stat-label">{escape(label)}</span>
+            </div>''')
 
-        stats_grid = "\n".join(stat_items)
+        stats_grid = "\n".join(stat_cards)
 
-        return f'''{title_html}
-{subtitle_html}
-  <div class="stat-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 2rem;">
+        return f'''{title_html}{subtitle_html}
+        <div class="stat-grid">
 {stats_grid}
-  </div>'''
+        </div>'''
 
     def _bullet_list_template(self, data: Dict[str, Any]) -> str:
         """bullet-list: Display bullet points"""
@@ -141,34 +214,30 @@ class HTMLComponentRenderer:
         subtitle = data.get("subtitle")
         bullets = data.get("bullets", [])
 
-        title_html = f'<h3 class="component-title">{escape(title)}</h3>' if title else ""
-        subtitle_html = f'<p class="component-subtitle">{escape(subtitle)}</p>' if subtitle else ""
+        title_html = f'  <h2>{escape(title)}</h2>\n' if title else ""
+        subtitle_html = f'  <p>{escape(subtitle)}</p>\n' if subtitle else ""
 
         # Generate bullets
         bullet_items = []
         for bullet in bullets:
-            bullet_items.append(f'    <li>{escape(bullet)}</li>')
+            bullet_items.append(f'            <li>{escape(bullet)}</li>')
 
         bullets_list = "\n".join(bullet_items)
 
-        return f'''{title_html}
-{subtitle_html}
-  <ul class="bullet-list" style="margin-left: {self.theme.bullet_indent}; list-style-type: disc;">
+        return f'''{title_html}{subtitle_html}
+        <ul class="bullet-list">
 {bullets_list}
-  </ul>'''
+        </ul>'''
 
     def _quote_template(self, data: Dict[str, Any]) -> str:
         """quote: Display highlighted quote"""
         quote_text = data.get("quote_text", "")
         quote_author = data.get("quote_author")
 
-        author_html = f'<p class="quote-author">— {escape(quote_author)}</p>' if quote_author else ""
+        author_html = f'\n    <footer>— {escape(quote_author)}</footer>' if quote_author else ""
 
-        return f'''  <blockquote class="quote-block" style="border-left: 4px solid {self.theme.primary_color}; padding-left: 1.5rem;">
-    <p class="quote-text"style="font-style: italic; font-size: 1.1rem;">
-      "{escape(quote_text)}"
-    </p>
-    {author_html}
+        return f'''  <blockquote class="quote">
+    <p>"{escape(quote_text)}"</p>{author_html}
   </blockquote>'''
 
     def _text_template(self, data: Dict[str, Any]) -> str:
@@ -177,18 +246,17 @@ class HTMLComponentRenderer:
         subtitle = data.get("subtitle")
         paragraphs = data.get("paragraphs", [])
 
-        title_html = f'<h3 class="component-title">{escape(title)}</h3>' if title else ""
-        subtitle_html = f'<p class="component-subtitle">{escape(subtitle)}</p>' if subtitle else ""
+        title_html = f'  <h2>{escape(title)}</h2>\n' if title else ""
+        subtitle_html = f'  <p>{escape(subtitle)}</p>\n' if subtitle else ""
 
         # Generate paragraphs
         para_items = []
         for para in paragraphs:
-            para_items.append(f'  <p class="text-paragraph">{escape(para)}</p>')
+            para_items.append(f'        <p>{escape(para)}</p>')
 
         paragraphs_html = "\n".join(para_items)
 
-        return f'''{title_html}
-{subtitle_html}
+        return f'''{title_html}{subtitle_html}
 {paragraphs_html}'''
 
     def _image_frame_template(self, data: Dict[str, Any]) -> str:
@@ -198,12 +266,18 @@ class HTMLComponentRenderer:
         image_alt_text = data.get("image_alt_text", "Image")
         title = data.get("title")
 
-        title_html = f'<h3 class="image-title">{escape(title)}</h3>' if title else ""
-        caption_html = f'<p class="image-caption">{escape(image_caption)}</p>' if image_caption else ""
+        title_html = f'  <h2>{escape(title)}</h2>\n' if title else ""
 
-        return f'''  <div class="image-frame">
-{title_html}
-    <img src="{escape(image_path)}" alt="{escape(image_alt_text)}" class="frame-image" style="max-width: 100%; height: auto; border-radius: 8px;" />
+        # Use structured image layout: .image-container > .image-wrapper + .image-content
+        caption_html = f'''    <div class="image-content">
+      <p>{escape(image_caption)}</p>
+    </div>''' if image_caption else ""
+
+        return f'''{title_html}
+  <div class="image-container">
+    <div class="image-wrapper">
+      <img src="{escape(image_path)}" alt="{escape(image_alt_text)}" />
+    </div>
 {caption_html}
   </div>'''
 
@@ -213,25 +287,22 @@ class HTMLComponentRenderer:
         subtitle = data.get("subtitle")
         bullets = data.get("bullets", [])  # Reuse bullets field for steps
 
-        title_html = f'<h3 class="component-title">{escape(title)}</h3>' if title else ""
-        subtitle_html = f'<p class="component-subtitle">{escape(subtitle)}</p>' if subtitle else ""
+        title_html = f'  <h2>{escape(title)}</h2>\n' if title else ""
+        subtitle_html = f'  <p>{escape(subtitle)}</p>\n' if subtitle else ""
 
-        # Generate step items
+        # Generate step items (using reference structure)
         step_items = []
         for i, step in enumerate(bullets, 1):
             step_items.append(f'''    <div class="process-step">
-      <div class="step-number" style="background-color: {self.theme.primary_color}; color: white; width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
-        {i}
-      </div>
-      <div class="step-content">
+      <div class="process-number">{i}</div>
+      <div class="process-content">
         <p>{escape(step)}</p>
       </div>
     </div>''')
 
         steps_html = "\n".join(step_items)
 
-        return f'''{title_html}
-{subtitle_html}
+        return f'''{title_html}{subtitle_html}
   <div class="process-chain">
 {steps_html}
   </div>'''
@@ -242,25 +313,25 @@ class HTMLComponentRenderer:
         # Assuming table data in 'table_data' with headers and rows
         table_data = data.get("table_data", {"headers": [], "rows": []})
 
-        title_html = f'<h3 class="component-title">{escape(title)}</h3>' if title else ""
+        title_html = f'  <h2>{escape(title)}</h2>\n' if title else ""
 
         headers = table_data.get("headers", [])
         rows = table_data.get("rows", [])
 
         # Generate header row
         header_cells = "".join([f"<th>{escape(h)}</th>" for h in headers])
-        header_row = f"    <tr>\n      {header_cells}\n    </tr>"
+        header_row = f"      <tr>\n        {header_cells}\n      </tr>"
 
         # Generate data rows
         body_rows = []
         for row in rows:
             row_cells = "".join([f"<td>{escape(str(cell))}</td>" for cell in row])
-            body_rows.append(f"    <tr>\n      {row_cells}\n    </tr>")
+            body_rows.append(f"      <tr>\n        {row_cells}\n      </tr>")
 
         body_html = "\n".join(body_rows)
 
         return f'''{title_html}
-  <table class="data-table" style="width: 100%; border-collapse: collapse;">
+  <table>
     <thead>
 {header_row}
     </thead>

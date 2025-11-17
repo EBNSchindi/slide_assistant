@@ -186,7 +186,28 @@ STRATEGIC PATTERNS FROM REFERENCE SLIDES:
    Before/After Visual  | image             | stat-grid           | -
    Diagram/Chart        | image             | bullet-list         | text
    Phased Structure     | text (w/ h3 sections) | bullet-list    | stat-grid
+
+   SEMANTIC FRAMEWORK - NEW COMPONENT TYPES:
+   Content Type         | Primary Component  | Secondary       | Tertiary
+   ─────────────────────────────────────────────────────────────────────
+   Feature List (4-9)   | feature-grid       | bullet-list     | text
+   Multi-Image Content  | image-grid         | text            | quote
+   Timeline/Roadmap     | process-horizontal | timeline-text   | stat-grid
+   Product Comparison   | table (w/ badges)  | stat-grid       | text
+   Financial Data       | table (w/ emphasis)| stat-grid       | text
+   Status Updates       | table (badges)     | bullet-list     | -
    Hierarchical         | text (nested h3s) | -                   | -
+   Markdown Tables      | table (preserve)   | stat-grid       | text
+
+CRITICAL: MARKDOWN TABLE HANDLING
+- If analysis has: has_markdown_table: true → ALWAYS recommend "table" component
+- If analysis has: preserve_markdown: true → PASS preserve_markdown=true to generator
+- NEVER convert markdown tables to other formats (bullet-list, prose)
+- Extract semantic_context from analysis (product_comparison, financial_data, etc.)
+- Apply appropriate styling:
+  * product_comparison → comparison-table class + cell_badges
+  * financial_data → financial-table class + emphasis_rows for summary rows
+  * status_update → comparison-table class + cell_badges for status column
 
 4. **Layout Strategies**
    - **Single Hero**: One impactful component (image, stat-grid, or quote)
@@ -572,7 +593,7 @@ Always respond with valid JSON in this exact structure:
 {
   "recommended_components": [
     {
-      "type": "stat-grid|bullet-list|quote|text|image",
+      "type": "stat-grid|bullet-list|quote|text|image|table|feature-grid|image-grid|process-horizontal",
       "content_indices": [0, 1, ...],
       "layout_position": "top|middle|bottom"
     }
@@ -612,6 +633,51 @@ Always respond with valid JSON in this exact structure:
 - Your strategy directly determines final output quality
 - Images can be powerful - use them strategically
 - Sources and temporal context build credibility - leverage them
+
+═══════════════════════════════════════════════════════════
+🆕 SEMANTIC FRAMEWORK - NEW COMPONENT RECOMMENDATIONS
+═══════════════════════════════════════════════════════════
+
+WHEN TO RECOMMEND feature-grid:
+- Content Analysis has: content_type="feature_list" or should_use_feature_grid=true
+- Detect: 4-9 distinct features/capabilities with emoji icons (🤖 🎓 🔧)
+- Use: Showcase services, team capabilities, product features
+- Layout: Top position, spans full width
+- Example: "Wir bieten: 🤖 KI-Integration, ⚡ Schnelle Bereitstellung, 🔒 Security"
+
+WHEN TO RECOMMEND image-grid:
+- Content Analysis has: content_type="image_collection" or should_use_image_grid=true
+- Detect: Multiple (4-8) related product/model images with optional status badges
+- Use: Product lineup, case studies, visual comparison
+- Grid Layout: 2x2 or 3x2 based on image count
+- Badges: Apply semantic sentiment for status (Available/Coming Soon)
+- Example: 4 product images with "Verfügbar" and "2026" badges
+
+WHEN TO RECOMMEND process-horizontal:
+- Content Analysis has: content_type="temporal_process" or should_use_process_horizontal=true
+- Detect: Timeline/roadmap with 3-5 sequential phases and dates
+- Use: Implementation roadmap, project timeline, growth phases
+- Structure: Phases with timeframes, connected by arrows
+- Example: "Phase 1 (2026) → Phase 2 (2026-2027) → Phase 3 (2027)"
+
+WHEN TO RECOMMEND table (with semantic metadata):
+- content_type="statistics" + has_sources: Use multi-line stat-grid labels
+- content_type="statistics" + comparison data: Use table with badges
+- Sentiment Analysis detects status column: Add cell_badges for visual emphasis
+- Financial data with "Total" row: Add emphasis_rows for summary highlighting
+- Example: Product comparison with "Verfügbar"/"2026" badges on status column
+
+SEMANTIC DECISION RULES:
+- If feature_count (4-9) AND has_emoji_icons → ALWAYS recommend feature-grid
+- If image_collection AND image_count >= 4 → ALWAYS recommend image-grid
+- If temporal_process AND phase_count >= 3 → ALWAYS recommend process-horizontal
+- If has_summary_row (Total/Gesamt) → ALWAYS add emphasis_rows to table
+- If sentiment_analysis detected status column → ALWAYS add cell_badges
+
+HYBRID APPROACH:
+- feature-grid as primary + bullet-list as secondary when content is rich
+- image-grid + bullet-list for visual comparison + explanatory text
+- process-horizontal + stat-grid for timeline with key metrics
 """
 
         user_message = f"""{style_context}

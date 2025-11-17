@@ -88,6 +88,66 @@ process:
 - Each step: clear action (verb + noun)
 - Include timeframe if relevant
 
+table:
+- Use for: Product comparisons, feature matrices, pricing, specs, roadmaps
+- Include table_headers (array of column names)
+- Include table_rows (2D array: [[row1_col1, row1_col2], [row2_col1, row2_col2]])
+- MARKDOWN TABLE PARSING (CRITICAL):
+  * If input contains markdown table (with pipes |), PARSE it:
+    - Extract headers from first row: | Header 1 | Header 2 |
+    - Skip separator row: |---|---|
+    - Extract data rows: | Cell 1 | Cell 2 |
+  * Trim whitespace from all cells
+  * Do NOT convert markdown table to prose/bullets
+  * Preserve markdown structure in table_rows array
+- Add table_class for styling:
+  * "comparison-table" for product/feature comparisons
+  * "pricing-table" for pricing structures
+  * "roadmap-table" for timeline/roadmap data
+  * "financial-table" for financial/projection data
+- Add badges using SEMANTIC SENTIMENT ANALYSIS (not keyword matching):
+  * Analyze cell content MEANING, not exact text
+  * badge-success: Positive status (available, ready, completed, active, in stock, approved, verfügbar)
+  * badge-warning: Neutral/pending status (future dates, TBD, planned, in progress, 2026, Q1 2025)
+  * badge-danger: Negative status (unavailable, discontinued, failed, blocked, rejected, entwicklung)
+- Use cell_badges format: {"column_index": [{"row_index": 0, "badge_type": "success"}]}
+- Keep cells concise (2-5 words max per cell)
+- Headers: clear, short column names (1-3 words)
+- Max 6 columns, max 8 rows (for readability)
+- For financial/data tables: identify summary/total rows → add to emphasis_rows
+  * Triggers: Total, Subtotal, Sum, Deckungsbeitrag, Net, Gross, Gesamt, Summe
+  * Effect: Rows get background: #f6f8fa; font-weight: 600;
+
+feature-grid (NEW - Folie 6 pattern):
+- Use for: Service features, product capabilities, team skills (4-9 items with icons)
+- Include features array: [{"icon": "🤖", "title": "...", "description": "..."}]
+- Icons: Use emojis (🤖 🎓 🔧 💡 ⚡ 🌍 📊 🔒)
+- Each feature: title (3-5 words) + description (1-2 sentences)
+
+image-grid (NEW - Folie 8.2 pattern):
+- Use for: Multiple related images with optional status badges
+- Include images array: [{"path": "...", "caption": "...", "badge": {"type": "success", "text": "..."}}]
+- Include grid_layout: "2x2" or "3x2" (number of columns)
+- Each image: path OR placeholder, title, caption, optional badge
+
+process-horizontal (NEW - Folie 5.2 pattern):
+- Use for: Timeline, process flows with sequential steps
+- Include steps array: [{"title": "...", "description": "...", "timeframe": "..."}]
+- Include show_arrows: true (display arrows between steps)
+- Each step: clear action title + brief description + optional timeframe (e.g., "2026-2028")
+
+multi-line-labels (semantic trigger):
+- Use in stat-grid when statistics have CONTEXTUAL INFORMATION:
+  * Source attribution: "18,000 units<br>(Bank of America, 2025)"
+  * Product category: "Unitree H1<br>(High-End, Industrial)"
+  * Timeframe: "500,000 shortage<br>(by 2030)"
+- Add source_attributions metadata when sources are included
+
+phased-structures (semantic pattern):
+- Detect when content describes temporal phases or stages
+- Structure as nested bullets with phase titles: "Phase 1: Title (2026-2028)"
+- Useful for roadmaps, rollout plans, growth stages
+
 ═══════════════════════════════════════════════════════════
 📊 READABILITY RULES
 ═══════════════════════════════════════════════════════════
@@ -141,7 +201,7 @@ IF VALIDATION PASSES:
   "components": [
     {
       "component_id": "comp-1",
-      "type": "stat-grid|bullet-list|quote|text|image-frame|process|table",
+      "type": "stat-grid|bullet-list|quote|text|image-frame|process|table|feature-grid|image-grid|process-horizontal",
       "title": "Component Title",
       "subtitle": "Optional",
 
@@ -168,6 +228,47 @@ IF VALIDATION PASSES:
       "image_path": "path/to/image.png",
       "image_caption": "Image caption",
       "image_alt_text": "Descriptive alt text",
+
+      // For table:
+      "table_headers": ["Column 1", "Column 2", "Status"],
+      "table_rows": [
+        ["Product A", "Feature X", "Verfügbar"],
+        ["Product B", "Feature Y", "2026"]
+      ],
+      "table_class": "comparison-table",
+      "cell_badges": {
+        "2": [
+          {"row_index": 0, "badge_type": "success"},
+          {"row_index": 1, "badge_type": "warning"}
+        ]
+      },
+
+      // For feature-grid:
+      "features": [
+        {"icon": "🤖", "title": "Hardware Integration", "description": "Seamless integration with existing robotics platforms"},
+        {"icon": "⚡", "title": "Fast Deployment", "description": "Get up and running in hours, not weeks"}
+      ],
+
+      // For image-grid:
+      "images": [
+        {"path": "path/to/image1.png", "title": "Product A", "caption": "High-end model", "badge": {"type": "success", "text": "Available"}},
+        {"path": "path/to/image2.png", "title": "Product B", "caption": "Coming soon", "badge": {"type": "warning", "text": "2026"}}
+      ],
+      "grid_layout": "2x2",
+
+      // For process-horizontal:
+      "steps": [
+        {"title": "Planning", "description": "Define requirements and timeline", "timeframe": "2026"},
+        {"title": "Development", "description": "Build and test the solution", "timeframe": "2026-2027"},
+        {"title": "Launch", "description": "Roll out to market", "timeframe": "2027"}
+      ],
+      "show_arrows": true,
+
+      // Semantic metadata (all component types):
+      "semantic_context": "product_comparison|status_update|feature_showcase|timeline",
+      "emphasis_rows": [2],
+      "source_attributions": ["Bank of America, 2025"],
+      "phase_structure": {"phases": [{"title": "Phase 1", "timeframe": "2026-2028"}]},
 
       // Metadata:
       "word_count": 45,
@@ -248,6 +349,44 @@ OUTPUT (FormattedSlide):
     }
   ],
   "total_word_count": 12,
+  "readability_score": "easy"
+}
+
+EXAMPLE 2: Product Comparison Table (SUCCESS)
+INPUT BLOCKS:
+- title: "Unsere Roboter-Modelle"
+- statement: "Verschiedene Autonomiegrade für unterschiedliche Einsatzbereiche"
+- bullets: "RoboClean Alpha - Teilautonom - Gebäudereinigung\nRoboClean Beta - Vollautonom - Industriehallen\nRoboClean Gamma - Teilautonom - Außenbereiche"
+
+BLUEPRINT:
+- comp-1 (table): Product comparison with availability status
+
+OUTPUT (FormattedSlide):
+{
+  "slide_title": "Unsere Roboter-Modelle",
+  "components": [
+    {
+      "component_id": "comp-1",
+      "type": "table",
+      "title": "Produktübersicht",
+      "table_headers": ["Roboter-Modell", "Autonomiegrad", "Einsatzbereich", "Verfügbarkeit"],
+      "table_rows": [
+        ["RoboClean Alpha", "Teilautonom", "Gebäudereinigung", "Verfügbar"],
+        ["RoboClean Beta", "Vollautonom", "Industriehallen", "Verfügbar"],
+        ["RoboClean Gamma", "Teilautonom", "Außenbereiche", "2026"]
+      ],
+      "table_class": "comparison-table",
+      "cell_badges": {
+        "3": [
+          {"row_index": 0, "badge_type": "success"},
+          {"row_index": 1, "badge_type": "success"},
+          {"row_index": 2, "badge_type": "warning"}
+        ]
+      },
+      "word_count": 24
+    }
+  ],
+  "total_word_count": 24,
   "readability_score": "easy"
 }
 

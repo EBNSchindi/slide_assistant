@@ -1,0 +1,14 @@
+{% if title %}  <h2>{{ title }}</h2>
+{% endif %}{% if subtitle %}  <p>{{ subtitle }}</p>
+{% endif %}
+  <div class="feature-grid">
+{% for feature in features %}
+    <div class="feature-card">
+{%- if feature.icon %}
+      <div class="feature-icon">{{ feature.icon }}</div>
+{%- endif %}
+      <h3>{{ feature.title }}</h3>
+      <p>{{ feature.description }}</p>
+    </div>
+{% endfor %}
+  </div>

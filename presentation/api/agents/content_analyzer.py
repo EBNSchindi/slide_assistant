@@ -198,6 +198,20 @@ KEY MESSAGE EXTRACTION:
 ✓ Extract temporal context (e.g., "Stand 2023", "bis 2030", "2024-2028")
 ✓ Identify icons/emojis if present (preserve for visual hierarchy)
 
+MARKDOWN TABLE DETECTION (CRITICAL):
+- **PRESERVE markdown table syntax** when detected (pipes | separating columns)
+- Flag as "table" content type immediately
+- Do NOT convert markdown tables to prose or bullet lists
+- Examples of markdown table:
+  * | Header 1 | Header 2 | → Markdown table syntax
+  * |----------|----------|
+  * | Row 1 Col 1 | Row 1 Col 2 |
+- If content contains markdown table (has pipes |), output must include:
+  * content_type: includes "table" or "comparison"
+  * has_markdown_table: true
+  * preserve_markdown: true (tells downstream agents to keep table format)
+- Mark table semantic context: "product_comparison" or "financial_data"
+
 GRANULARITY RULES:
 - Break long prose into atomic messages
 - Group related statistics together
@@ -426,7 +440,7 @@ GOOD OUTPUT:
 Always respond with valid JSON in this exact structure:
 
 {
-  "content_type": "statistics|narrative|list|quote|image|mixed|phased|hierarchical",
+  "content_type": "statistics|narrative|list|quote|image|mixed|phased|hierarchical|feature_list|image_collection|temporal_process|table|comparison",
   "key_messages": ["specific, actionable message 1", "message 2", "..."],
   "raw_content": "structured representation of input",
   "has_statistics": true/false,
@@ -434,6 +448,8 @@ Always respond with valid JSON in this exact structure:
   "has_quotes": true/false,
   "has_images": true/false,
   "has_icons": true/false,
+  "has_markdown_table": true/false,
+  "preserve_markdown": true/false,
   "image_references": ["filename1.png", "..."] or null,
   "image_purpose": "description of what image should convey" or null,
   "icons_used": ["🤖", "🎓", "..."] or null,
@@ -446,7 +462,29 @@ Always respond with valid JSON in this exact structure:
   "narrative_arc": "problem-solution|before-after|chronological|null",
   "warnings": ["warning1", "..."] or [],
   "needs_user_input": false,
-  "confidence_score": 0.0-1.0
+  "confidence_score": 0.0-1.0,
+
+  "semantic_context": "product_comparison|status_update|feature_showcase|timeline|financial_data|narrative|table_comparison",
+  "sentiment_analysis": {
+    "status_cells": [{"cell_value": "Verfügbar", "sentiment": "positive", "badge_type": "success"}],
+    "has_future_dates": true/false,
+    "has_status_info": true/false
+  },
+  "multi_line_label_triggers": [
+    {"statistic": "18,000 units", "has_source": true, "source": "Bank of America"},
+    {"statistic": "€50M", "has_category": true, "category": "High-end"}
+  ],
+  "emphasis_rows_triggers": {
+    "has_summary_row": true,
+    "summary_keywords": ["Total", "Sum", "Deckungsbeitrag", "Gesamt"]
+  },
+  "feature_count": 0-9,
+  "has_emoji_icons": true/false,
+  "should_use_feature_grid": true/false,
+  "should_use_image_grid": true/false,
+  "should_use_process_horizontal": true/false,
+  "table_rows_count": 0 or number,
+  "table_cols_count": 0 or number
 }
 
 ═══════════════════════════════════════════════════════════
@@ -464,6 +502,39 @@ Always respond with valid JSON in this exact structure:
 - Flag issues early rather than propagate errors
 - Every field in the output format is important
 - Images should enhance, not replace, the core message
+
+═══════════════════════════════════════════════════════════
+🧠 SEMANTIC ANALYSIS - NEW CAPABILITIES
+═══════════════════════════════════════════════════════════
+
+NEW content_types to detect:
+- "feature_list": 4-9 distinct capabilities/features with icons (→ feature-grid)
+- "image_collection": Multiple related images (→ image-grid)
+- "temporal_process": Timeline/roadmap with sequential phases (→ process-horizontal)
+
+SENTIMENT ANALYSIS (for badges):
+- Analyze status information semantically, not by keywords
+- Positive sentiment: "Verfügbar", "Available", "In Stock", "Ready", "Approved"
+- Neutral/pending: "2026", "Coming Soon", "Planned", "Q1 2025"
+- Negative sentiment: "Unavailable", "Discontinued", "Failed", "Blocked"
+- Store badge type recommendations in sentiment_analysis.status_cells
+
+MULTI-LINE LABEL TRIGGERS:
+- Detect if statistic has SOURCE: "(Bank of America, 2025)" → has_source: true
+- Detect if statistic has CATEGORY: "(High-End, Industrial)" → has_category: true
+- These trigger multi-line stat-grid labels with <br> tags
+
+EMPHASIS ROWS TRIGGERS:
+- Detect summary/total rows in financial data
+- Keywords: Total, Sum, Subtotal, Deckungsbeitrag, Net, Gross, Gesamt
+- Set emphasis_rows_triggers.has_summary_row: true when detected
+
+NEW Component Detection:
+- feature_count: Count distinct features (4-9 → feature-grid candidate)
+- has_emoji_icons: Are emojis used? (🤖 🎓 🔧 → icons for feature-grid)
+- should_use_feature_grid: true if feature_list with 4+ items and icons
+- should_use_image_grid: true if image_collection with 4+ related images
+- should_use_process_horizontal: true if temporal_process with clear phases
 """
 
     def analyze(self, user_input: str, slide_title: str = None) -> dict:

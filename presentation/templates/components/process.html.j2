@@ -1,0 +1,13 @@
+{% if title %}  <h2>{{ title }}</h2>
+{% endif %}{% if subtitle %}  <p>{{ subtitle }}</p>
+{% endif %}
+  <div class="process-chain">
+{% for step in steps %}
+    <div class="process-step">
+      <div class="process-number">{{ loop.index }}</div>
+      <div class="process-content">
+        <p>{{ step }}</p>
+      </div>
+    </div>
+{% endfor %}
+  </div>

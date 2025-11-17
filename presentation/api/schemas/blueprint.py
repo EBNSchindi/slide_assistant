@@ -71,7 +71,7 @@ class ImageSlot(BaseModel):
 class ComponentBlueprint(BaseModel):
     """Blueprint for a single slide component"""
     component_id: str = Field(..., description="Unique ID, e.g., 'comp-1'")
-    type: Literal["stat-grid", "bullet-list", "quote", "text", "image-frame", "process", "table"] = Field(
+    type: Literal["stat-grid", "bullet-list", "quote", "text", "image-frame", "process", "table", "feature-grid", "image-grid", "process-horizontal"] = Field(
         ..., description="Component type"
     )
     position: Literal["top", "middle", "bottom"] = Field(
@@ -106,7 +106,7 @@ class SlideBlueprint(BaseModel):
 class FormattedComponentData(BaseModel):
     """Fully formatted text data for a single component (no HTML)"""
     component_id: str = Field(..., description="Reference to ComponentBlueprint ID")
-    type: Literal["stat-grid", "bullet-list", "quote", "text", "image-frame", "process", "table"] = Field(
+    type: Literal["stat-grid", "bullet-list", "quote", "text", "image-frame", "process", "table", "feature-grid", "image-grid", "process-horizontal"] = Field(
         ..., description="Component type"
     )
 
@@ -134,9 +134,38 @@ class FormattedComponentData(BaseModel):
     image_caption: Optional[str] = Field(None, description="Image caption")
     image_alt_text: Optional[str] = Field(None, description="Alt text for image")
 
+    # For table
+    table_headers: Optional[List[str]] = Field(None, description="Table column headers")
+    table_rows: Optional[List[List[str]]] = Field(None, description="Table rows (2D array)")
+    table_class: Optional[str] = Field(None, description="CSS class for table (e.g., 'comparison-table')")
+    cell_badges: Optional[Dict[str, Any]] = Field(None, description="Badge information per column {col_index: [{row_index, badge_type}]}")
+
+    # For feature-grid (Folie 6 pattern)
+    features: Optional[List[Dict[str, Any]]] = Field(
+        None, description="List of features with icon, title, description"
+    )
+
+    # For image-grid (Folie 8.2 pattern)
+    images: Optional[List[Dict[str, Any]]] = Field(
+        None, description="List of images with path, caption, optional badge"
+    )
+    grid_layout: Optional[str] = Field(None, description="Grid layout ('2x2', '3x2', etc.)")
+
+    # For process-horizontal (Folie 5.2 pattern)
+    steps: Optional[List[Dict[str, Any]]] = Field(
+        None, description="Steps for horizontal process with title, description"
+    )
+    show_arrows: Optional[bool] = Field(default=True, description="Show arrows between steps")
+
     # Metadata
     word_count: int = Field(default=0, description="Approximate word count")
     formatting_notes: Optional[str] = Field(None, description="Notes on formatting applied")
+
+    # Semantic metadata (for intelligent rendering decisions)
+    semantic_context: Optional[str] = Field(None, description="Semantic context for AI decision making (e.g., 'product_comparison', 'status_update')")
+    emphasis_rows: Optional[List[int]] = Field(None, description="Table row indices to emphasize with background color")
+    source_attributions: Optional[List[str]] = Field(None, description="Sources for statistics (e.g., ['Bank of America, 2025'])")
+    phase_structure: Optional[Dict[str, Any]] = Field(None, description="Phased structure info {'phases': [{'title': '...', 'timeframe': '...'}]}")
 
 
 class FormattedSlide(BaseModel):

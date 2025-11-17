@@ -1,0 +1,11 @@
+{% if title %}  <h2>{{ title }}</h2>
+{% endif %}{% if subtitle %}  <p>{{ subtitle }}</p>
+{% endif %}
+        <div class="stat-grid">
+{% for stat in stats %}
+            <div class="stat-card">
+                <span class="stat-number">{{ stat.value }}{% if stat.unit %}<span class="unit">{{ stat.unit }}</span>{% endif %}</span>
+                <span class="stat-label">{{ stat.label }}{% if stat.source %}<br>({{ stat.source }}){% endif %}</span>
+            </div>
+{% endfor %}
+        </div>

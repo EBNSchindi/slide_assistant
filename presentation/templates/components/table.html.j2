@@ -1,0 +1,38 @@
+{% if title %}  <h2>{{ title }}</h2>
+{% endif %}
+  <table{% if table_class %} class="{{ table_class }}"{% endif %}>
+    <thead>
+      <tr>
+{% for header in headers %}
+        <th>{{ header }}</th>
+{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+{% for row in rows %}
+{%- set row_idx = loop.index0 -%}
+{%- set is_emphasized = emphasis_rows and row_idx in emphasis_rows -%}
+      <tr{% if is_emphasized %} style="background: #f6f8fa; font-weight: 600;"{% endif %}>
+{% for cell in row %}
+{%- set col_idx = loop.index0 | string -%}
+{%- set ns = namespace(has_badge=false, badge_type='') -%}
+{%- if cell_badges and col_idx in cell_badges -%}
+  {%- for badge_info in cell_badges[col_idx] -%}
+    {%- if badge_info.row_index == row_idx -%}
+      {%- set ns.has_badge = true -%}
+      {%- set ns.badge_type = badge_info.badge_type -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+        <td>
+{%- if ns.has_badge -%}
+<span class="badge badge-{{ ns.badge_type }}">{{ cell }}</span>
+{%- else -%}
+{{ cell }}
+{%- endif -%}
+</td>
+{% endfor %}
+      </tr>
+{% endfor %}
+    </tbody>
+  </table>

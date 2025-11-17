@@ -1,0 +1,12 @@
+{% if title %}  <h2>{{ title }}</h2>
+{% endif %}
+  <div class="image-container">
+    <div class="image-wrapper">
+      <img src="{{ image_path }}" alt="{{ image_alt_text | default('Image') }}" />
+    </div>
+{% if image_caption %}
+    <div class="image-content">
+      <p>{{ image_caption }}</p>
+    </div>
+{% endif %}
+  </div>

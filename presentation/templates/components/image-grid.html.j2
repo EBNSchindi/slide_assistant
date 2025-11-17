@@ -1,0 +1,31 @@
+{% if title %}  <h2>{{ title }}</h2>
+{% endif %}{% if subtitle %}  <p>{{ subtitle }}</p>
+{% endif %}
+  <div class="image-grid{% if grid_layout %} grid-{{ grid_layout }}{% endif %}">
+{% for image in images %}
+    <div class="image-card">
+      <div class="image-wrapper">
+{%- if image.path %}
+        <img src="{{ image.path }}" alt="{{ image.alt_text or 'Image' }}" />
+{%- else %}
+        <div class="image-placeholder">{{ image.placeholder or '📷' }}</div>
+{%- endif %}
+{%- if image.badge %}
+        <span class="image-badge">
+          <span class="badge badge-{{ image.badge.type }}">{{ image.badge.text }}</span>
+        </span>
+{%- endif %}
+      </div>
+{%- if image.caption or image.title %}
+      <div class="image-content">
+{%- if image.title %}
+        <h4>{{ image.title }}</h4>
+{%- endif %}
+{%- if image.caption %}
+        <p>{{ image.caption }}</p>
+{%- endif %}
+      </div>
+{%- endif %}
+    </div>
+{% endfor %}
+  </div>
