@@ -30,7 +30,16 @@ from models import (
     ProjectStyle,
     AgentStep,
 )
-from agents import AgentOrchestrator
+from routes.v2 import router as v2_router
+
+# Try to import v1 orchestrator (optional)
+try:
+    from agents import AgentOrchestrator
+    V1_AGENTS_AVAILABLE = True
+except ImportError:
+    V1_AGENTS_AVAILABLE = False
+    AgentOrchestrator = None
+
 from services import ProjectService, StyleParser, FileService
 
 # Load environment variables
@@ -51,6 +60,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include v2 router (new 3-agent pipeline)
+app.include_router(v2_router)
 
 # Initialize services
 project_service = ProjectService(PROJECTS_BASE_PATH)

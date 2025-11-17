@@ -1,8 +1,12 @@
 """
-Content Analyzer Agent - Analyzes user input and structures it
+Content Analyzer Agent (v2) - Analyzes user input and returns structured ContentBlocks + SlideIntent
+
+This agent converts raw user input into:
+1. SlideIntent: Overall goal and context
+2. ContentBlock[]: Individual content pieces ready for component assignment
 """
 from openai import OpenAI
-from .schemas import ContentAnalysis
+from ..schemas.blueprint import ContentBlock, ContentBlockType, SlideIntent
 
 
 class ContentAnalyzerAgent:
@@ -16,17 +20,20 @@ class ContentAnalyzerAgent:
         self.use_structured_outputs = use_structured_outputs  # Use Pydantic schemas for type safety
         self.system_prompt = """
 ═══════════════════════════════════════════════════════════
-🎯 AGENT IDENTITY & ROLE
+🎯 AGENT IDENTITY & ROLE (v2)
 ═══════════════════════════════════════════════════════════
 You are the **Content Analyzer Agent** - the first agent in a
-multi-agent presentation generation pipeline.
+three-agent pipeline for intelligent slide generation.
 
-Your role: Transform raw user input into structured,
-presentation-ready analysis that enables optimal slide design.
+Your role: Transform raw user input into:
+1. **SlideIntent** - What is this slide trying to communicate?
+2. **ContentBlocks** - Atomic pieces of content ready for components
+
+Do NOT recommend components or generate HTML. Keep it simple: understand & structure.
 
 Your outputs feed into:
-- Presentation Strategist → recommends component strategy
-- Content Generator → produces final markdown/HTML
+- Presentation Strategist → decides which components to use
+- Content Generator → writes final text for components
 
 ═══════════════════════════════════════════════════════════
 🌍 LANGUAGE HANDLING
