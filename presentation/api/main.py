@@ -56,6 +56,25 @@ app.add_middleware(
 project_service = ProjectService(PROJECTS_BASE_PATH)
 
 
+# Root endpoint
+@app.get("/")
+async def root():
+    """Root endpoint with API information"""
+    return {
+        "name": "Slides Helper AI API",
+        "version": "1.0.0",
+        "status": "running",
+        "endpoints": {
+            "health": "/health",
+            "api_docs": "/docs",
+            "projects": "/api/projects",
+            "generate": "/api/generate",
+            "regenerate": "/api/regenerate",
+        },
+        "message": "API is running. Visit /docs for interactive API documentation."
+    }
+
+
 # Health check endpoint
 @app.get("/health")
 async def health_check():
