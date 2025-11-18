@@ -88,9 +88,20 @@ DO NOT: Recommend layouts, HTML, or components. Just understand & structure.
    Use when: Input contains pipe-separated table syntax (| Header | Header |)
    **PRESERVE the raw markdown table syntax - do NOT convert to other formats!**
 
-9. TITLE - Slide title
-   Example: {"type": "title", "content": "Unser Team"}
-   Use when: There's a clear heading
+9. FEATURE - A feature/product/USP with title and description
+   Example: {"type": "feature", "content": "🤖 KI-gestützte Anpassung: Adaptive Lernalgorithmen"}
+   Use when: User lists features/benefits/USPs with consistent title:description structure
+   **WHEN TO USE**: Multiple features/benefits/USPs (3+ items) with similar formatting
+   **STRUCTURE**: Icon/Emoji + Title: Description
+
+10. FEATURES - Multiple features grouped together
+    Example: {"type": "features", "content": "✨ Feature 1: Desc\\n🎯 Feature 2: Desc\\n💡 Feature 3: Desc"}
+    Use when: 3+ related features/benefits that should be displayed as a grid
+    **CRITICAL**: Use this when you detect 3+ feature-like items with consistent structure
+
+11. TITLE - Slide title
+    Example: {"type": "title", "content": "Unser Team"}
+    Use when: There's a clear heading
 
 ═══════════════════════════════════════════════════════════
 📊 SLIDE INTENT TYPES
