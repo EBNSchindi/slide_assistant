@@ -1,0 +1,23 @@
+{% if title %}  <h2>{{ title }}</h2>
+{% endif %}{% if subtitle %}  <p>{{ subtitle }}</p>
+{% endif %}
+  <div class="timeline timeline-{{ orientation }}">
+{% for item in items %}
+    <div class="timeline-item timeline-{{ item.status }}">
+      <div class="timeline-marker">
+{%- if item.badge %}
+        <span class="timeline-badge">{{ item.badge }}</span>
+{%- else %}
+        <span class="timeline-dot"></span>
+{%- endif %}
+      </div>
+      <div class="timeline-content">
+        <div class="timeline-date">{{ item.date }}</div>
+        <h3 class="timeline-title">{{ item.title }}</h3>
+{%- if item.description %}
+        <p class="timeline-description">{{ item.description }}</p>
+{%- endif %}
+      </div>
+    </div>
+{% endfor %}
+  </div>

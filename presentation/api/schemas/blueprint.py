@@ -71,7 +71,11 @@ class ImageSlot(BaseModel):
 class ComponentBlueprint(BaseModel):
     """Blueprint for a single slide component"""
     component_id: str = Field(..., description="Unique ID, e.g., 'comp-1'")
-    type: Literal["stat-grid", "bullet-list", "quote", "text", "image-frame", "process", "table", "feature-grid", "image-grid", "process-horizontal"] = Field(
+    type: Literal[
+        "stat-grid", "bullet-list", "quote", "text", "image-frame", "process", "table",
+        "feature-grid", "image-grid", "process-horizontal", "comparison-cards", "timeline",
+        "logo-grid", "team-grid", "metric-trend"
+    ] = Field(
         ..., description="Component type"
     )
     position: Literal["top", "middle", "bottom"] = Field(
@@ -106,7 +110,11 @@ class SlideBlueprint(BaseModel):
 class FormattedComponentData(BaseModel):
     """Fully formatted text data for a single component (no HTML)"""
     component_id: str = Field(..., description="Reference to ComponentBlueprint ID")
-    type: Literal["stat-grid", "bullet-list", "quote", "text", "image-frame", "process", "table", "feature-grid", "image-grid", "process-horizontal"] = Field(
+    type: Literal[
+        "stat-grid", "bullet-list", "quote", "text", "image-frame", "process", "table",
+        "feature-grid", "image-grid", "process-horizontal", "comparison-cards", "timeline",
+        "logo-grid", "team-grid", "metric-trend"
+    ] = Field(
         ..., description="Component type"
     )
 
@@ -156,6 +164,37 @@ class FormattedComponentData(BaseModel):
         None, description="Steps for horizontal process with title, description"
     )
     show_arrows: Optional[bool] = Field(default=True, description="Show arrows between steps")
+
+    # For comparison-cards
+    comparison_items: Optional[List[Dict[str, Any]]] = Field(
+        None, description="Comparison cards with label, icon, items, style (e.g., [{label: 'Vorher', icon: '❌', items: ['...'], style: 'danger'}])"
+    )
+
+    # For timeline
+    timeline_items: Optional[List[Dict[str, Any]]] = Field(
+        None, description="Timeline events with date, title, description, status, badge (e.g., [{date: 'Q1 2024', title: '...', status: 'completed'}])"
+    )
+    timeline_orientation: Optional[Literal["horizontal", "vertical"]] = Field(
+        default="horizontal", description="Timeline orientation"
+    )
+
+    # For logo-grid
+    logos: Optional[List[Dict[str, Any]]] = Field(
+        None, description="Logo items with src, alt, grayscale (e.g., [{src: 'path/logo.png', alt: 'Company Name', grayscale: true}])"
+    )
+    logo_layout: Optional[Literal["3-columns", "4-columns", "centered"]] = Field(
+        default="4-columns", description="Logo grid layout"
+    )
+
+    # For team-grid
+    team_members: Optional[List[Dict[str, Any]]] = Field(
+        None, description="Team members with image, initials, name, role, credentials, linkedin (e.g., [{name: 'Max Mustermann', role: 'CEO', credentials: 'Ex-Google'}])"
+    )
+
+    # For metric-trend
+    metrics: Optional[List[Dict[str, Any]]] = Field(
+        None, description="Metrics with value, label, trend, change, period, icon (e.g., [{value: '€2,3M', label: 'ARR', trend: 'up', change: '+127%', period: 'YoY'}])"
+    )
 
     # Metadata
     word_count: int = Field(default=0, description="Approximate word count")

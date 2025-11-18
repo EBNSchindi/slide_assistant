@@ -411,6 +411,150 @@
       "responsive": true,
       "responsiveFallback": "vertical",
       "animation": "smooth"
+    },
+    {
+      "id": "comparison-cards",
+      "name": "Comparison Cards",
+      "description": "Side-by-side comparison with modern animations (Before/After, Competitor, Problem/Solution)",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "items": {
+          "type": "array",
+          "description": "Comparison cards (typically 2-3)",
+          "items": {
+            "label": "string - Card label (e.g., 'Before', 'After')",
+            "icon": "string (optional) - Emoji or icon",
+            "items": "array - List of bullet points",
+            "style": "string - Visual style (success, danger, warning, neutral)"
+          }
+        }
+      },
+      "cssClasses": ["component", "comparison-cards", "comparison-card"],
+      "gridColumns": "repeat(auto-fit, minmax(280px, 1fr))",
+      "useCases": ["before-after", "competitor-analysis", "problem-solution"],
+      "animation": "fade-in"
+    },
+    {
+      "id": "timeline",
+      "name": "Timeline",
+      "description": "Modern chronological display with smooth animations",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "orientation": {
+          "type": "string",
+          "description": "Timeline orientation (horizontal or vertical)",
+          "default": "horizontal"
+        },
+        "items": {
+          "type": "array",
+          "description": "Timeline events",
+          "items": {
+            "date": "string - Date or period (e.g., 'Q1 2024', 'März 2023')",
+            "title": "string - Event title",
+            "description": "string (optional) - Event description",
+            "status": "string - Status indicator (completed, current, upcoming)",
+            "badge": "string (optional) - Badge emoji or icon"
+          }
+        }
+      },
+      "cssClasses": ["component", "timeline", "timeline-item"],
+      "orientations": ["horizontal", "vertical"],
+      "statusStyles": ["completed", "current", "upcoming"],
+      "animation": "slide-in"
+    },
+    {
+      "id": "logo-grid",
+      "name": "Logo Grid",
+      "description": "Modern grid display of partner, client, or investor logos",
+      "type": "media",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional, e.g., 'Unsere Kunden')"
+        },
+        "layout": {
+          "type": "string",
+          "description": "Grid layout (3-columns, 4-columns, centered)",
+          "default": "4-columns"
+        },
+        "logos": {
+          "type": "array",
+          "description": "Logo items",
+          "items": {
+            "src": "string - Logo image path",
+            "alt": "string - Company name (accessibility)",
+            "grayscale": "boolean - Apply grayscale filter (default: true)"
+          }
+        }
+      },
+      "cssClasses": ["component", "logo-grid", "logo-item"],
+      "layouts": ["3-columns", "4-columns", "centered"],
+      "responsive": true,
+      "hoverEffect": "color-reveal"
+    },
+    {
+      "id": "team-grid",
+      "name": "Team Grid",
+      "description": "Modern team member cards with smooth hover effects",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "members": {
+          "type": "array",
+          "description": "Team members",
+          "items": {
+            "image": "string (optional) - Photo path",
+            "initials": "string (optional) - Fallback initials if no image",
+            "name": "string - Full name",
+            "role": "string - Position/role",
+            "credentials": "string (optional) - Background info (e.g., 'Ex-Google, Stanford MBA')",
+            "linkedin": "string (optional) - LinkedIn profile URL"
+          }
+        }
+      },
+      "cssClasses": ["component", "team-grid", "team-card"],
+      "gridColumns": "repeat(auto-fit, minmax(250px, 1fr))",
+      "responsive": true,
+      "cardStyle": "modern-elevated"
+    },
+    {
+      "id": "metric-trend",
+      "name": "Metric Trend Cards",
+      "description": "Modern KPI metrics with animated trend indicators",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "metrics": {
+          "type": "array",
+          "description": "Metric items",
+          "items": {
+            "value": "string - Metric value (e.g., '€2,3M', '10.000')",
+            "label": "string - Metric label",
+            "trend": "string - Trend direction (up, down, neutral)",
+            "change": "string (optional) - Change percentage (e.g., '+127%', '-5%')",
+            "period": "string (optional) - Time period (e.g., 'YoY', 'MoM')",
+            "icon": "string (optional) - Emoji or icon"
+          }
+        }
+      },
+      "cssClasses": ["component", "metric-trend-grid", "metric-trend-card"],
+      "trendStyles": ["up", "down", "neutral"],
+      "gridColumns": "repeat(auto-fit, minmax(220px, 1fr))",
+      "animation": "counter-up"
     }
   ],
 
@@ -491,6 +635,42 @@
       "cardMinWidth": "240px",
       "interactiveHover": true,
       "hoverShadow": "lg"
+    },
+    "comparison-cards": {
+      "maxCards": 3,
+      "recommendedCards": 2,
+      "itemsPerCard": "3-5 items",
+      "useCases": ["before-after scenarios", "competitor comparison", "problem-solution"],
+      "cardAnimation": "fade-in",
+      "borderStyle": "subtle"
+    },
+    "timeline": {
+      "maxItems": 8,
+      "recommendedOrientation": "horizontal for roadmaps, vertical for history",
+      "statusIndicators": true,
+      "dateFormat": "flexible (Q1 2024, März 2023, etc.)",
+      "animation": "slide-in-sequence"
+    },
+    "logo-grid": {
+      "recommendedLogos": "6-12 logos",
+      "grayscale": "true by default for visual consistency",
+      "aspectRatio": "maintain original, center-aligned",
+      "padding": "generous spacing between logos",
+      "hoverEffect": "color-reveal with smooth transition"
+    },
+    "team-grid": {
+      "maxMembers": 8,
+      "recommendedMembers": "4-6 for single slide",
+      "imageSize": "consistent square dimensions",
+      "fallbackInitials": "use when no photo available",
+      "cardElevation": "subtle shadow with hover lift"
+    },
+    "metric-trend": {
+      "maxMetrics": 4,
+      "trendIndicators": "up (blue), down (red), neutral (gray)",
+      "changeFormat": "percentage or absolute value",
+      "periodLabel": "recommended (YoY, MoM, QoQ)",
+      "animation": "counter-up effect"
     }
   },
 

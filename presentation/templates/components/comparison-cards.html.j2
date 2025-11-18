@@ -1,0 +1,20 @@
+{% if title %}  <h2>{{ title }}</h2>
+{% endif %}{% if subtitle %}  <p>{{ subtitle }}</p>
+{% endif %}
+  <div class="comparison-cards">
+{% for card in items %}
+    <div class="comparison-card comparison-card-{{ card.style }}">
+      <div class="comparison-header">
+{%- if card.icon %}
+        <span class="comparison-icon">{{ card.icon }}</span>
+{%- endif %}
+        <h3>{{ card.label }}</h3>
+      </div>
+      <ul class="comparison-list">
+{%- for item in card.items %}
+        <li>{{ item }}</li>
+{%- endfor %}
+      </ul>
+    </div>
+{% endfor %}
+  </div>

@@ -1,0 +1,28 @@
+{% if title %}  <h2>{{ title }}</h2>
+{% endif %}{% if subtitle %}  <p>{{ subtitle }}</p>
+{% endif %}
+  <div class="team-grid">
+{% for member in members %}
+    <div class="team-card">
+{%- if member.image %}
+      <div class="team-avatar">
+        <img src="{{ member.image }}" alt="{{ member.name }}">
+      </div>
+{%- else %}
+      <div class="team-avatar team-avatar-initials">
+        <span>{{ member.initials }}</span>
+      </div>
+{%- endif %}
+      <div class="team-info">
+        <h3 class="team-name">{{ member.name }}</h3>
+        <div class="team-role">{{ member.role }}</div>
+{%- if member.credentials %}
+        <p class="team-credentials">{{ member.credentials }}</p>
+{%- endif %}
+{%- if member.linkedin %}
+        <a href="{{ member.linkedin }}" class="team-linkedin" target="_blank">LinkedIn →</a>
+{%- endif %}
+      </div>
+    </div>
+{% endfor %}
+  </div>

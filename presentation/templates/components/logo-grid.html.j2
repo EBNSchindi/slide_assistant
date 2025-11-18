@@ -1,0 +1,10 @@
+{% if title %}  <h2>{{ title }}</h2>
+{% endif %}{% if subtitle %}  <p>{{ subtitle }}</p>
+{% endif %}
+  <div class="logo-grid logo-grid-{{ layout }}">
+{% for logo in logos %}
+    <div class="logo-item{% if logo.grayscale %} logo-grayscale{% endif %}">
+      <img src="{{ logo.src }}" alt="{{ logo.alt }}" class="logo-image">
+    </div>
+{% endfor %}
+  </div>

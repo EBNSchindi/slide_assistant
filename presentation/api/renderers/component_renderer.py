@@ -49,6 +49,11 @@ class HTMLComponentRenderer:
             "feature-grid": "feature-grid",
             "image-grid": "image-grid",
             "process-horizontal": "process-horizontal",
+            "comparison-cards": "comparison-cards",
+            "timeline": "timeline",
+            "logo-grid": "logo-grid",
+            "team-grid": "team-grid",
+            "metric-trend": "metric-trend",
         }
 
     def render_component(self, component_data: Dict[str, Any], slide_num: int = 1, comp_num: int = 1) -> str:
@@ -176,6 +181,23 @@ class HTMLComponentRenderer:
         elif component_type == "process-horizontal":
             data["steps"] = component_data.get("steps", [])
             data["show_arrows"] = component_data.get("show_arrows", True)
+
+        elif component_type == "comparison-cards":
+            data["items"] = component_data.get("comparison_items", [])
+
+        elif component_type == "timeline":
+            data["items"] = component_data.get("timeline_items", [])
+            data["orientation"] = component_data.get("timeline_orientation", "horizontal")
+
+        elif component_type == "logo-grid":
+            data["logos"] = component_data.get("logos", [])
+            data["layout"] = component_data.get("logo_layout", "4-columns")
+
+        elif component_type == "team-grid":
+            data["members"] = component_data.get("team_members", [])
+
+        elif component_type == "metric-trend":
+            data["metrics"] = component_data.get("metrics", [])
 
         return data
 

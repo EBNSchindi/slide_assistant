@@ -115,6 +115,36 @@ DO NOT: Generate text, HTML, or styling details. Just plan structure.
     Constraints: 4-6 steps max, each with title + description
     **WHEN TO USE**: When process/timeline should flow horizontally instead of vertically
 
+11. comparison-cards
+    Purpose: Side-by-side comparison of options (Before/After, Competitor, Problem/Solution)
+    Best for: Contrasting scenarios, highlighting changes, competitive analysis
+    Constraints: 2-3 cards max, each with label, icon, 3-5 bullet points, and style (success/danger/warning)
+    **WHEN TO USE**: User compares two things, shows before/after, or contrasts alternatives
+
+12. timeline
+    Purpose: Chronological display of events, milestones, or roadmap
+    Best for: Company history, project timeline, future roadmap, milestone tracking
+    Constraints: 4-8 items max, each with date, title, description, status (completed/current/upcoming)
+    **WHEN TO USE**: User mentions dates, phases, quarters, milestones, or chronological progression
+
+13. logo-grid
+    Purpose: Display partner, client, or investor logos for social proof
+    Best for: Customer logos, partner companies, press mentions, investor names
+    Constraints: 6-12 logos recommended, grayscale by default for visual consistency
+    **WHEN TO USE**: User mentions clients, partners, customers, investors, or "supported by"
+
+14. team-grid
+    Purpose: Showcase team members with photos, names, roles, and credentials
+    Best for: Team introduction, founder profiles, advisory board, key people
+    Constraints: 4-8 members max per slide, includes name, role, credentials, optional LinkedIn
+    **WHEN TO USE**: User mentions team, founders, advisors, experts, or key personnel
+
+15. metric-trend
+    Purpose: Display KPI metrics with trend indicators and percentage changes
+    Best for: Performance metrics, growth indicators, comparative KPIs over time
+    Constraints: 2-4 metrics max, each with value, label, trend (up/down/neutral), change%, period
+    **WHEN TO USE**: User mentions growth, trends, YoY/MoM changes, or performance tracking
+
 ═══════════════════════════════════════════════════════════
 📐 LAYOUT PATTERNS
 ═══════════════════════════════════════════════════════════
@@ -159,7 +189,7 @@ If no images: ImageSlot is null for all components
   "components": [
     {
       "component_id": "comp-1",
-      "type": "stat-grid|bullet-list|quote|text|image-frame|process|table|feature-grid|image-grid|process-horizontal",
+      "type": "stat-grid|bullet-list|quote|text|image-frame|process|table|feature-grid|image-grid|process-horizontal|comparison-cards|timeline|logo-grid|team-grid|metric-trend",
       "position": "top|middle|bottom",
       "content_block_indices": [0, 1],  // Which ContentBlocks go here
       "image_slot": {

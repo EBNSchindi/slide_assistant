@@ -1,0 +1,23 @@
+{% if title %}  <h2>{{ title }}</h2>
+{% endif %}{% if subtitle %}  <p>{{ subtitle }}</p>
+{% endif %}
+  <div class="metric-trend-grid">
+{% for metric in metrics %}
+    <div class="metric-trend-card">
+{%- if metric.icon %}
+      <div class="metric-icon">{{ metric.icon }}</div>
+{%- endif %}
+      <div class="metric-value">{{ metric.value }}</div>
+      <div class="metric-label">{{ metric.label }}</div>
+{%- if metric.trend %}
+      <div class="metric-change metric-trend-{{ metric.trend }}">
+        <span class="metric-trend-icon">{{ '↑' if metric.trend == 'up' else '↓' if metric.trend == 'down' else '→' }}</span>
+        <span class="metric-change-value">{{ metric.change }}</span>
+{%- if metric.period %}
+        <span class="metric-period">{{ metric.period }}</span>
+{%- endif %}
+      </div>
+{%- endif %}
+    </div>
+{% endfor %}
+  </div>
