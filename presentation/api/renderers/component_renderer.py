@@ -156,7 +156,8 @@ class HTMLComponentRenderer:
             data["image_alt_text"] = component_data.get("image_alt_text", "Image")
 
         elif component_type == "process":
-            data["steps"] = component_data.get("bullets", [])  # Process uses bullets field
+            data["steps"] = component_data.get("steps", [])  # Process uses steps field
+            data["show_arrows"] = component_data.get("show_arrows", True)
 
         elif component_type == "table":
             data["headers"] = component_data.get("table_headers", [])

@@ -130,8 +130,13 @@ class MockContentGeneratorAgentV2:
         slide_blueprint: Dict[str, Any],
         content_blocks: List[Dict[str, Any]],
         language: str = "de",
+        design_system: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
-        """Return mock formatted slide"""
+        """Return mock formatted slide
+
+        Args:
+            design_system: Optional design system with components_schema (for slot validation)
+        """
         return {
             "slide_title": "Unser Team",
             "slide_subtitle": None,

@@ -31,15 +31,6 @@ from models import (
     AgentStep,
 )
 from routes.v2 import router as v2_router
-
-# Try to import v1 orchestrator (optional)
-try:
-    from agents import AgentOrchestrator
-    V1_AGENTS_AVAILABLE = True
-except ImportError:
-    V1_AGENTS_AVAILABLE = False
-    AgentOrchestrator = None
-
 from services import ProjectService, StyleParser, FileService
 
 # Load environment variables
@@ -236,113 +227,12 @@ async def update_project_scope(project_name: str, scope_content: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Main content generation endpoint
-@app.post("/api/generate")
-async def generate_content(request: GenerateContentRequest):
-    """Generate content using AI agents"""
-
-    # Validate API key (skip if test mode)
-    if not TEST_MODE and not OPENAI_API_KEY:
-        raise HTTPException(
-            status_code=500,
-            detail="OPENAI_API_KEY not configured. Set it in .env or enable TEST_MODE",
-        )
-
-    try:
-        # Validate project exists
-        project_path = project_service.get_project_path(request.project_name)
-
-        # Initialize orchestrator
-        orchestrator = AgentOrchestrator(OPENAI_API_KEY, DEFAULT_MODEL)
-
-        # Process content through agent chain
-        result = orchestrator.process(
-            user_input=request.user_input,
-            project_path=project_path,
-            project_name=request.project_name,
-            slide_title=request.slide_title,
-            preferences=request.preferences,
-            image_references=request.image_references,
-        )
-
-        if result["success"]:
-            return GenerateContentResponse(
-                success=True,
-                project_name=request.project_name,
-                agent_steps=result["agent_steps"],
-                generated_slides=result["generated_slides"],
-                message=result["message"],
-                total_components=result["total_components"],
-            )
-        else:
-            raise HTTPException(
-                status_code=400,
-                detail=result.get("message", "Content generation failed"),
-            )
-
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# NOTE: V1 /api/generate endpoint has been removed. Use /api/v2/generate instead.
+# The new endpoint provides the same functionality with the V2 3-agent pipeline.
 
 
-# Regenerate slide endpoint
-@app.post("/api/regenerate")
-async def regenerate_slide(request: RegenerateSlideRequest):
-    """Regenerate a slide with feedback"""
-
-    if not TEST_MODE and not OPENAI_API_KEY:
-        raise HTTPException(
-            status_code=500,
-            detail="OPENAI_API_KEY not configured. Set it in .env or enable TEST_MODE",
-        )
-
-    try:
-        project_path = project_service.get_project_path(request.project_name)
-        file_service = FileService(project_path)
-
-        # Create backup of existing slide
-        file_service.backup_slide(request.slide_name)
-
-        # Get existing markdown
-        markdown_content, html_content = file_service.get_slide_content(
-            request.slide_name
-        )
-
-        # Use feedback to regenerate
-        preferences = {"feedback": request.feedback}
-
-        orchestrator = AgentOrchestrator(OPENAI_API_KEY, DEFAULT_MODEL)
-        result = orchestrator.process(
-            user_input=markdown_content,
-            project_path=project_path,
-            slide_title=request.slide_name,
-            preferences=preferences,
-        )
-
-        if result["success"]:
-            return GenerateContentResponse(
-                success=True,
-                project_name=request.project_name,
-                agent_steps=result["agent_steps"],
-                generated_slides=result["generated_slides"],
-                message=result["message"],
-                total_components=result["total_components"],
-            )
-        else:
-            raise HTTPException(
-                status_code=400,
-                detail=result.get("message", "Regeneration failed"),
-            )
-
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# NOTE: V1 /api/regenerate endpoint has been removed.
+# Use /api/v2/generate with previous content for regeneration feedback.
 
 
 @app.get("/api/projects/{project_name}/slides")

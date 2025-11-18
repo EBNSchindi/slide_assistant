@@ -6,7 +6,17 @@
     <div class="process-step">
       <div class="process-number">{{ loop.index }}</div>
       <div class="process-content">
+{%- if step is mapping %}
+        <h4>{{ step.title }}</h4>
+{%- if step.description %}
+        <p>{{ step.description }}</p>
+{%- endif %}
+{%- if step.timeframe %}
+        <span class="process-timeframe">{{ step.timeframe }}</span>
+{%- endif %}
+{%- else %}
         <p>{{ step }}</p>
+{%- endif %}
       </div>
     </div>
 {% endfor %}

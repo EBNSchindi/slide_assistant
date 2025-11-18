@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Design - Component Reference</title>
+    <style>
+        /* GitHub Design System - CSS Variablen */
+        :root {
+          /* Primärfarben */
+          --color-primary: #238636;
+          --color-primary-light: #2ea043;
+          --color-primary-dark: #1a7f37;
+
+          /* Komponenten-Hintergrund */
+          --color-bg-component: #ffffff;
+          --color-bg-component-hover: #f6f8fa;
+          --color-bg-subtle: #f6f8fa;
+          --color-bg-overlay: #ffffff;
+
+          /* Text-Farben */
+          --color-text-primary: #24292f;
+          --color-text-secondary: #57606a;
+          --color-text-muted: #6e7781;
+          --color-text-on-primary: #ffffff;
+
+          /* Rahmen-Farben */
+          --color-border: #d0d7de;
+          --color-border-muted: #d8dee4;
+          --color-border-hover: #238636;
+
+          /* Akzentfarben */
+          --color-accent: #0969da;
+          --color-success: #1a7f37;
+          --color-success-bg: #dff6e8;
+          --color-success-text: #0a3f20;
+          --color-warning: #9a6700;
+          --color-warning-bg: #fff8c5;
+          --color-warning-text: #7d4e00;
+          --color-danger: #cf222e;
+          --color-danger-bg: #ffebe9;
+          --color-danger-text: #82071e;
+
+          /* Schatten */
+          --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+          --shadow-md: 0 2px 8px rgba(0,0,0,0.1);
+          --shadow-lg: 0 4px 12px rgba(35, 134, 54, 0.15);
+          --shadow-xl: 0 8px 24px rgba(140, 149, 159, 0.2);
+
+          /* Border Radius */
+          --border-radius-sm: 3px;
+          --border-radius-md: 6px;
+          --border-radius-lg: 12px;
+          --border-radius-full: 50%;
+
+          /* Schriftart */
+          --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+          --font-family-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+          /* Spacing */
+          --spacing-xs: 4px;
+          --spacing-sm: 8px;
+          --spacing-md: 16px;
+          --spacing-lg: 24px;
+          --spacing-xl: 32px;
+          --spacing-2xl: 48px;
+
+          /* Komponenten-spezifisch */
+          --component-padding: 48px;
+          --component-border-width: 2px;
+          --component-border-radius: var(--border-radius-md);
+          --component-shadow: var(--shadow-sm);
+          --component-shadow-hover: var(--shadow-lg);
+
+          /* Label */
+          --label-bg: var(--color-primary);
+          --label-color: var(--color-text-on-primary);
+          --label-padding: 4px 12px;
+          --label-border-radius: var(--border-radius-sm);
+
+          /* Slide Title */
+          --slide-title-bg: #161b22;
+          --slide-title-color: var(--color-primary);
+          --slide-title-border: var(--color-primary);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: #f6f8fa;
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--color-primary);
+        }
+
+        .page-subtitle {
+            font-size: 16px;
+            color: var(--color-text-secondary);
+            margin-bottom: 40px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid var(--color-border);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--color-primary);
+        }
+
+        .section-desc {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            margin-bottom: 24px;
+        }
+
+        /* Komponenten-Basis */
+        .component {
+            background: var(--color-bg-component);
+            border: var(--component-border-width) solid var(--color-border);
+            border-radius: var(--component-border-radius);
+            padding: var(--component-padding);
+            position: relative;
+            box-shadow: var(--component-shadow);
+            transition: all 0.2s;
+            width: var(--component-width, fit-content);
+            max-width: 100%;
+            margin-bottom: 0;
+            isolation: isolate;
+        }
+
+        .component:hover {
+            border-color: var(--color-border-hover);
+            box-shadow: var(--component-shadow-hover);
+        }
+
+        .component-label {
+            position: absolute;
+            top: -12px;
+            left: 16px;
+            background: var(--label-bg);
+            color: var(--label-color);
+            padding: var(--label-padding);
+            border-radius: var(--label-border-radius);
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 10;
+            pointer-events: none;
+            transform: translateY(0);
+        }
+
+        .component h1, .component h2, .component h3, .component h4 {
+            color: var(--color-text-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .component h1 { font-size: 48px; font-weight: 700; }
+        .component h2 { font-size: 32px; font-weight: 600; }
+        .component h3 { font-size: 24px; font-weight: 600; }
+        .component h4 { font-size: 20px; font-weight: 600; }
+
+        .component p {
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        /* Statistik-Grid */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin: var(--spacing-md) 0;
+            width: 100%;
+        }
+
+        .stat-card {
+            background: var(--color-bg-subtle);
+            border: 1px solid var(--color-border);
+            border-radius: var(--component-border-radius);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--color-primary);
+            display: block;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+        }
+
+        /* Bullet-Liste */
+        .bullet-list {
+            list-style: none;
+            padding: 0;
+            margin: var(--spacing-md) 0;
+        }
+
+        .bullet-list li {
+            padding: 12px var(--spacing-md);
+            margin: var(--spacing-sm) 0;
+            background: var(--color-bg-subtle);
+            border-left: 4px solid var(--color-primary);
+            border-radius: var(--border-radius-sm);
+            color: var(--color-text-primary);
+        }
+
+        .bullet-list li strong {
+            color: var(--color-primary);
+        }
+
+        /* Quote */
+        .quote {
+            border-left: 4px solid var(--color-primary);
+            padding-left: 20px;
+            margin: 20px 0;
+            font-style: italic;
+            color: var(--color-text-secondary);
+        }
+
+        /* Tabellen */
+        .component table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-md) 0;
+            font-size: 14px;
+        }
+
+        .component table th {
+            background: var(--color-bg-subtle);
+            color: var(--color-text-primary);
+            font-weight: 600;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .component table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+        }
+
+        .component table tr:hover {
+            background: var(--color-bg-subtle);
+        }
+
+        .comparison-table th:first-child,
+        .comparison-table td:first-child {
+            font-weight: 600;
+            background: var(--color-bg-subtle);
+        }
+
+        /* Prozesskette */
+        .process-chain {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+        }
+
+        .process-step {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-md);
+            position: relative;
+        }
+
+        .process-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 48px;
+            width: 2px;
+            height: calc(100% + 8px);
+            background: var(--color-border);
+        }
+
+        .process-number {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--border-radius-full);
+            background: var(--color-primary);
+            color: var(--color-text-on-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .process-content {
+            flex: 1;
+            padding-top: var(--spacing-sm);
+        }
+
+        .process-content h4 {
+            margin: 0 0 var(--spacing-sm) 0;
+            color: var(--color-text-primary);
+            font-size: 18px;
+        }
+
+        .process-content p {
+            margin: 0;
+            color: var(--color-text-secondary);
+            font-size: 14px;
+        }
+
+        /* Horizontale Prozesskette */
+        .process-horizontal {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: var(--spacing-lg) 0;
+            position: relative;
+        }
+
+        .process-horizontal::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 60px;
+            right: 60px;
+            height: 2px;
+            background: var(--color-border);
+            z-index: 0;
+        }
+
+        .process-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .process-item-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--border-radius-full);
+            background: var(--color-primary);
+            color: var(--color-text-on-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .process-item-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--color-text-primary);
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .process-item-desc {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            text-align: center;
+        }
+
+        /* Feature-Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .feature-card {
+            background: var(--color-bg-subtle);
+            border: 1px solid var(--color-border);
+            border-radius: var(--component-border-radius);
+            padding: 20px;
+        }
+
+        .feature-card h4 {
+            margin: 0 0 var(--spacing-sm) 0;
+            color: var(--color-text-primary);
+            font-size: 16px;
+        }
+
+        .feature-card p {
+            margin: 0;
+            color: var(--color-text-secondary);
+            font-size: 14px;
+        }
+
+        /* Badge / Tag */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: var(--color-success-bg);
+            color: var(--color-success-text);
+        }
+
+        .badge-warning {
+            background: var(--color-warning-bg);
+            color: var(--color-warning-text);
+        }
+
+        .badge-danger {
+            background: var(--color-danger-bg);
+            color: var(--color-danger-text);
+        }
+
+        /* Bild-Komponenten */
+        .image-container {
+            border: 1px solid var(--color-border);
+            border-radius: var(--component-border-radius);
+            overflow: hidden;
+            background: var(--color-bg-component);
+            margin: var(--spacing-md) 0;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .image-wrapper {
+            width: 100%;
+            background: var(--color-bg-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+            min-height: 0;
+            box-sizing: border-box;
+        }
+
+        .image-wrapper:not(:has(img)) {
+            min-height: 200px;
+        }
+
+        .image-wrapper img {
+            max-width: 100%;
+            width: auto;
+            height: auto;
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--shadow-md);
+            display: block;
+            flex-shrink: 0;
+            object-fit: contain;
+            vertical-align: bottom;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 100%;
+            min-height: 200px;
+            background: linear-gradient(135deg, var(--color-bg-subtle) 0%, #e1e4e8 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            border-radius: var(--border-radius-sm);
+            gap: var(--spacing-sm);
+        }
+
+        .image-placeholder::before {
+            content: '🖼️';
+            font-size: 48px;
+            line-height: 1;
+        }
+
+        .image-content {
+            padding: 20px;
+        }
+
+        .image-content h4 {
+            margin: 0 0 var(--spacing-sm) 0;
+            color: var(--color-text-primary);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .image-content p {
+            margin: 0;
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Image-Grid */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .image-card {
+            border: 1px solid var(--color-border);
+            border-radius: var(--component-border-radius);
+            overflow: hidden;
+            background: var(--color-bg-component);
+        }
+
+        .image-card .image-wrapper {
+            padding: 20px;
+            min-height: 0;
+        }
+
+        .image-card .image-wrapper:not(:has(img)) {
+            min-height: 150px;
+        }
+
+        .image-card .image-placeholder {
+            min-height: 150px;
+        }
+
+        .image-card .image-content {
+            padding: var(--spacing-md);
+        }
+
+        @media (max-width: 768px) {
+            .image-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .process-horizontal {
+                flex-direction: column;
+                gap: var(--spacing-md);
+            }
+
+            .process-horizontal::before {
+                display: none;
+            }
+        }
+
+        .component-demo {
+            margin-bottom: 32px;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="page-title">GitHub Design - Component Reference</h1>
+    <p class="page-subtitle">Canonical examples of all component types and layouts</p>
+
+    <!-- 1. Stat Grid -->
+    <div class="section">
+        <h2 class="section-title">1. Stat Grid / Statistics</h2>
+        <p class="section-desc">Display multiple statistics in a grid layout with numbers, labels, and optional units or sources.</p>
+        <div class="component-demo">
+            <div class="component">
+                <div class="component-label">Example: Stat Grid</div>
+                <h2>Key Market Metrics</h2>
+
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <span class="stat-number">83,6 Mio</span>
+                        <span class="stat-label">Population (2024)</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">5,7 Mio</span>
+                        <span class="stat-label">Care-dependent persons<br>(2023)</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">500.000</span>
+                        <span class="stat-label">Missing care workers<br>by 2030</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">16.500</span>
+                        <span class="stat-label">Care homes needing<br>support</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Bullet List -->
+    <div class="section">
+        <h2 class="section-title">2. Bullet List</h2>
+        <p class="section-desc">Formatted lists with emoji support, bold emphasis, and optional nested items.</p>
+        <div class="component-demo">
+            <div class="component">
+                <div class="component-label">Example: Bullet List</div>
+                <h2>Solution: Robotics as a Service</h2>
+                <p><strong>Renting humanoid robots with comprehensive service packages.</strong></p>
+                <h3>Three Pillars</h3>
+                <ul class="bullet-list">
+                    <li><strong>🤖 Hardware:</strong> Market-leading humanoid robots</li>
+                    <li><strong>🎓 Training:</strong> Robotics coaches for optimal use</li>
+                    <li><strong>🔧 Service:</strong> Maintenance, updates, support included</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Text Block with Heading Hierarchy -->
+    <div class="section">
+        <h2 class="section-title">3. Text Block / Rich Content</h2>
+        <p class="section-desc">Complex text layouts with heading hierarchy, paragraphs, and phased sections.</p>
+        <div class="component-demo">
+            <div class="component">
+                <div class="component-label">Example: Text Block</div>
+                <h2>Target Markets</h2>
+
+                <h3>Phase 1: Institutional Market (2026-2028)</h3>
+                <ul class="bullet-list">
+                    <li><strong>Care Homes:</strong> 16,500 facilities</li>
+                    <li><strong>Libraries:</strong> 8,800 public libraries</li>
+                    <li><strong>Schools:</strong> 32,000 general education schools</li>
+                </ul>
+
+                <h3>Phase 2: Private Market (from 2029)</h3>
+                <ul class="bullet-list">
+                    <li><strong>Households:</strong> ~15 million target audience</li>
+                    <li>Conservative scenario: 1% penetration = 150,000 households</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Quote -->
+    <div class="section">
+        <h2 class="section-title">4. Quote</h2>
+        <p class="section-desc">Highlighted quote or testimonial with left border accent.</p>
+        <div class="component-demo">
+            <div class="component">
+                <div class="component-label">Example: Quote</div>
+                <h2>Industry Outlook</h2>
+
+                <div class="quote">
+                    "The next industrial revolution has already begun"
+                </div>
+
+                <p>Global market forecasts show exponential growth in robotics adoption across industries.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Table -->
+    <div class="section">
+        <h2 class="section-title">5. Data Table / Comparison</h2>
+        <p class="section-desc">Structured data display with optional badges, emphasized rows, and comparison styling.</p>
+        <div class="component-demo">
+            <div class="component">
+                <div class="component-label">Example: Comparison Table</div>
+                <h2>Robot Model Comparison</h2>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Price</th>
+                            <th>Use Case</th>
+                            <th>Availability</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Unitree H1</td>
+                            <td>~84,000 €</td>
+                            <td>Industry, Research</td>
+                            <td><span class="badge badge-success">Available</span></td>
+                        </tr>
+                        <tr>
+                            <td>1X NEO</td>
+                            <td>~18,500 €</td>
+                            <td>Service, Household</td>
+                            <td><span class="badge badge-warning">2026</span></td>
+                        </tr>
+                        <tr>
+                            <td>Unitree G1</td>
+                            <td>~15,000 €</td>
+                            <td>Education, Research</td>
+                            <td><span class="badge badge-success">Available</span></td>
+                        </tr>
+                        <tr>
+                            <td>Unitree R1</td>
+                            <td>~5,100 €</td>
+                            <td>Entry-Level, Development</td>
+                            <td><span class="badge badge-success">Available</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Image Frame -->
+    <div class="section">
+        <h2 class="section-title">6. Image Frame</h2>
+        <p class="section-desc">Single image with frame, title, and caption support.</p>
+        <div class="component-demo">
+            <div class="component">
+                <div class="component-label">Example: Image Frame</div>
+                <h2>Product Showcase</h2>
+
+                <div class="image-container">
+                    <div class="image-wrapper">
+                        <div class="image-placeholder"></div>
+                    </div>
+                    <div class="image-content">
+                        <h4>Humanoid Robot System</h4>
+                        <p>Advanced robotic solution for industrial and service applications.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Feature Grid -->
+    <div class="section">
+        <h2 class="section-title">7. Feature Grid</h2>
+        <p class="section-desc">Card-based grid for features with icons, titles, and descriptions.</p>
+        <div class="component-demo">
+            <div class="component">
+                <div class="component-label">Example: Feature Grid</div>
+                <h2>Service Features</h2>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🤖 Hardware</h4>
+                        <p>Market-leading humanoid robots. Regular hardware upgrades included.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🎓 Training</h4>
+                        <p>Comprehensive training by certified robotics coaches.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔧 Maintenance</h4>
+                        <p>Proactive maintenance and repairs by our service team.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📱 Software</h4>
+                        <p>Automatic updates and new features always included.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📞 Support</h4>
+                        <p>24/7 support hotline for critical issues.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔄 Flexibility</h4>
+                        <p>Monthly cancellation, no long-term contracts.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. Process Chain (Vertical) -->
+    <div class="section">
+        <h2 class="section-title">8. Process Chain / Timeline</h2>
+        <p class="section-desc">Vertical timeline showing sequential process steps.</p>
+        <div class="component-demo">
+            <div class="component">
+                <div class="component-label">Example: Vertical Process</div>
+                <h2>Deployment Workflow</h2>
+
+                <div class="process-chain">
+                    <div class="process-step">
+                        <div class="process-number">1</div>
+                        <div class="process-content">
+                            <h4>Needs Assessment</h4>
+                            <p>Analysis of customer requirements and use cases</p>
+                        </div>
+                    </div>
+                    <div class="process-step">
+                        <div class="process-number">2</div>
+                        <div class="process-content">
+                            <h4>Robot Selection</h4>
+                            <p>Choosing the right model based on requirements and budget</p>
+                        </div>
+                    </div>
+                    <div class="process-step">
+                        <div class="process-number">3</div>
+                        <div class="process-content">
+                            <h4>Installation & Setup</h4>
+                            <p>On-site installation and initial configuration</p>
+                        </div>
+                    </div>
+                    <div class="process-step">
+                        <div class="process-number">4</div>
+                        <div class="process-content">
+                            <h4>Training & Coaching</h4>
+                            <p>Comprehensive staff training by robotics coaches</p>
+                        </div>
+                    </div>
+                    <div class="process-step">
+                        <div class="process-number">5</div>
+                        <div class="process-content">
+                            <h4>Operation & Support</h4>
+                            <p>Continuous support, maintenance and updates</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9. Process Horizontal -->
+    <div class="section">
+        <h2 class="section-title">9. Process Horizontal / Timeline</h2>
+        <p class="section-desc">Horizontal timeline with steps and optional connecting arrows.</p>
+        <div class="component-demo">
+            <div class="component">
+                <div class="component-label">Example: Horizontal Process</div>
+                <h2>Sales Process</h2>
+
+                <div class="process-horizontal">
+                    <div class="process-item">
+                        <div class="process-item-circle">1</div>
+                        <div class="process-item-title">Contact</div>
+                        <div class="process-item-desc">Initial conversation</div>
+                    </div>
+                    <div class="process-item">
+                        <div class="process-item-circle">2</div>
+                        <div class="process-item-title">Analysis</div>
+                        <div class="process-item-desc">Check requirements</div>
+                    </div>
+                    <div class="process-item">
+                        <div class="process-item-circle">3</div>
+                        <div class="process-item-title">Proposal</div>
+                        <div class="process-item-desc">Calculate costs</div>
+                    </div>
+                    <div class="process-item">
+                        <div class="process-item-circle">4</div>
+                        <div class="process-item-title">Deployment</div>
+                        <div class="process-item-desc">Installation</div>
+                    </div>
+                    <div class="process-item">
+                        <div class="process-item-circle">5</div>
+                        <div class="process-item-title">Operation</div>
+                        <div class="process-item-desc">Support & Maintenance</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 10. Image Grid -->
+    <div class="section">
+        <h2 class="section-title">10. Image Grid</h2>
+        <p class="section-desc">Multi-image grid layout (2x2, 3x2) with captions and optional badges.</p>
+        <div class="component-demo">
+            <div class="component">
+                <div class="component-label">Example: Image Grid</div>
+                <h2>Product Portfolio</h2>
+
+                <div class="image-grid">
+                    <div class="image-card">
+                        <div class="image-wrapper">
+                            <div class="image-placeholder"></div>
+                        </div>
+                        <div class="image-content">
+                            <h4>Model H1</h4>
+                            <p>High-end industrial robot</p>
+                        </div>
+                    </div>
+                    <div class="image-card">
+                        <div class="image-wrapper">
+                            <div class="image-placeholder"></div>
+                        </div>
+                        <div class="image-content">
+                            <h4>Model G1</h4>
+                            <p>Education and research</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Badge Examples -->
+    <div class="section">
+        <h2 class="section-title">Bonus: Badge System</h2>
+        <p class="section-desc">Status badges for tables and components (success, warning, danger).</p>
+        <div class="component-demo">
+            <div class="component">
+                <div class="component-label">Example: Badges</div>
+                <p>
+                    <span class="badge badge-success">✓ Available</span>
+                    <span class="badge badge-warning">⏱ Pending</span>
+                    <span class="badge badge-danger">✕ Error</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -217,10 +217,41 @@ MIXED CONTENT (stats + bullets + image):
             SlideBlueprint as dict
         """
 
-        # Build context for the LLM
+        # Build context for the LLM (enhanced with JSON schema if available)
         design_context = ""
         if design_system:
-            design_context = f"""Available Components: {design_system.get('available_components', ['stat-grid', 'bullet-list', 'quote', 'text', 'image-frame'])}
+            # Check if we have component schemas from design-guide.json
+            components_schema = design_system.get('components_schema', [])
+            layouts = design_system.get('layouts', [])
+
+            if components_schema:
+                # Enhanced context with JSON schema details
+                design_context = f"""═══════════════════════════════════════════════════════════
+📦 DESIGN SYSTEM (from design-guide.json)
+═══════════════════════════════════════════════════════════
+
+Available Components ({len(components_schema)} types):
+"""
+                for comp in components_schema:
+                    comp_id = comp.get('id', 'unknown')
+                    comp_name = comp.get('name', '')
+                    comp_desc = comp.get('description', '')
+                    slots = comp.get('slots', {})
+                    design_context += f"\n• {comp_id} ({comp_name})"
+                    design_context += f"\n  Description: {comp_desc}"
+                    design_context += f"\n  Slots: {list(slots.keys())}"
+
+                if layouts:
+                    design_context += f"\n\nAvailable Layouts ({len(layouts)} patterns):\n"
+                    for layout in layouts:
+                        layout_id = layout.get('id', 'unknown')
+                        layout_desc = layout.get('description', '')
+                        design_context += f"• {layout_id}: {layout_desc}\n"
+
+                design_context += f"\nMax Components per Slide: {design_system.get('max_components', 3)}\n"
+            else:
+                # Fallback to simple component list (Markdown-based)
+                design_context = f"""Available Components: {design_system.get('available_components', ['stat-grid', 'bullet-list', 'quote', 'text', 'image-frame'])}
 Max Components per Slide: {design_system.get('max_components', 3)}
 Spacing: {design_system.get('spacing', 'standard')}
 """

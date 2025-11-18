@@ -1,0 +1,492 @@
+{
+  "theme": "github",
+  "name": "GitHub Design",
+  "description": "Professional, clean design based on GitHub's design system with green accent color",
+  "version": "1.0.0",
+
+  "tokens": {
+    "colors": {
+      "primary": {
+        "main": "#238636",
+        "light": "#2ea043",
+        "dark": "#1a7f37",
+        "name": "GitHub Green",
+        "usage": "Primary accent for highlights and interactive elements"
+      },
+      "background": {
+        "main": "#ffffff",
+        "subtle": "#f6f8fa",
+        "component": "#ffffff",
+        "overlay": "#ffffff",
+        "name": "White backgrounds"
+      },
+      "text": {
+        "primary": "#24292f",
+        "secondary": "#57606a",
+        "muted": "#6e7781",
+        "onPrimary": "#ffffff",
+        "name": "Text colors"
+      },
+      "border": {
+        "main": "#d0d7de",
+        "muted": "#d8dee4",
+        "hover": "#238636",
+        "name": "Border colors"
+      },
+      "semantic": {
+        "success": {
+          "bg": "#dff6e8",
+          "text": "#0a3f20",
+          "border": "#1a7f37",
+          "name": "Success/Available"
+        },
+        "warning": {
+          "bg": "#fff8c5",
+          "text": "#7d4e00",
+          "border": "#9a6700",
+          "name": "Warning/Pending"
+        },
+        "danger": {
+          "bg": "#ffebe9",
+          "text": "#82071e",
+          "border": "#cf222e",
+          "name": "Danger/Error"
+        },
+        "accent": {
+          "main": "#0969da",
+          "name": "Secondary accent (blue)"
+        }
+      }
+    },
+
+    "typography": {
+      "fontFamily": {
+        "default": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'",
+        "mono": "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+        "name": "System Font Stack"
+      },
+      "fontWeights": {
+        "light": 400,
+        "normal": 400,
+        "medium": 500,
+        "semibold": 600,
+        "bold": 700
+      },
+      "lineHeights": {
+        "tight": 1.4,
+        "normal": 1.6,
+        "relaxed": 1.8
+      },
+      "headings": {
+        "h1": {
+          "fontSize": "48px",
+          "fontWeight": 700,
+          "lineHeight": 1.2
+        },
+        "h2": {
+          "fontSize": "32px",
+          "fontWeight": 600,
+          "lineHeight": 1.2
+        },
+        "h3": {
+          "fontSize": "24px",
+          "fontWeight": 600,
+          "lineHeight": 1.3
+        },
+        "h4": {
+          "fontSize": "20px",
+          "fontWeight": 600,
+          "lineHeight": 1.3
+        }
+      },
+      "body": {
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.6
+      }
+    },
+
+    "spacing": {
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "2xl": "48px"
+    },
+
+    "borderRadius": {
+      "sm": "3px",
+      "md": "6px",
+      "lg": "12px",
+      "full": "50%"
+    },
+
+    "shadows": {
+      "sm": "0 1px 3px rgba(0,0,0,0.12)",
+      "md": "0 2px 8px rgba(0,0,0,0.1)",
+      "lg": "0 4px 12px rgba(35, 134, 54, 0.15)",
+      "xl": "0 8px 24px rgba(140, 149, 159, 0.2)"
+    }
+  },
+
+  "components": [
+    {
+      "id": "stat-grid",
+      "name": "Statistic Grid",
+      "description": "Display multiple statistics in a grid layout with numbers, labels, and optional units/sources",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "stats": {
+          "type": "array",
+          "description": "Array of statistics",
+          "items": {
+            "value": "string (required) - The number or statistic (e.g., '83,6 Mio')",
+            "unit": "string (optional) - Unit suffix (e.g., 'Mio', '%', '€')",
+            "label": "string (required) - Description of the statistic",
+            "source": "string (optional) - Attribution or data source"
+          }
+        }
+      },
+      "cssClasses": ["component", "stat-grid", "stat-card"],
+      "gridColumns": "auto-fit, minmax(200px, 1fr)",
+      "responsive": true
+    },
+    {
+      "id": "bullet-list",
+      "name": "Bullet List",
+      "description": "Formatted list with bullet points, emoji support, and optional bold text emphasis",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "intro": {
+          "type": "string",
+          "description": "Introductory paragraph (optional)"
+        },
+        "items": {
+          "type": "array",
+          "description": "List items",
+          "items": {
+            "text": "string - HTML content with potential <strong> and emoji",
+            "nested": "array (optional) - Sub-bullets"
+          }
+        }
+      },
+      "cssClasses": ["component", "bullet-list"],
+      "features": ["emoji-support", "bold-emphasis", "icon-leading"]
+    },
+    {
+      "id": "text",
+      "name": "Text Block",
+      "description": "Rich text with support for headings, paragraphs, and nested lists (phased structures)",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "content": {
+          "type": "string",
+          "description": "HTML content with h2, h3, p, ul, ol"
+        }
+      },
+      "cssClasses": ["component", "text-block"],
+      "features": ["heading-hierarchy", "nested-lists", "phased-sections"]
+    },
+    {
+      "id": "quote",
+      "name": "Quote",
+      "description": "Highlighted quote or testimonial with left border accent",
+      "type": "container",
+      "slots": {
+        "text": {
+          "type": "string",
+          "description": "Quote text"
+        },
+        "author": {
+          "type": "string",
+          "description": "Quote author (optional)"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source attribution (optional)"
+        }
+      },
+      "cssClasses": ["component", "quote"],
+      "borderColor": "primary"
+    },
+    {
+      "id": "table",
+      "name": "Data Table",
+      "description": "Structured data display with optional badges, emphasized rows, and comparison styling",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "headers": {
+          "type": "array",
+          "description": "Table column headers"
+        },
+        "rows": {
+          "type": "array",
+          "description": "Table rows (each row is array of cells)"
+        },
+        "tableClass": {
+          "type": "string",
+          "description": "CSS class for table styling (comparison-table, financial-table)"
+        },
+        "cellBadges": {
+          "type": "boolean",
+          "description": "Enable badge styling for cells"
+        },
+        "badgeType": {
+          "type": "string",
+          "description": "Badge style (success, warning, danger)"
+        },
+        "emphasisRows": {
+          "type": "array",
+          "description": "Zero-indexed row numbers to highlight"
+        }
+      },
+      "cssClasses": ["component", "table", "comparison-table"],
+      "features": ["badges", "emphasis-rows", "responsive"]
+    },
+    {
+      "id": "image-frame",
+      "name": "Image Frame",
+      "description": "Single image with frame, title, and caption support",
+      "type": "media",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "imageSrc": {
+          "type": "string",
+          "description": "Image file path (e.g., 'projects/beispiel-projekt/images/uploads/image.jpg')"
+        },
+        "imageTitle": {
+          "type": "string",
+          "description": "Image title (optional)"
+        },
+        "caption": {
+          "type": "string",
+          "description": "Image caption/description"
+        },
+        "altText": {
+          "type": "string",
+          "description": "Alternative text for accessibility"
+        }
+      },
+      "cssClasses": ["component", "image-container", "image-wrapper"],
+      "features": ["responsive", "alt-text", "caption-support"],
+      "aspectRatio": "auto"
+    },
+    {
+      "id": "image-grid",
+      "name": "Image Grid",
+      "description": "Multi-image grid layout (2x2, 3x2, 2x3) with captions and badges",
+      "type": "media",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "gridLayout": {
+          "type": "string",
+          "description": "Grid layout (grid-2x2, grid-3x2, grid-2x3)"
+        },
+        "images": {
+          "type": "array",
+          "description": "Image items",
+          "items": {
+            "src": "string - Image path",
+            "title": "string (optional) - Image title",
+            "caption": "string (optional) - Image caption",
+            "altText": "string - Alt text",
+            "badge": "string (optional) - Badge text/color"
+          }
+        }
+      },
+      "cssClasses": ["component", "image-grid"],
+      "gridOptions": ["grid-2x2", "grid-3x2", "grid-2x3"],
+      "responsive": true
+    },
+    {
+      "id": "feature-grid",
+      "name": "Feature Grid",
+      "description": "Card-based grid for features, with icons, titles, and descriptions",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "features": {
+          "type": "array",
+          "description": "Feature items",
+          "items": {
+            "icon": "string - Emoji or icon",
+            "title": "string - Feature title",
+            "description": "string - Feature description"
+          }
+        }
+      },
+      "cssClasses": ["component", "feature-grid", "feature-card"],
+      "gridColumns": "auto-fit, minmax(240px, 1fr)",
+      "cardStyle": "subtle-bg",
+      "interactive": true
+    },
+    {
+      "id": "process",
+      "name": "Process Chain",
+      "description": "Vertical timeline/process steps with numbers and descriptions",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "steps": {
+          "type": "array",
+          "description": "Process steps",
+          "items": {
+            "number": "number - Step number",
+            "title": "string - Step title",
+            "description": "string - Step description"
+          }
+        }
+      },
+      "cssClasses": ["component", "process-chain", "process-step"],
+      "layout": "vertical",
+      "connector": "vertical-line"
+    },
+    {
+      "id": "process-horizontal",
+      "name": "Process Horizontal",
+      "description": "Horizontal timeline with steps, arrows, and optional timing",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "items": {
+          "type": "array",
+          "description": "Process items",
+          "items": {
+            "number": "number - Item number",
+            "title": "string - Item title",
+            "description": "string (optional) - Item description",
+            "time": "string (optional) - Time/duration"
+          }
+        }
+      },
+      "cssClasses": ["component", "process-horizontal", "process-item"],
+      "layout": "horizontal",
+      "connector": "arrow-line",
+      "responsive": true,
+      "responsiveFallback": "vertical"
+    }
+  ],
+
+  "layouts": [
+    {
+      "id": "title_single_component",
+      "name": "Title + Single Component",
+      "description": "Slide title with one main component",
+      "components": 1,
+      "pattern": "title_component"
+    },
+    {
+      "id": "title_two_components",
+      "name": "Title + Two Components",
+      "description": "Slide title with two side-by-side components",
+      "components": 2,
+      "pattern": "title_two_columns"
+    },
+    {
+      "id": "title_three_components",
+      "name": "Title + Three Components",
+      "description": "Slide title with three stacked components",
+      "components": 3,
+      "pattern": "title_three_stacked"
+    },
+    {
+      "id": "title_statgrid_text",
+      "name": "Title + Stat Grid + Text",
+      "description": "Common pattern: title with statistics and supporting text",
+      "components": 2,
+      "componentTypes": ["stat-grid", "text"],
+      "pattern": "title_hero_stats_text"
+    },
+    {
+      "id": "title_two_columns",
+      "name": "Two Column Layout",
+      "description": "Side-by-side components (image + text or feature + details)",
+      "components": 2,
+      "layout": "two-columns"
+    }
+  ],
+
+  "componentBestPractices": {
+    "stat-grid": {
+      "maxCards": 4,
+      "recommendedLayout": "2-column or 4-column",
+      "multiLineLabels": true,
+      "sourceAttribution": "optional, appended in parentheses"
+    },
+    "bullet-list": {
+      "maxItems": 5,
+      "emojiSupport": true,
+      "boldFirstPhrase": "recommended for emphasis",
+      "nestedDepth": "1-2 levels"
+    },
+    "table": {
+      "maxRows": 6,
+      "badgeSupport": true,
+      "emphasisRows": "use for key metrics",
+      "responsiveBreakpoint": "768px"
+    },
+    "image-grid": {
+      "standardLayouts": ["2x2", "3x2"],
+      "minImageHeight": "200px",
+      "captionSupport": true,
+      "badgeOverlay": true
+    },
+    "feature-grid": {
+      "maxFeatures": 6,
+      "emojiIcons": true,
+      "cardMinWidth": "240px",
+      "interactiveHover": true
+    }
+  },
+
+  "colorAccessibility": {
+    "contrastRatio": {
+      "primary_white": "6.5:1 (AAA)",
+      "primary_light": "5.2:1 (AA)",
+      "text_bg": "12.6:1 (AAA)"
+    },
+    "semanticMeanings": {
+      "success": "green - available, approved, complete",
+      "warning": "yellow - pending, caution, attention needed",
+      "danger": "red - error, blocked, critical"
+    }
+  },
+
+  "responsiveBreakpoints": {
+    "desktop": "≥1024px",
+    "tablet": "768px - 1023px",
+    "mobile": "<768px"
+  }
+}

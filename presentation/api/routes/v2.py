@@ -22,8 +22,9 @@ from agents.content_analyzer_v2 import ContentAnalyzerAgentV2
 from agents.presentation_strategist_v2 import PresentationStrategistAgentV2
 from agents.content_generator_v2 import ContentGeneratorAgentV2
 from renderers.component_renderer import HTMLComponentRenderer, Theme, render_styled_slide
-from config import OPENAI_API_KEY, TEST_MODE, DEFAULT_MODEL
+from config import OPENAI_API_KEY, TEST_MODE, DEFAULT_MODEL, PROJECTS_BASE_PATH
 from services.file_service import FileService
+from services.style_parser import StyleParser
 
 router = APIRouter(prefix="/api/v2", tags=["v2"])
 
@@ -102,18 +103,14 @@ async def generate_slide_v2(
             model=DEFAULT_MODEL,
         )
 
-        design_system = {
-            "available_components": [
-                "stat-grid",
-                "bullet-list",
-                "quote",
-                "text",
-                "image-frame",
-                "process",
-                "table",
-            ],
-            "max_components": 3,
-        }
+        # Load design system from project (includes components_schema from design-guide.json)
+        project_path = os.path.join(PROJECTS_BASE_PATH, project_name)
+        style_parser = StyleParser(project_path)
+        design_system = style_parser.parse_project_style()
+
+        # Fallback for basic fields if not in parsed style
+        if "max_components" not in design_system:
+            design_system["max_components"] = 3
 
         image_metadata = None
         if images:
@@ -151,6 +148,7 @@ async def generate_slide_v2(
                 slide_blueprint=blueprint,
                 content_blocks=content_blocks,
                 language=language,
+                design_system=design_system,  # Pass for slot validation
             )
 
             # Check if valid
@@ -208,8 +206,6 @@ async def generate_slide_v2(
         # Save HTML and Markdown if project_name provided
         if project_name and slide_number:
             try:
-                from config import PROJECTS_BASE_PATH
-
                 project_path = os.path.join(PROJECTS_BASE_PATH, project_name)
                 file_service = FileService(project_path=project_path)
 

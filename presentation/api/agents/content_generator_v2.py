@@ -411,15 +411,75 @@ OUTPUT (FormattedSlide):
 ═══════════════════════════════════════════════════════════
 """
 
+    def _validate_component_slots(
+        self,
+        component: Dict[str, Any],
+        components_schema: List[Dict[str, Any]],
+    ) -> List[str]:
+        """
+        Validate a component against design-guide.json schema
+
+        Returns:
+            List of warning messages (empty if valid)
+        """
+        warnings = []
+        component_type = component.get("type", "unknown")
+
+        # Find schema for this component type
+        schema = None
+        for comp_schema in components_schema:
+            if comp_schema.get("id") == component_type:
+                schema = comp_schema
+                break
+
+        if not schema:
+            # Component type not in schema, skip validation
+            return warnings
+
+        # Get required slots
+        slots = schema.get("slots", {})
+        component_id = component.get("component_id", "unknown")
+
+        for slot_name, slot_def in slots.items():
+            slot_required = slot_def.get("required", False)
+            slot_type = slot_def.get("type", "string")
+
+            # Check if slot exists in component
+            if slot_required and slot_name not in component:
+                warnings.append(
+                    f"Component '{component_id}' (type: {component_type}) is missing required slot '{slot_name}'"
+                )
+            elif slot_name in component:
+                # Validate slot type
+                actual_value = component[slot_name]
+                if slot_type == "array" and not isinstance(actual_value, list):
+                    warnings.append(
+                        f"Component '{component_id}' slot '{slot_name}' should be array, got {type(actual_value).__name__}"
+                    )
+                elif slot_type == "string" and not isinstance(actual_value, str):
+                    warnings.append(
+                        f"Component '{component_id}' slot '{slot_name}' should be string, got {type(actual_value).__name__}"
+                    )
+
+        return warnings
+
     def generate(
         self,
         slide_title: str,
         slide_blueprint: Dict[str, Any],
         content_blocks: List[Dict[str, Any]],
         language: str = "de",
+        design_system: Optional[Dict[str, Any]] = None,
     ) -> Union[Dict[str, Any], ValidationResult]:
         """
         Generate formatted slide content with validation
+
+        Args:
+            slide_title: Title of the slide
+            slide_blueprint: Component layout plan from Agent 2
+            content_blocks: Raw content from Agent 1
+            language: Output language (de/en)
+            design_system: Design system with components_schema for validation
 
         Returns:
             FormattedSlide dict (if valid) or ValidationResult dict (if needs feedback)
@@ -475,7 +535,7 @@ If any component is overloaded, return ValidationResult instead."""
                 }
             else:
                 # Success! Return formatted slide
-                return {
+                formatted_slide = {
                     "slide_title": result.get("slide_title", slide_title),
                     "slide_subtitle": result.get("slide_subtitle"),
                     "components": result.get("components", []),
@@ -484,6 +544,26 @@ If any component is overloaded, return ValidationResult instead."""
                     "readability_score": result.get("readability_score", "medium"),
                     "accessibility_notes": result.get("accessibility_notes", []),
                 }
+
+                # Validate component slots against design-guide.json schema (if available)
+                validation_warnings = []
+                if design_system and "components_schema" in design_system:
+                    components_schema = design_system["components_schema"]
+                    for component in formatted_slide["components"]:
+                        slot_warnings = self._validate_component_slots(
+                            component, components_schema
+                        )
+                        validation_warnings.extend(slot_warnings)
+
+                # Add validation warnings to response (if any)
+                if validation_warnings:
+                    formatted_slide["validation_warnings"] = validation_warnings
+                    # Log warnings to console for developer visibility
+                    print("⚠️ Component slot validation warnings:")
+                    for warning in validation_warnings:
+                        print(f"   - {warning}")
+
+                return formatted_slide
 
         except Exception as e:
             raise Exception(f"ContentGeneratorV2 error: {str(e)}")
