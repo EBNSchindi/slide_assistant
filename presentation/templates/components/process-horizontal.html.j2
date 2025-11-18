@@ -1,0 +1,22 @@
+{% if title %}  <h2>{{ title }}</h2>
+{% endif %}{% if subtitle %}  <p>{{ subtitle }}</p>
+{% endif %}
+  <div class="process-horizontal">
+{% for step in steps %}
+    <div class="process-item">
+      <div class="process-item-circle">{{ loop.index }}</div>
+      <div class="process-item-content">
+        <h4 class="process-item-title">{{ step.title }}</h4>
+{%- if step.description %}
+        <p class="process-item-desc">{{ step.description }}</p>
+{%- endif %}
+{%- if step.timeframe %}
+        <span class="process-item-time">{{ step.timeframe }}</span>
+{%- endif %}
+      </div>
+{%- if not loop.last and show_arrows %}
+      <div class="process-arrow">→</div>
+{%- endif %}
+    </div>
+{% endfor %}
+  </div>

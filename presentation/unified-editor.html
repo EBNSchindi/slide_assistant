@@ -1829,29 +1829,29 @@ Any specific requirements or limitations?
             agentStepsPanel.innerHTML = '';
 
             try {
-                // Collect image filenames for the request
-                const imageReferences = uploadedImages
+                // Collect image data for the request (v2 format)
+                const images = uploadedImages
                     .filter(img => !img.uploading && img.filename)
-                    .map(img => img.filename);
+                    .map(img => ({
+                        filename: img.filename,
+                        description: img.original_filename || img.filename
+                    }));
 
-                // DEBUG: Log image data before sending to API
-                console.log('=== DEBUG IMAGE UPLOAD (Frontend) ===');
-                console.log('uploadedImages:', uploadedImages);
-                console.log('imageReferences:', imageReferences);
-                console.log('Sending to API:', { image_references: imageReferences });
-                console.log('=====================================');
+                // Generate slide number (use current timestamp or increment)
+                const slideNumber = Date.now() % 1000; // Simple slide number
 
-                const response = await fetch(`${API_BASE}/generate`, {
+                // Use v2 API endpoint
+                const response = await fetch(`${API_BASE}/v2/generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         project_name: currentProject,
+                        slide_number: slideNumber,
                         user_input: userInput.value,
                         slide_title: slideTitle.value || null,
-                        image_references: imageReferences.length > 0 ? imageReferences : null,
-                        preferences: {
-                            generate_variants: document.getElementById('generateVariantsCheckbox').checked
-                        }
+                        theme: currentStyle || 'github',
+                        language: 'de',
+                        images: images.length > 0 ? images : []
                     }),
                 });
 
@@ -1861,25 +1861,33 @@ Any specific requirements or limitations?
                     throw new Error(data.detail || 'Generation failed');
                 }
 
-                // Show agent steps
-                if (data.agent_steps) {
-                    data.agent_steps.forEach(step => {
-                        const stepEl = document.createElement('div');
-                        stepEl.className = `agent-step ${step.status}`;
-                        stepEl.innerHTML = `
-                            <div class="agent-step-name">
-                                ${step.status === 'completed' ? '✓' : step.status === 'error' ? '✗' : '⏳'}
-                                ${step.agent_name}
-                            </div>
-                            <div class="agent-step-status">${step.output || step.error || 'Processing...'}</div>
-                        `;
-                        agentStepsPanel.appendChild(stepEl);
-                    });
+                // Show agent steps (v2 doesn't return agent_steps, but we can show iteration info)
+                if (data.iteration_count) {
+                    const stepEl = document.createElement('div');
+                    stepEl.className = 'agent-step completed';
+                    stepEl.innerHTML = `
+                        <div class="agent-step-name">
+                            ✓ v2 Pipeline Complete
+                        </div>
+                        <div class="agent-step-status">Generated in ${data.iteration_count} iteration(s)</div>
+                    `;
+                    agentStepsPanel.appendChild(stepEl);
                 }
 
                 if (data.success) {
-                    currentSlides = data.generated_slides;
-                    displayPreviews(data.generated_slides);
+                    // Convert v2 response to display format
+                    const slide = {
+                        slide_title: data.formatted_slide?.slide_title || slideTitle.value || 'Untitled',
+                        slide_name: `folie-${slideNumber.toString().padStart(2, '0')}`,
+                        html_content: data.html,
+                        markdown: data.markdown,
+                        components: data.formatted_slide?.components?.map(c => c.type) || [],
+                        blueprint: data.slide_blueprint,
+                        formatted_slide: data.formatted_slide
+                    };
+                    
+                    currentSlides = [slide];
+                    displayPreviews(currentSlides);
                     // Refresh slide browser to show newly generated slides
                     loadProjectSlides(currentProject);
                 } else {
