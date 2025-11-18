@@ -21,6 +21,9 @@ Diese PR integriert die neue v2-API-Architektur mit dem Frontend und behebt Test
 ### Agent Improvements
 - ✅ `content_analyzer_v2.py` mit verbesserten Markdown-Table-Detection
 
+### API Improvements
+- ✅ Root endpoint (`/`) hinzugefügt, um 404-Fehler zu vermeiden
+
 ## 📊 Test-Ergebnisse
 
 ```
@@ -72,6 +75,8 @@ Alle v2-Tests bestehen:
 
 ## 📝 Commits
 
+- `b3331b7` Fix: Add root endpoint to prevent 404 errors on /
+- `6bf3f67` Optimize: V2 Agent Prompts für verbesserte feature-grid Erkennung
 - `dead059` Feat: Integrate v2 API with frontend and fix test imports
 - `0f4e4f4` Fix: Regenerate folie 713 with complete markdown table data
 - `3da5a92` Fix: Add markdown table detection to v2 agents
