@@ -1,0 +1,516 @@
+{
+  "theme": "minimal",
+  "name": "Minimal Design",
+  "description": "Minimalist design with reduced colors, no shadows, clean lines and essential elements only",
+  "version": "1.0.0",
+
+  "tokens": {
+    "colors": {
+      "primary": {
+        "main": "#666666",
+        "light": "#999999",
+        "dark": "#333333",
+        "name": "Minimal Gray",
+        "usage": "Primary accent for highlights and interactive elements"
+      },
+      "background": {
+        "main": "#ffffff",
+        "subtle": "#f9f9f9",
+        "component": "#ffffff",
+        "overlay": "#ffffff",
+        "name": "White backgrounds"
+      },
+      "text": {
+        "primary": "#1a1a1a",
+        "secondary": "#666666",
+        "muted": "#999999",
+        "onPrimary": "#ffffff",
+        "name": "Text colors"
+      },
+      "border": {
+        "main": "#e5e5e5",
+        "muted": "#f0f0f0",
+        "hover": "#666666",
+        "name": "Border colors"
+      },
+      "semantic": {
+        "success": {
+          "bg": "#e8f5e9",
+          "text": "#2e7d32",
+          "border": "#4caf50",
+          "name": "Success/Available"
+        },
+        "warning": {
+          "bg": "#fff9c4",
+          "text": "#f57f17",
+          "border": "#fbc02d",
+          "name": "Warning/Pending"
+        },
+        "danger": {
+          "bg": "#ffebee",
+          "text": "#c62828",
+          "border": "#ef5350",
+          "name": "Danger/Error"
+        },
+        "accent": {
+          "main": "#424242",
+          "name": "Secondary accent (dark gray)"
+        }
+      }
+    },
+
+    "typography": {
+      "fontFamily": {
+        "default": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif",
+        "mono": "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+        "name": "System Font Stack"
+      },
+      "fontWeights": {
+        "light": 300,
+        "normal": 400,
+        "medium": 500,
+        "semibold": 500,
+        "bold": 600
+      },
+      "lineHeights": {
+        "tight": 1.3,
+        "normal": 1.5,
+        "relaxed": 1.7
+      },
+      "headings": {
+        "h1": {
+          "fontSize": "48px",
+          "fontWeight": 600,
+          "lineHeight": 1.2
+        },
+        "h2": {
+          "fontSize": "32px",
+          "fontWeight": 500,
+          "lineHeight": 1.25
+        },
+        "h3": {
+          "fontSize": "24px",
+          "fontWeight": 500,
+          "lineHeight": 1.3
+        },
+        "h4": {
+          "fontSize": "20px",
+          "fontWeight": 500,
+          "lineHeight": 1.4
+        }
+      },
+      "body": {
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.5
+      }
+    },
+
+    "spacing": {
+      "xs": "4px",
+      "sm": "8px",
+      "md": "16px",
+      "lg": "24px",
+      "xl": "32px",
+      "2xl": "48px"
+    },
+
+    "borderRadius": {
+      "sm": "2px",
+      "md": "4px",
+      "lg": "8px",
+      "full": "50%"
+    },
+
+    "shadows": {
+      "none": "none",
+      "sm": "0 1px 2px rgba(0, 0, 0, 0.05)",
+      "md": "0 1px 3px rgba(0, 0, 0, 0.08)",
+      "lg": "0 2px 4px rgba(0, 0, 0, 0.1)",
+      "xl": "0 2px 4px rgba(0, 0, 0, 0.1)"
+    }
+  },
+
+  "components": [
+    {
+      "id": "stat-grid",
+      "name": "Statistic Grid",
+      "description": "Display multiple statistics in a grid layout with numbers and labels only",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "stats": {
+          "type": "array",
+          "description": "Array of statistics",
+          "items": {
+            "value": "string (required) - The number or statistic (e.g., '83,6 Mio')",
+            "unit": "string (optional) - Unit suffix (e.g., 'Mio', '%', '€')",
+            "label": "string (required) - Description of the statistic",
+            "source": "string (optional) - Attribution or data source"
+          }
+        }
+      },
+      "cssClasses": ["component", "stat-grid", "stat-card"],
+      "gridColumns": "auto-fit, minmax(180px, 1fr)",
+      "responsive": true,
+      "cardStyle": "minimal-flat",
+      "borderOnly": true
+    },
+    {
+      "id": "bullet-list",
+      "name": "Bullet List",
+      "description": "Simple list with bullet points and optional bold text emphasis",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "intro": {
+          "type": "string",
+          "description": "Introductory paragraph (optional)"
+        },
+        "items": {
+          "type": "array",
+          "description": "List items",
+          "items": {
+            "text": "string - Plain text or HTML with <strong> only",
+            "nested": "array (optional) - Sub-bullets"
+          }
+        }
+      },
+      "cssClasses": ["component", "bullet-list"],
+      "features": ["bold-emphasis"],
+      "listStyle": "minimal-dot"
+    },
+    {
+      "id": "text",
+      "name": "Text Block",
+      "description": "Simple text with headings and paragraphs",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "content": {
+          "type": "string",
+          "description": "HTML content with h2, h3, p, ul, ol"
+        }
+      },
+      "cssClasses": ["component", "text-block"],
+      "features": ["heading-hierarchy", "nested-lists"],
+      "style": "minimal"
+    },
+    {
+      "id": "quote",
+      "name": "Quote",
+      "description": "Simple quote with optional attribution",
+      "type": "container",
+      "slots": {
+        "text": {
+          "type": "string",
+          "description": "Quote text"
+        },
+        "author": {
+          "type": "string",
+          "description": "Quote author (optional)"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source attribution (optional)"
+        }
+      },
+      "cssClasses": ["component", "quote"],
+      "style": "minimal-italic",
+      "borderLeft": "1px"
+    },
+    {
+      "id": "table",
+      "name": "Data Table",
+      "description": "Structured data display with minimal styling",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "headers": {
+          "type": "array",
+          "description": "Table column headers"
+        },
+        "rows": {
+          "type": "array",
+          "description": "Table rows (each row is array of cells)"
+        },
+        "tableClass": {
+          "type": "string",
+          "description": "CSS class for table styling"
+        },
+        "cellBadges": {
+          "type": "boolean",
+          "description": "Enable badge styling for cells"
+        },
+        "badgeType": {
+          "type": "string",
+          "description": "Badge style (success, warning, danger)"
+        },
+        "emphasisRows": {
+          "type": "array",
+          "description": "Zero-indexed row numbers to highlight"
+        }
+      },
+      "cssClasses": ["component", "table"],
+      "features": ["badges", "minimal-styling"],
+      "borderCollapse": "true",
+      "borderOnly": true
+    },
+    {
+      "id": "image-frame",
+      "name": "Image Frame",
+      "description": "Single image with minimal frame and optional caption",
+      "type": "media",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "imageSrc": {
+          "type": "string",
+          "description": "Image file path"
+        },
+        "imageTitle": {
+          "type": "string",
+          "description": "Image title (optional)"
+        },
+        "caption": {
+          "type": "string",
+          "description": "Image caption (optional)"
+        },
+        "altText": {
+          "type": "string",
+          "description": "Alternative text for accessibility"
+        }
+      },
+      "cssClasses": ["component", "image-container", "image-wrapper"],
+      "features": ["responsive", "alt-text"],
+      "aspectRatio": "auto",
+      "cornerRadius": "2px",
+      "border": "1px solid #e5e5e5"
+    },
+    {
+      "id": "image-grid",
+      "name": "Image Grid",
+      "description": "Multi-image grid with minimal styling",
+      "type": "media",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "gridLayout": {
+          "type": "string",
+          "description": "Grid layout (grid-2x2, grid-3x2)"
+        },
+        "images": {
+          "type": "array",
+          "description": "Image items",
+          "items": {
+            "src": "string - Image path",
+            "title": "string (optional) - Image title",
+            "caption": "string (optional) - Image caption",
+            "altText": "string - Alt text",
+            "badge": "string (optional) - Badge text/color"
+          }
+        }
+      },
+      "cssClasses": ["component", "image-grid"],
+      "gridOptions": ["grid-2x2", "grid-3x2"],
+      "responsive": true,
+      "borderOnly": true
+    },
+    {
+      "id": "feature-grid",
+      "name": "Feature Grid",
+      "description": "Simple card grid for features with minimal styling",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "features": {
+          "type": "array",
+          "description": "Feature items",
+          "items": {
+            "icon": "string - Emoji or icon",
+            "title": "string - Feature title",
+            "description": "string - Feature description"
+          }
+        }
+      },
+      "cssClasses": ["component", "feature-grid", "feature-card"],
+      "gridColumns": "auto-fit, minmax(200px, 1fr)",
+      "cardStyle": "minimal-border",
+      "interactive": false
+    },
+    {
+      "id": "process",
+      "name": "Process Chain",
+      "description": "Vertical timeline/process steps with minimal styling",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "steps": {
+          "type": "array",
+          "description": "Process steps",
+          "items": {
+            "number": "number - Step number",
+            "title": "string - Step title",
+            "description": "string - Step description"
+          }
+        }
+      },
+      "cssClasses": ["component", "process-chain", "process-step"],
+      "layout": "vertical",
+      "connector": "minimal-line"
+    },
+    {
+      "id": "process-horizontal",
+      "name": "Process Horizontal",
+      "description": "Horizontal timeline with minimal design",
+      "type": "container",
+      "slots": {
+        "title": {
+          "type": "string",
+          "description": "Component title (optional)"
+        },
+        "items": {
+          "type": "array",
+          "description": "Process items",
+          "items": {
+            "number": "number - Item number",
+            "title": "string - Item title",
+            "description": "string (optional) - Item description",
+            "time": "string (optional) - Time/duration"
+          }
+        }
+      },
+      "cssClasses": ["component", "process-horizontal", "process-item"],
+      "layout": "horizontal",
+      "connector": "minimal-arrow",
+      "responsive": true
+    }
+  ],
+
+  "layouts": [
+    {
+      "id": "title_single_component",
+      "name": "Title + Single Component",
+      "description": "Slide title with one main component",
+      "components": 1,
+      "pattern": "title_component"
+    },
+    {
+      "id": "title_two_components",
+      "name": "Title + Two Components",
+      "description": "Slide title with two side-by-side components",
+      "components": 2,
+      "pattern": "title_two_columns",
+      "spacing": "16px"
+    },
+    {
+      "id": "title_three_components",
+      "name": "Title + Three Components",
+      "description": "Slide title with three stacked components",
+      "components": 3,
+      "pattern": "title_three_stacked",
+      "spacing": "12px"
+    },
+    {
+      "id": "title_statgrid_text",
+      "name": "Title + Stat Grid + Text",
+      "description": "Common pattern: title with statistics and supporting text",
+      "components": 2,
+      "componentTypes": ["stat-grid", "text"],
+      "pattern": "title_stats_text"
+    },
+    {
+      "id": "title_two_columns",
+      "name": "Two Column Layout",
+      "description": "Side-by-side components",
+      "components": 2,
+      "layout": "two-columns",
+      "gapSize": "16px"
+    }
+  ],
+
+  "componentBestPractices": {
+    "stat-grid": {
+      "maxCards": 4,
+      "recommendedLayout": "2-column or 4-column",
+      "multiLineLabels": false,
+      "sourceAttribution": "minimal",
+      "borderOnly": true
+    },
+    "bullet-list": {
+      "maxItems": 5,
+      "emojiSupport": false,
+      "boldFirstPhrase": "optional",
+      "nestedDepth": "1 level maximum",
+      "itemSpacing": "4px"
+    },
+    "table": {
+      "maxRows": 6,
+      "badgeSupport": true,
+      "responsiveBreakpoint": "768px",
+      "borderOnly": true,
+      "minimumBorders": true
+    },
+    "image-grid": {
+      "standardLayouts": ["2x2"],
+      "minImageHeight": "200px",
+      "captionSupport": true,
+      "borderOnly": true
+    },
+    "feature-grid": {
+      "maxFeatures": 6,
+      "emojiIcons": false,
+      "cardMinWidth": "200px",
+      "interactiveHover": false
+    }
+  },
+
+  "designPrinciples": {
+    "simplicity": "Only essential elements, no decorations",
+    "borders": "Thin 1px borders instead of shadows",
+    "typography": "Lighter weights for modern minimalism",
+    "spacing": "Reduced padding and gaps",
+    "colors": "Grayscale primary with semantic colors only",
+    "animations": "None or minimal (prefer no transitions)"
+  },
+
+  "colorAccessibility": {
+    "contrastRatio": {
+      "primary_white": "4.5:1 (AA)",
+      "text_bg": "11.2:1 (AAA)"
+    },
+    "semanticMeanings": {
+      "success": "green - available, approved, complete",
+      "warning": "yellow - pending, caution, attention needed",
+      "danger": "red - error, blocked, critical"
+    }
+  },
+
+  "responsiveBreakpoints": {
+    "desktop": "≥1024px",
+    "tablet": "768px - 1023px",
+    "mobile": "<768px"
+  }
+}

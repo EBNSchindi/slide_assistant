@@ -1,0 +1,7 @@
+<div class="slide-section">
+    <div class="slide-title">{{ slide_title }}</div>
+
+{% for component_html in components %}
+    {{ component_html | safe }}
+{% endfor %}
+</div>

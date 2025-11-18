@@ -1,0 +1,286 @@
+{
+  "timestamp": "2025-11-18T15:25:56.599794",
+  "api_url": "http://localhost:8001",
+  "project": "beispiel-projekt",
+  "total_slides": 8,
+  "successful": 8,
+  "component_matches": 5,
+  "results": [
+    {
+      "slide_number": 1,
+      "title": "Problem - Demografischer Wandel",
+      "success": true,
+      "component_count": 3,
+      "expected_count": 3,
+      "component_types": [
+        "stat-grid",
+        "text",
+        "quote"
+      ],
+      "expected_types": [
+        "stat-grid",
+        "bullet-list",
+        "stat-grid"
+      ],
+      "component_count_ok": true,
+      "comparison": {
+        "component_count_match": true,
+        "generated_count": 3,
+        "expected_count": 3,
+        "component_types_match": false,
+        "generated_types": [
+          "stat-grid",
+          "text",
+          "text"
+        ],
+        "expected_types": [
+          "stat-grid",
+          "bullet-list",
+          "stat-grid"
+        ]
+      },
+      "iteration_count": 1,
+      "error": null
+    },
+    {
+      "slide_number": 2,
+      "title": "Lösung - Robo4you",
+      "success": true,
+      "component_count": 3,
+      "expected_count": 3,
+      "component_types": [
+        "text",
+        "bullet-list",
+        "bullet-list"
+      ],
+      "expected_types": [
+        "text",
+        "bullet-list",
+        "text"
+      ],
+      "component_count_ok": true,
+      "comparison": {
+        "component_count_match": true,
+        "generated_count": 3,
+        "expected_count": 3,
+        "component_types_match": false,
+        "generated_types": [
+          "text",
+          "bullet-list",
+          "bullet-list"
+        ],
+        "expected_types": [
+          "bullet-list",
+          "bullet-list",
+          "bullet-list"
+        ]
+      },
+      "iteration_count": 1,
+      "error": null
+    },
+    {
+      "slide_number": 3,
+      "title": "Markt - Robotik-Boom",
+      "success": true,
+      "component_count": 3,
+      "expected_count": 3,
+      "component_types": [
+        "table",
+        "text",
+        "stat-grid"
+      ],
+      "expected_types": [
+        "text",
+        "text",
+        "stat-grid"
+      ],
+      "component_count_ok": true,
+      "comparison": {
+        "component_count_match": true,
+        "generated_count": 3,
+        "expected_count": 3,
+        "component_types_match": false,
+        "generated_types": [
+          "table",
+          "text",
+          "stat-grid"
+        ],
+        "expected_types": [
+          "stat-grid",
+          "text",
+          "stat-grid"
+        ]
+      },
+      "iteration_count": 1,
+      "error": null
+    },
+    {
+      "slide_number": 4,
+      "title": "Vergleichstabelle - Roboter-Modelle",
+      "success": true,
+      "component_count": 2,
+      "expected_count": 2,
+      "component_types": [
+        "table",
+        "table"
+      ],
+      "expected_types": [
+        "table",
+        "table"
+      ],
+      "component_count_ok": true,
+      "comparison": {
+        "component_count_match": true,
+        "generated_count": 2,
+        "expected_count": 2,
+        "component_types_match": true,
+        "generated_types": [
+          "table",
+          "table"
+        ],
+        "expected_types": [
+          "table",
+          "table"
+        ]
+      },
+      "iteration_count": 1,
+      "error": null
+    },
+    {
+      "slide_number": 5,
+      "title": "Prozesskette - Deployment-Workflow",
+      "success": true,
+      "component_count": 2,
+      "expected_count": 2,
+      "component_types": [
+        "process",
+        "process-horizontal"
+      ],
+      "expected_types": [
+        "process",
+        "process-horizontal"
+      ],
+      "component_count_ok": true,
+      "comparison": {
+        "component_count_match": true,
+        "generated_count": 2,
+        "expected_count": 2,
+        "component_types_match": true,
+        "generated_types": [
+          "process",
+          "process-horizontal"
+        ],
+        "expected_types": [
+          "process",
+          "process-horizontal"
+        ]
+      },
+      "iteration_count": 1,
+      "error": null
+    },
+    {
+      "slide_number": 6,
+      "title": "Features & Vorteile",
+      "success": true,
+      "component_count": 3,
+      "expected_count": 1,
+      "component_types": [
+        "text",
+        "bullet-list",
+        "bullet-list"
+      ],
+      "expected_types": [
+        "feature-grid"
+      ],
+      "component_count_ok": false,
+      "comparison": {
+        "component_count_match": false,
+        "generated_count": 3,
+        "expected_count": 1,
+        "component_types_match": false,
+        "generated_types": [
+          "text",
+          "bullet-list",
+          "bullet-list"
+        ],
+        "expected_types": [
+          "feature-grid"
+        ]
+      },
+      "iteration_count": 1,
+      "error": null
+    },
+    {
+      "slide_number": 7,
+      "title": "Daten & Metriken",
+      "success": true,
+      "component_count": 3,
+      "expected_count": 2,
+      "component_types": [
+        "table",
+        "table",
+        "text"
+      ],
+      "expected_types": [
+        "table",
+        "table"
+      ],
+      "component_count_ok": false,
+      "comparison": {
+        "component_count_match": false,
+        "generated_count": 3,
+        "expected_count": 2,
+        "component_types_match": false,
+        "generated_types": [
+          "table",
+          "table",
+          "text"
+        ],
+        "expected_types": [
+          "table",
+          "table"
+        ]
+      },
+      "iteration_count": 1,
+      "error": null
+    },
+    {
+      "slide_number": 8,
+      "title": "Bilder & Visualisierungen",
+      "success": true,
+      "component_count": 3,
+      "expected_count": 4,
+      "component_types": [
+        "image-frame",
+        "text",
+        "image-grid"
+      ],
+      "expected_types": [
+        "image-frame",
+        "image-grid",
+        "image-frame",
+        "image-frame"
+      ],
+      "component_count_ok": false,
+      "comparison": {
+        "component_count_match": false,
+        "generated_count": 3,
+        "expected_count": 4,
+        "component_types_match": false,
+        "generated_types": [
+          "image-frame",
+          "text",
+          "image-grid"
+        ],
+        "expected_types": [
+          "image-frame",
+          "image-grid",
+          "image-frame",
+          "bullet-list"
+        ]
+      },
+      "iteration_count": 1,
+      "error": null
+    }
+  ]
+}

@@ -23,19 +23,40 @@ slide_assistant/
 │   ├── api/                                 # FastAPI backend
 │   │   ├── main.py                          # API routes & endpoints
 │   │   ├── config.py                        # Configuration & environment
-│   │   ├── agents/                          # Multi-agent system
-│   │   │   ├── orchestrator.py              # Agent coordinator
-│   │   │   ├── content_analyzer.py          # Content analysis agent
-│   │   │   ├── presentation_strategist.py   # Strategy recommendation agent
-│   │   │   ├── content_generator.py         # HTML/Markdown generation agent
-│   │   │   ├── mock_agents.py               # Testing (TEST_MODE)
-│   │   │   └── schemas.py                   # Pydantic models for structured outputs
+│   │   ├── agents/                          # V2 Multi-agent system (deterministic)
+│   │   │   ├── orchestrator.py              # Agent coordinator (V2)
+│   │   │   ├── content_analyzer_v2.py       # V2 Content analysis agent
+│   │   │   ├── presentation_strategist_v2.py # V2 Strategy recommendation agent
+│   │   │   ├── content_generator_v2.py      # V2 Text generation agent (NO HTML)
+│   │   │   ├── mock_agents_v2.py            # Testing (TEST_MODE)
+│   │   │   ├── schemas.py                   # Pydantic models (FormattedSlide, etc.)
+│   │   │   └── VARIANT_GENERATION_DOCUMENTATION.md # V1 archive (reference only)
+│   │   ├── renderers/                       # Deterministic HTML rendering
+│   │   │   ├── component_renderer.py        # Jinja2 template rendering engine
+│   │   │   └── (uses Jinja2 templates)
+│   │   ├── routes/                          # API routes
+│   │   │   ├── v2.py                        # V2 API endpoints
+│   │   │   └── __init__.py
 │   │   ├── services/                        # Utilities
-│   │   │   ├── style_parser.py              # Project style guide parsing
-│   │   │   ├── file_service.py              # File management
+│   │   │   ├── style_parser.py              # design-guide.json + variables.css parsing
+│   │   │   ├── file_service.py              # File management & backups
 │   │   │   ├── project_service.py           # Project operations
-│   │   │   └── variant_style_parser.py      # Design variant parsing
-│   │   └── models/                          # Request/response schemas
+│   │   │   └── variant_style_parser.py      # Design variant parsing (archived)
+│   │   ├── models/                          # Request/response schemas
+│   │   └── templates/                       # Jinja2 component templates
+│   │       └── components/
+│   │           ├── stat-grid.html.j2
+│   │           ├── bullet-list.html.j2
+│   │           ├── text.html.j2
+│   │           ├── quote.html.j2
+│   │           ├── table.html.j2
+│   │           ├── image-frame.html.j2
+│   │           ├── image-grid.html.j2
+│   │           ├── feature-grid.html.j2
+│   │           ├── process.html.j2
+│   │           ├── process-horizontal.html.j2
+│   │           ├── component-wrapper.html.j2
+│   │           └── slide-section.html.j2
 │   └── projects/                            # Project workspace
 │       └── beispiel-projekt/                # Example project
 │           ├── html/                        # Generated HTML slides
@@ -44,6 +65,24 @@ slide_assistant/
 │           │   └── optimized/               # Per-slide optimized (auto-generated)
 │           ├── images/uploads/              # User-uploaded images
 │           └── styles/                      # Style themes (github, modern, minimal)
+│               ├── github/
+│               │   ├── design-guide.json   # Component definitions & design tokens (JSON)
+│               │   ├── design-guide.md     # Human-readable design guide
+│               │   ├── reference.html      # Canonical component showcase
+│               │   ├── style.css           # Theme styles
+│               │   └── variables.css       # CSS custom properties (tokens)
+│               ├── modern/
+│               │   ├── design-guide.json
+│               │   ├── design-guide.md
+│               │   ├── reference.html
+│               │   ├── style.css
+│               │   └── variables.css
+│               └── minimal/
+│                   ├── design-guide.json
+│                   ├── design-guide.md
+│                   ├── reference.html
+│                   ├── style.css
+│                   └── variables.css
 └── requirements.txt                         # Python dependencies
 ```
 
@@ -81,11 +120,12 @@ Markdown (H1 = slide, H2 = component)
   → component-viewer.html for viewing/screenshots
 ```
 
-**Dynamic Workflow (AI-Powered - via API):**
+**Dynamic Workflow (AI-Powered - via API - V2 DETERMINISTIC):**
 ```
 User input (text/stichpunkte)
-  → /api/generate endpoint
-  → Multi-agent pipeline
+  → /api/v2/generate endpoint
+  → 3-Agent Pipeline with Feedback Loop
+  → Deterministic Jinja2 Template Rendering
   → Auto-generated HTML + Markdown
   → ai-editor.html for preview
 ```
@@ -102,38 +142,68 @@ User input (text/stichpunkte)
 - **ai-editor.html** - Generate new content via API
 - **markdown-to-components.py** - Batch Python conversion
 
-### 3. Multi-Agent API System (`presentation/api/`)
+### 3. Multi-Agent API System (`presentation/api/`) - V2 ARCHITECTURE
 
-**Purpose:** AI-powered intelligent slide content generation using OpenAI GPT-4o/GPT-5.
+**Purpose:** AI-powered intelligent slide content generation using OpenAI GPT-4o/GPT-5 with deterministic HTML rendering.
 
-**Architecture:**
+**V2 Architecture (CURRENT - DETERMINISTIC):**
 ```
-User Input
+User Input + Project Context
     ↓
-ContentAnalyzerAgent (analyze content type, extract key messages)
+ContentAnalyzerAgentV2 (LLM)
+  ├─ Analyzes content structure
+  ├─ Detects statistics, lists, quotes
+  ├─ Auto-detects language (German/English)
+  └─ Outputs: ContentBlock[] with metadata
     ↓
-PresentationStrategistAgent (recommend components, layout, styling)
+PresentationStrategistAgentV2 (LLM) ←──────┐
+  ├─ Plans component types & layout     │ Feedback Loop
+  ├─ References design-guide.json        (if validation fails)
+  └─ Outputs: SlideBlueprintGenerator   │
+    ↓─────────────────────────────────────┘
+ContentGeneratorAgentV2 (LLM)
+  ├─ Generates formatted text (NO HTML!)
+  ├─ Respects slide blueprint
+  ├─ Validates against component schemas
+  └─ Outputs: FormattedSlide (pure data)
     ↓
-ContentGeneratorAgent (generate HTML + Markdown)
+HTMLComponentRenderer (JINJA2 - NO LLM)
+  ├─ Renders templates from FormattedSlide
+  ├─ Applies theme tokens from design-guide.json
+  ├─ Generates deterministic HTML
+  └─ Outputs: HTML string
     ↓
 FileService (save to project structure)
     ↓
-Response (HTML + Markdown + component metadata)
+Response (HTML + Markdown + metadata)
 ```
+
+**Key V2 Improvements:**
+- ✅ **Deterministic HTML:** Templates ensure consistent output
+- ✅ **Feedback Loop:** Agent 2 can adjust plan if Agent 3 validation fails
+- ✅ **Type Safety:** Pydantic models for all data structures
+- ✅ **No HTML in LLM:** Agents generate pure data, not code
+- ✅ **Instant Variants:** 3 theme variants in same time as 1 slide (no extra API calls)
+- ✅ **Design System:** design-guide.json drives all styling decisions
 
 **Agent Features:**
 - **Language Auto-Detection:** German & English automatically detected and matched
 - **GPT-5 Support:** `reasoning_effort` and `verbosity` controls for cost/quality optimization
-- **Pydantic Structured Outputs:** Type-safe JSON responses (optional, opt-in)
-- **Style-Aware:** Respects project design system and style guides
-- **Variant Generation:** Optional 3 design variants per slide
+- **Pydantic Structured Outputs:** Type-safe JSON responses via schemas.py
+- **Style-Aware:** Respects design-guide.json and theme-specific tokens
+- **Variant Generation:** Optional 3 design variants (instant, no extra API calls)
+- **Feedback Loop:** Agent 2 can replan if Agent 3 validation fails
 
 **Key Capabilities:**
-- Intelligent content type detection (statistics, narrative, lists, quotes, mixed)
-- Automatic statistics recognition (handles €, %, Mio, Mrd formats)
-- Multi-language content generation
-- Image integration for uploaded files
+- Intelligent content type detection (statistics, narrative, lists, quotes, tables, process, etc.)
+- Automatic statistics recognition (handles €, %, Mio, Mrd, K, M, B formats)
+- Multi-language content generation (German & English)
+- Image integration with standardized image frames
 - Backup & version management
+- Multi-line stat labels with source attribution
+- Phased timeline structures
+- Icon/emoji preservation
+- Markdown table detection
 
 ### 4. Projects System
 
@@ -184,19 +254,26 @@ python3 run_api.py
 # Health check: curl http://localhost:8001/health
 ```
 
-### Testing (Mock Mode)
+### Testing (Mock Mode - V2)
 ```bash
 cd presentation/api
 
 # Set TEST_MODE to use mock agents (no API key needed)
-export OPENAI_API_KEY=mock
+export TEST_MODE=true
 
-# Run tests
+# Run V2 integration tests
+python3 -m pytest test_agents_v2.py -v
+python3 -m pytest test_v2_integration.py -v
+python3 -m pytest test_v2_mock_flow.py -v
+
+# Run renderer tests
+python3 -m pytest test_renderer_fix.py -v
+
+# Run all tests
 python3 -m pytest test_*.py -v
-
-# Test with mock agents only (no OpenAI calls)
-python3 test_agents.py
 ```
+
+**Note:** V1 tests have been removed. See MIGRATION_GUIDE.md for upgrading existing code.
 
 ### Word Document Conversion
 ```bash
@@ -374,7 +451,7 @@ When committing:
 
 ## Development Tips
 
-- Test mock agents in isolation with: `python3 -m pytest presentation/api/test_agents.py -v`
+- Test mock agents in isolation with: `python3 -m pytest presentation/api/test_agents_v2.py -v`
 - Use TEST_MODE=true for development/testing (no API costs)
 - Use GPT-5-mini for cost control, GPT-5 for complex strategy
 - Enable structured_outputs for production code (type safety)
@@ -382,3 +459,96 @@ When committing:
 - Keep components focused (1 idea per component)
 - Use pixel-perfect screenshots: Browser DevTools element inspector + 100% zoom
 - Batch test: `python3 -m pytest presentation/api/test_*.py -v -k keyword`
+
+## V2 Architecture & Recent Changes (2025-11-18)
+
+### Key Updates
+- ✅ **V1 Deprecated:** LLM-based HTML generation completely removed
+- ✅ **V2 Active:** Deterministic Jinja2-based HTML rendering (no LLM)
+- ✅ **Design Guides Created:** design-guide.json for github, modern, minimal themes
+- ✅ **Reference HTML:** Canonical component examples for all themes
+- ✅ **Variant Support:** Instant 3-variant generation (no extra API calls)
+
+### Removed Files
+- `presentation/api/agents/content_analyzer.py` (V1)
+- `presentation/api/agents/content_generator.py` (V1)
+- `presentation/api/agents/presentation_strategist.py` (V1)
+- `presentation/api/agents/mock_agents.py` (V1)
+- API endpoints: `/api/generate`, `/api/regenerate` (use `/api/v2/generate` instead)
+
+### New Files
+- `presentation/api/agents/content_analyzer_v2.py`
+- `presentation/api/agents/content_generator_v2.py`
+- `presentation/api/agents/presentation_strategist_v2.py`
+- `presentation/api/renderers/component_renderer.py` (Jinja2 renderer)
+- `presentation/api/routes/v2.py` (V2 API endpoints)
+- `projects/beispiel-projekt/styles/{theme}/design-guide.json` (3 files)
+- `projects/beispiel-projekt/styles/{theme}/reference.html` (3 files)
+
+### Migration & Documentation
+See the following files for detailed information:
+- **MIGRATION_GUIDE.md** - How to update code from V1 to V2
+- **REMAINING_FEATURES.md** - Future enhancements (image colors, variants in V2, etc.)
+- **presentation/api/VARIANT_GENERATION_DOCUMENTATION.md** - V1 variant logic (archived reference)
+
+### Design System Integration
+All three themes now have structured design-guide.json files defining:
+- **Tokens**: Colors, typography, spacing, border radius, shadows
+- **Components**: 10 component types with slots and CSS classes
+- **Layouts**: Standard layout patterns (1-3 components)
+- **Best Practices**: Component-specific guidance
+
+View reference slides at:
+- `projects/beispiel-projekt/styles/github/reference.html`
+- `projects/beispiel-projekt/styles/modern/reference.html`
+- `projects/beispiel-projekt/styles/minimal/reference.html`
+
+### API Changes
+**Old Endpoint (REMOVED):**
+```http
+POST /api/generate
+```
+
+**New Endpoint (USE THIS):**
+```http
+POST /api/v2/generate
+{
+  "project_name": "beispiel-projekt",
+  "user_input": "...",
+  "slide_title": "Folie 46",
+  "slide_number": 46,
+  "theme": "github",
+  "language": "de"
+}
+```
+
+### Performance Improvements
+| Metric | V1 | V2 |
+|--------|----|----|
+| Single Slide | ~4-6s | ~3-5s |
+| 3 Variants | ~15-20s | ~3-5s |
+| API Calls | 1-4 | 1 |
+| Cost | 4x tokens | 1x tokens |
+
+### Known Issues & Gotchas
+
+1. **design-guide.json not fully integrated yet**
+   - Files created ✅
+   - Agents still need to read and validate against them
+   - See: REMAINING_FEATURES.md task #6
+
+2. **Image color extraction not implemented**
+   - Reference: REMAINING_FEATURES.md task #1
+   - Requires: pillow + colorthief
+
+3. **Variant generation uses theme switching (future)**
+   - Currently: Each theme manually configured
+   - Future: FormattedSlide renders with different themes for instant variants
+
+## Questions?
+
+- Struggling with V1→V2 migration? → See MIGRATION_GUIDE.md
+- Want to implement new features? → See REMAINING_FEATURES.md
+- Need variant logic reference? → See VARIANT_GENERATION_DOCUMENTATION.md
+- Questions about agents? → Check agents/*.py docstrings
+- Questions about templates? → Check presentation/templates/components/*.j2

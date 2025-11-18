@@ -1,0 +1,23 @@
+{% if title %}  <h2>{{ title }}</h2>
+{% endif %}{% if subtitle %}  <p>{{ subtitle }}</p>
+{% endif %}
+  <div class="process-chain">
+{% for step in steps %}
+    <div class="process-step">
+      <div class="process-number">{{ loop.index }}</div>
+      <div class="process-content">
+{%- if step is mapping %}
+        <h4>{{ step.title }}</h4>
+{%- if step.description %}
+        <p>{{ step.description }}</p>
+{%- endif %}
+{%- if step.timeframe %}
+        <span class="process-timeframe">{{ step.timeframe }}</span>
+{%- endif %}
+{%- else %}
+        <p>{{ step }}</p>
+{%- endif %}
+      </div>
+    </div>
+{% endfor %}
+  </div>
