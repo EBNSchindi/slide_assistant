@@ -96,6 +96,25 @@ DO NOT: Generate text, HTML, or styling details. Just plan structure.
    **CRITICAL**: When ContentBlock has type "markdown_table", ALWAYS use "table" component type
    Do NOT convert markdown tables to stat-grid or other types
 
+8. feature-grid
+   Purpose: Display multiple features/products with icons and descriptions
+   Best for: Multiple related features, product offerings, USPs with titles
+   Constraints: 3-6 features per grid, each with title + description
+   **WHEN TO USE**: User lists multiple features/benefits/USPs with consistent structure
+   Example input: "✨ Feature 1: Description\n🎯 Feature 2: Description"
+
+9. image-grid
+   Purpose: Display multiple images in a grid layout
+   Best for: Multiple related images that belong together (gallery, comparison)
+   Constraints: 2-4 images in grid
+   **WHEN TO USE**: User mentions multiple images for same context
+
+10. process-horizontal
+    Purpose: Show sequential workflow/timeline horizontally
+    Best for: Linear workflows, timelines, step-by-step processes displayed left-to-right
+    Constraints: 4-6 steps max, each with title + description
+    **WHEN TO USE**: When process/timeline should flow horizontally instead of vertically
+
 ═══════════════════════════════════════════════════════════
 📐 LAYOUT PATTERNS
 ═══════════════════════════════════════════════════════════
@@ -140,7 +159,7 @@ If no images: ImageSlot is null for all components
   "components": [
     {
       "component_id": "comp-1",
-      "type": "stat-grid|bullet-list|quote|text|image-frame|process|table",
+      "type": "stat-grid|bullet-list|quote|text|image-frame|process|table|feature-grid|image-grid|process-horizontal",
       "position": "top|middle|bottom",
       "content_block_indices": [0, 1],  // Which ContentBlocks go here
       "image_slot": {
@@ -166,6 +185,13 @@ If no images: ImageSlot is null for all components
 → NEVER convert to stat-grid or other types
 → Single table layout or multiple tables in two_row/three_component
 
+**🟠 FEATURES (IMPORTANT RULE):**
+→ If ANY ContentBlock has type "feature" OR "features":
+→ ALWAYS use "feature-grid" component type
+→ Combine all feature blocks into single feature-grid (3-6 features)
+→ Do NOT split into multiple bullet-list or text components
+→ Example: 6 features with icons → single feature-grid, NOT 3 × bullet-list
+
 STATISTICS (2-6 metrics):
 → Use stat-grid in single component layout
 → Do NOT use for markdown tables (use "table" component instead)
@@ -186,13 +212,24 @@ MIXED CONTENT (stats + bullets + image):
 ✅ QUALITY RULES
 ═══════════════════════════════════════════════════════════
 
-✓ Max 3 components per slide (constraint from design system)
-✓ Each component should focus on one idea
+✓ Max 3 components per slide (design constraint)
+  → HOWEVER: feature-grid with 6 features = 1 component (not 3)
+  → HOWEVER: image-grid with 4 images = 1 component (not 4)
+  → Think in components, not in content items
+  → Prefer aggregating related content into one rich component over splitting
+
+✓ Each component should focus on one idea/dimension
+  → Exception: feature-grid groups multiple related features (that's its purpose)
+
 ✓ Position components for visual flow (top: headline, middle: main, bottom: supporting)
 ✓ Assign correct content_block_indices
-✓ If image exists, use image-frame component
+✓ If image exists, prefer image-frame or image-grid component
 ✓ Match language of input (design_notes in same language)
 ✓ Set realistic layout_type
+
+EXAMPLE:
+  ❌ BAD: 6 features → text + bullet-list + bullet-list (3 components, fragmented)
+  ✅ GOOD: 6 features → feature-grid (1 component, cohesive)
 
 ═══════════════════════════════════════════════════════════
 """

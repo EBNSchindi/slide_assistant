@@ -59,6 +59,24 @@ app.include_router(v2_router)
 project_service = ProjectService(PROJECTS_BASE_PATH)
 
 
+# Root endpoint
+@app.get("/")
+async def root():
+    """Root endpoint with API information"""
+    return {
+        "name": "Slides Helper AI API",
+        "version": "2.0.0",
+        "status": "running",
+        "endpoints": {
+            "health": "/health",
+            "api_docs": "/docs",
+            "projects": "/api/projects",
+            "v2_generate": "/api/v2/generate",
+        },
+        "message": "API is running. Visit /docs for interactive API documentation."
+    }
+
+
 # Health check endpoint
 @app.get("/health")
 async def health_check():
