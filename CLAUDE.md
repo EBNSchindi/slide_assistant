@@ -4,20 +4,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-A **presentation generation system** with three main components:
-1. **Word-to-Markdown converter** - Converts .docx files to Markdown (preserves exact content)
-2. **Component-based presentation system** - Markdown → HTML components for screenshot-friendly pitch decks
-3. **AI Agent API** - Multi-agent FastAPI backend for intelligent slide content generation (GPT-4o/GPT-5 support)
+A **presentation generation system** with two main components:
+1. **Unified Editor Interface** - Single-page web app for creating and previewing slides with live theme switching
+2. **AI Agent API** - Multi-agent FastAPI backend for intelligent slide content generation (GPT-4o/GPT-5 support with deterministic Jinja2 rendering)
 
 ## Project Structure
 
 ```
 slide_assistant/
-├── convert_word_to_markdown.py              # Word→Markdown converter
+├── archive/                                 # Legacy files (archived)
+│   ├── legacy-scripts/
+│   │   ├── convert_word_to_markdown.py      # (archived) Word→Markdown converter
+│   │   └── markdown-to-components.py        # (archived) Markdown→HTML converter
+│   └── legacy-editors/
+│       ├── component-viewer.html            # (archived) Old slide viewer
+│       └── ai-editor.html                   # (archived) Old AI editor
 ├── presentation/                            # Main presentation system
-│   ├── component-viewer.html                # Slide viewer & editor UI
-│   ├── ai-editor.html                       # AI content generation UI
-│   ├── markdown-to-components.py            # Markdown→HTML converter (Python)
+│   ├── unified-editor.html                  # NEW: Unified slide editor & viewer UI
 │   ├── projects.json                        # Project configuration
 │   ├── run_api.py                           # FastAPI server entry point
 │   ├── api/                                 # FastAPI backend
@@ -33,7 +36,7 @@ slide_assistant/
 │   │   │   └── VARIANT_GENERATION_DOCUMENTATION.md # V1 archive (reference only)
 │   │   ├── renderers/                       # Deterministic HTML rendering
 │   │   │   ├── component_renderer.py        # Jinja2 template rendering engine
-│   │   │   └── (uses Jinja2 templates)
+│   │   │   └── __init__.py
 │   │   ├── routes/                          # API routes
 │   │   │   ├── v2.py                        # V2 API endpoints
 │   │   │   └── __init__.py
@@ -41,22 +44,24 @@ slide_assistant/
 │   │   │   ├── style_parser.py              # design-guide.json + variables.css parsing
 │   │   │   ├── file_service.py              # File management & backups
 │   │   │   ├── project_service.py           # Project operations
+│   │   │   ├── template_loader.py           # Jinja2 template loader
 │   │   │   └── variant_style_parser.py      # Design variant parsing (archived)
-│   │   ├── models/                          # Request/response schemas
-│   │   └── templates/                       # Jinja2 component templates
-│   │       └── components/
-│   │           ├── stat-grid.html.j2
-│   │           ├── bullet-list.html.j2
-│   │           ├── text.html.j2
-│   │           ├── quote.html.j2
-│   │           ├── table.html.j2
-│   │           ├── image-frame.html.j2
-│   │           ├── image-grid.html.j2
-│   │           ├── feature-grid.html.j2
-│   │           ├── process.html.j2
-│   │           ├── process-horizontal.html.j2
-│   │           ├── component-wrapper.html.j2
-│   │           └── slide-section.html.j2
+│   │   └── models/                          # Request/response schemas
+│   ├── templates/                           # Jinja2 component templates (NOT in api/)
+│   │   ├── components/
+│   │   │   ├── stat-grid.html.j2
+│   │   │   ├── bullet-list.html.j2
+│   │   │   ├── text.html.j2
+│   │   │   ├── quote.html.j2
+│   │   │   ├── table.html.j2
+│   │   │   ├── image-frame.html.j2
+│   │   │   ├── image-grid.html.j2
+│   │   │   ├── feature-grid.html.j2
+│   │   │   ├── process.html.j2
+│   │   │   └── process-horizontal.html.j2
+│   │   └── wrappers/
+│   │       ├── component-wrapper.html.j2
+│   │       └── slide-section.html.j2
 │   └── projects/                            # Project workspace
 │       └── beispiel-projekt/                # Example project
 │           ├── html/                        # Generated HTML slides
@@ -88,46 +93,18 @@ slide_assistant/
 
 ## Key Architecture
 
-### 1. Word-to-Markdown Converter (`convert_word_to_markdown.py`)
+### 1. Presentation System (Frontend)
 
-**Purpose:** Preserves exact word-for-word content from .docx files while converting to Markdown.
+**Purpose:** AI-powered slide generation system with unified editor interface.
 
-**Key Features:**
-- Maintains formatting: bold, italic, underline, hyperlinks
-- Handles headings (Heading 1-6 → `#` syntax)
-- Converts bullet lists and numbered lists
-- Converts tables to Markdown tables
-- Preserves document element order
-
-**Usage:**
-```bash
-# Single file
-python convert_word_to_markdown.py dokument.docx [ausgabe.md]
-
-# Batch conversion
-python convert_word_to_markdown.py --folder ./documents
+**Main Workflow (V2 DETERMINISTIC):**
 ```
-
-### 2. Presentation System (Frontend)
-
-**Purpose:** Converts Markdown pitch decks into screenshot-ready HTML components for PowerPoint/Keynote.
-
-**Static Workflow (Manual):**
-```
-Markdown (H1 = slide, H2 = component)
-  → LLM-PROMPT.md (Claude/ChatGPT)
-  → Manual HTML in projects/{name}/html/
-  → component-viewer.html for viewing/screenshots
-```
-
-**Dynamic Workflow (AI-Powered - via API - V2 DETERMINISTIC):**
-```
-User input (text/stichpunkte)
+User input (text/stichpunkte) in unified-editor.html
   → /api/v2/generate endpoint
   → 3-Agent Pipeline with Feedback Loop
   → Deterministic Jinja2 Template Rendering
   → Auto-generated HTML + Markdown
-  → ai-editor.html for preview
+  → Live preview in unified-editor.html
 ```
 
 **Component Types:**
@@ -135,14 +112,24 @@ User input (text/stichpunkte)
 - `bullet-list` - Formatted bullet lists
 - `quote` - Highlighted quotes
 - `text` - Regular paragraphs with formatting
-- `image` - User-uploaded images
+- `image-frame` - Single image with caption
+- `image-grid` - Multiple images in grid layout
+- `feature-grid` - Feature cards with icons/emojis
+- `table` - Markdown-style tables
+- `process` - Vertical process/timeline
+- `process-horizontal` - Horizontal process flow
 
-**Tools:**
-- **component-viewer.html** - View/screenshot existing components
-- **ai-editor.html** - Generate new content via API
-- **markdown-to-components.py** - Batch Python conversion
+**Unified Editor Features:**
+- **unified-editor.html** - Single-page editor combining all functionality:
+  - Live slide preview with HTML rendering
+  - Theme switching (GitHub/Modern/Minimal) without page reload
+  - Project and slide management
+  - Direct integration with /api/v2/generate endpoint
+  - Slide regeneration with variant support
+  - Export functionality for individual slides or entire decks
+  - Compact component editing in side-by-side layout
 
-### 3. Multi-Agent API System (`presentation/api/`) - V2 ARCHITECTURE
+### 2. Multi-Agent API System (`presentation/api/`) - V2 ARCHITECTURE
 
 **Purpose:** AI-powered intelligent slide content generation using OpenAI GPT-4o/GPT-5 with deterministic HTML rendering.
 
@@ -205,7 +192,7 @@ Response (HTML + Markdown + metadata)
 - Icon/emoji preservation
 - Markdown table detection
 
-### 4. Projects System
+### 3. Projects System
 
 **Configuration:** `projects.json` defines project structure and available styles.
 
@@ -275,50 +262,39 @@ python3 -m pytest test_*.py -v
 
 **Note:** V1 tests have been removed. See MIGRATION_GUIDE.md for upgrading existing code.
 
-### Word Document Conversion
+### Using the Unified Editor
 ```bash
-# Single file
-python convert_word_to_markdown.py dokument.docx [ausgabe.md]
-
-# Batch conversion
-python convert_word_to_markdown.py --folder ./path/to/docs
-```
-
-### Markdown-to-HTML Conversion (Local)
-```bash
-# Python script (no API needed)
-python presentation/markdown-to-components.py input.md presentation/output/
-```
-
-### Viewing Presentations
-```bash
-# Static component viewer (works offline)
-# Open in browser: file:///path/to/presentation/component-viewer.html
-
-# AI Editor (requires API server running)
-# 1. Start API: python3 presentation/run_api.py
-# 2. Open: file:///path/to/presentation/ai-editor.html
-# 3. API will be called at http://localhost:8001/api/generate
-
-# Local server for CORS issues
+# 1. Start API server
 cd presentation
+python3 run_api.py
+# Server runs at http://localhost:8001
+
+# 2. Open unified editor in browser
+# Option A: Direct file access (may have CORS issues)
+# file:///path/to/presentation/unified-editor.html
+
+# Option B: Local server (recommended)
 python3 -m http.server 8000
-# Then visit: http://localhost:8000/component-viewer.html
+# Then visit: http://localhost:8000/unified-editor.html
 ```
 
 ## Important Technical Details
 
-### Word Converter
-- Uses `python-docx` library
-- Extracts hyperlinks via XML relationships
-- Handles standard styles and custom formatting
-- Preserves element order via `doc.element.body` iteration
+### Archived Legacy Tools
+The following tools have been moved to `archive/` and are no longer actively maintained:
+- **convert_word_to_markdown.py** - Word→Markdown converter (archived in archive/legacy-scripts/)
+- **markdown-to-components.py** - Old Markdown→HTML converter (archived in archive/legacy-scripts/)
+- **component-viewer.html** - Old standalone viewer (archived in archive/legacy-editors/)
+- **ai-editor.html** - Old AI editor interface (archived in archive/legacy-editors/)
 
-### Markdown-to-Components Script
-- Parses H1 as slide boundaries, H2 as component boundaries
-- Auto-detects statistics (numbers with units: Mio, Mrd, %, €, $, USD)
-- Generates unique component IDs: `slide-{X}-comp-{Y}`
-- Outputs HTML with embedded CSS
+These have been replaced by the unified-editor.html which combines all functionality.
+
+### Template System
+- **Location:** `presentation/templates/` (NOT in api/)
+- **Loader:** `services/template_loader.py` handles Jinja2 template loading
+- **Components:** 10 component types in `templates/components/*.html.j2`
+- **Wrappers:** Component and slide wrappers in `templates/wrappers/*.html.j2`
+- **Rendering:** `renderers/component_renderer.py` converts FormattedSlide → HTML
 
 ### Multi-Agent API System
 
@@ -412,21 +388,22 @@ When committing:
    - Then edit .env to add your actual API key
 
 ### Frontend & Viewing
-4. **CORS Issues:** Custom HTML files require local server
+4. **CORS Issues:** unified-editor.html may require local server
    - Use: `python3 -m http.server 8000` in presentation directory
-   - Then visit: http://localhost:8000/component-viewer.html
+   - Then visit: http://localhost:8000/unified-editor.html
 
-5. **Component IDs:** Must follow format `slide-{X}-comp-{Y}` for viewer
-   - Auto-generated by API and Python converter
-   - Manual HTML needs proper IDs for viewer to recognize them
+5. **Component IDs:** Must follow format `slide-{X}-comp-{Y}`
+   - Auto-generated by API's component_renderer.py
+   - Ensures unique IDs for each component on each slide
 
 6. **Style Paths:** Relative to project. Check projects.json for correct theme paths
    - Example: `projects/beispiel-projekt/styles/github/style.css`
 
-### Content Generation
-7. **Markdown Format:** H1 = slide, H2 = component (strict parsing)
-   - Deviate from this and parser fails silently
+7. **Template Paths:** Templates in `presentation/templates/`, NOT `presentation/api/templates/`
+   - Component renderer uses template_loader.py to find templates
+   - Template path is relative to presentation/ directory
 
+### Content Generation
 8. **Statistics Detection:** Requires units for auto-detection
    - Regex: `\d+[.,\d]*\s*(Mio|Mrd|%|€|$|USD)`
    - Example: "€12,3 Mio" ✅, "12.3 million" ❌
@@ -436,18 +413,17 @@ When committing:
    - Use consistent language for best results
 
 ### Development
-10. **API Venv Location:** Separate venv for API only
+10. **API Venv Location:** API has its own venv
     - Location: presentation/api/venv
-    - Root venv for Word converter: ./venv
-    - Keep them separate to avoid dependency conflicts
+    - Dependencies: FastAPI, OpenAI, Jinja2, Pydantic
 
 11. **Image Paths:** Images saved to `projects/{name}/images/uploads/`
     - Generated HTML references this path
     - Ensure project exists before uploading
 
 12. **Python Dependencies:**
-    - Root requirements: python-docx, fastapi, uvicorn, openai, pydantic
-    - Install both root and API requirements
+    - Root requirements.txt: Minimal (python-docx if Word converter was active)
+    - API requirements: presentation/api/requirements.txt (fastapi, uvicorn, openai, pydantic, jinja2)
 
 ## Development Tips
 

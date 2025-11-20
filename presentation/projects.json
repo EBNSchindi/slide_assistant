@@ -27,21 +27,6 @@
           "default": false
         }
       ]
-    },
-    {
-      "name": "test01",
-      "displayName": "Test01",
-      "path": "projects/test01",
-      "htmlPath": "html",
-      "markdownPath": "markdown",
-      "styles": [
-        {
-          "name": "github",
-          "displayName": "Github",
-          "cssPath": "styles/github/style.css",
-          "default": true
-        }
-      ]
     }
   ]
 }

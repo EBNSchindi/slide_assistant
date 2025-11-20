@@ -9,6 +9,13 @@ env/
 ENV/
 .venv
 
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+
 # Temporäre Dateien
 *.tmp
 *.temp
@@ -34,3 +41,12 @@ notes/
 private/
 
 Screenshot*.png
+
+# Project test outputs (aber beispiel-projekt bleibt erhalten)
+**/test_output/
+
+# Optional: Generierte Test-Varianten (uncommenten falls gewünscht)
+# **/test-variant-slide_*.html
+# **/test-variant-slide_*.md
+# **/variant-test-slide_*.html
+# **/variant-test-slide_*.md
