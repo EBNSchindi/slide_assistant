@@ -445,6 +445,159 @@ Ich habe 3 Features im Web entwickelt. Teste alle:
 
 ---
 
+## Teleport Integration (Bevorzugte Methode) 🚀
+
+### Was ist Teleport?
+
+**Teleport** überträgt Ihre Web-Session (claude.ai/code) nahtlos zu Claude Code Desktop.
+
+**Workflow:**
+1. Feature in claude.ai/code entwickeln
+2. **Teleport-Befehl** erhalten: `claude --teleport session_xxx`
+3. Session in Desktop laden (mit vollständigem Kontext!)
+4. Agent direkt aufrufen (kein Kontext-Verlust)
+
+### Warum Teleport + Agent?
+
+**Ohne Teleport:**
+```
+Web-Entwicklung → Lokal: Branch manuell fetchen
+→ Kontext fehlt → Tests manuell → Merge unsicher
+```
+
+**Mit Teleport + Agent:** ✅
+```
+Web-Entwicklung → Teleport (Kontext erhalten!)
+→ Agent automatisch testen → Klare Empfehlung
+```
+
+### Teleport-Workflow
+
+#### Schritt 1: Im Web entwickeln
+
+```
+In claude.ai/code:
+1. Feature entwickeln
+2. Branch pushen: git push origin claude/feature-xyz
+3. Teleport-Befehl kopieren:
+   claude --teleport session_014KZZLRj1jWZvTfp2HMt6rq
+```
+
+#### Schritt 2: Session teleportieren
+
+```bash
+# Lokales Terminal
+cd /path/to/slide_assistant
+claude --teleport session_014KZZLRj1jWZvTfp2HMt6rq
+```
+
+**→ Claude Code Desktop öffnet sich mit Session**
+
+#### Schritt 3: Agent aufrufen
+
+```
+In Desktop-Session (nach Teleport):
+
+@agent web-to-local-sync-tester {
+  "remote_branch": "claude/feature-xyz",
+  "test_scope": "full"
+}
+```
+
+**→ Agent testet Branch mit vollem Kontext**
+
+### Multi-Session Management (2+ Web-Entwicklungen)
+
+**Problem:** Sie haben 3+ Features parallel im Web entwickelt.
+
+**Lösung:** Sequential Teleport + Agent
+
+```
+Session 1 (Größter Branch)
+    ↓ Teleport
+    → Agent testet
+    → ✅ Merge
+    → Master Update
+
+Session 2 (Mittlerer Branch)
+    ↓ Teleport
+    → Agent testet (gegen NEUEN Master!)
+    → ✅ Merge
+    → Master Update
+
+Session 3 (Kleinster Branch)
+    ↓ Teleport
+    → Agent testet
+    → ✅ Merge
+```
+
+**Wichtig:**
+- ✅ **Größtes Feature zuerst** (weniger Konflikte später)
+- ✅ **Master zwischen Sessions aktualisieren**
+- ✅ **Agent gegen aktuellen Master** testen
+
+### Priorisierung (2+ Sessions)
+
+**Welche Session zuerst teleportieren?**
+
+1. **Größe:** Größter Branch zuerst (42 Files vor 1 File)
+2. **Abhängigkeiten:** Foundation vor Features (API vor Frontend)
+3. **Konflikte:** Unabhängige vor konfliktträchtigen
+4. **Kritikalität:** Wichtigste Features bevorzugen
+
+**Beispiel:**
+```
+Session A: 42 Files (API + Frontend) → ZUERST
+Session B: 1 File (Frontend only) → DANACH
+Session C: 8 Files (Docs only) → ZULETZT
+```
+
+### Teleport + Agent: Vollständiges Beispiel
+
+```
+# === Web-Entwicklung (claude.ai/code) ===
+# Feature: Multi-Provider LLM Support
+# Branch: claude/multi-provider-abc
+# Status: Fertig, gepusht
+# Teleport-Befehl erhalten: claude --teleport session_xyz
+
+# === Lokal: Session übertragen ===
+cd ~/projects/slide_assistant
+claude --teleport session_xyz
+
+# Claude Code Desktop öffnet sich...
+
+# === In Desktop: Agent aufrufen ===
+@agent web-to-local-sync-tester {
+  "remote_branch": "claude/multi-provider-abc",
+  "test_scope": "full"
+}
+
+# === Agent-Report ===
+✅ Tests: 35 passed, 0 failed
+✅ No conflicts with master
+✅ MERGE READY
+
+Commands:
+git checkout master
+git merge claude/multi-provider-abc
+git push origin master
+
+# === Befehle ausführen ===
+git checkout master
+git merge claude/multi-provider-abc
+git push origin master
+
+# Fertig! ✅
+```
+
+### Weiterführende Docs
+
+- **Quick Guide:** `TELEPORT_QUICK_GUIDE.md`
+- **Multi-Session:** `TELEPORT_MULTI_SESSION_WORKFLOW.md`
+
+---
+
 ## Trouble-Shooting
 
 ### Agent findet Remote-Branch nicht
