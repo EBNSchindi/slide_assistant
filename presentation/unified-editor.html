@@ -1067,6 +1067,76 @@
             font-size: 11px;
         }
 
+        /* Fullscreen Mode */
+        .preview-panel.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: #0d1117;
+        }
+
+        .fullscreen-controls {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: none;
+            gap: 8px;
+            z-index: 10000;
+        }
+
+        .preview-panel.fullscreen .fullscreen-controls {
+            display: flex;
+        }
+
+        .fullscreen-btn {
+            padding: 8px 12px;
+            background: #238636;
+            border: 1px solid #238636;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .fullscreen-btn:hover {
+            background: #2ea043;
+            border-color: #2ea043;
+        }
+
+        .fullscreen-close-btn {
+            padding: 8px 12px;
+            background: #da3633;
+            border: 1px solid #da3633;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .fullscreen-close-btn:hover {
+            background: #f85149;
+            border-color: #f85149;
+        }
+
+        /* Hide other panels in fullscreen */
+        .preview-panel.fullscreen ~ .input-panel,
+        .preview-panel.fullscreen ~ .resize-handle {
+            display: none;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .editor-container {
@@ -1217,7 +1287,14 @@ Or markdown:
         </div>
 
         <!-- Right Panel -->
-        <div class="preview-panel">
+        <div class="preview-panel" id="previewPanel">
+            <!-- Fullscreen Controls (shown when in fullscreen) -->
+            <div class="fullscreen-controls">
+                <button class="fullscreen-close-btn" id="exitFullscreenBtn" title="Exit Fullscreen (ESC)">
+                    ✕ Schließen
+                </button>
+            </div>
+
             <div class="preview-controls">
                 <div class="preview-control-group">
                     <span class="preview-control-label">Component Width:</span>
@@ -1228,6 +1305,11 @@ Or markdown:
                         <button class="width-btn" data-width="800px">800px</button>
                         <button class="width-btn" data-width="100%">Full</button>
                     </div>
+                </div>
+                <div class="preview-control-group">
+                    <button class="fullscreen-btn" id="enterFullscreenBtn" title="Enter Fullscreen (F11)">
+                        ⛶ Vollbild
+                    </button>
                 </div>
             </div>
             <div class="preview-content" id="previewContent">
@@ -1803,6 +1885,13 @@ Any specific requirements or limitations?
                 }
             });
 
+            // Fullscreen controls
+            const enterFullscreenBtn = document.getElementById('enterFullscreenBtn');
+            const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
+
+            enterFullscreenBtn.addEventListener('click', enterFullscreen);
+            exitFullscreenBtn.addEventListener('click', exitFullscreen);
+
             // Project management dropdown
             const menuBtn = document.getElementById('projectMenuBtn');
             const menu = document.getElementById('projectMenu');
@@ -1828,12 +1917,19 @@ Any specific requirements or limitations?
             document.getElementById('renameProjectBtn').addEventListener('click', openRenameProjectModal);
             document.getElementById('deleteProjectBtn').addEventListener('click', openDeleteProjectModal);
 
-            // Close modals on Escape key
+            // Close modals on Escape key (and exit fullscreen)
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
-                    document.querySelectorAll('.modal.show').forEach(modal => {
-                        modal.classList.remove('show');
-                    });
+                    // Check if in fullscreen mode first
+                    const previewPanel = document.getElementById('previewPanel');
+                    if (previewPanel.classList.contains('fullscreen')) {
+                        exitFullscreen();
+                    } else {
+                        // Close modals
+                        document.querySelectorAll('.modal.show').forEach(modal => {
+                            modal.classList.remove('show');
+                        });
+                    }
                 }
             });
         }
@@ -2077,6 +2173,37 @@ Any specific requirements or limitations?
                     document.body.style.userSelect = '';
                 }
             });
+        }
+
+        // Fullscreen functions
+        function enterFullscreen() {
+            const previewPanel = document.getElementById('previewPanel');
+            const slideBrowser = document.getElementById('slideBrowserSidebar');
+
+            previewPanel.classList.add('fullscreen');
+
+            // Hide sidebar when entering fullscreen
+            if (slideBrowser && !slideBrowser.classList.contains('collapsed')) {
+                slideBrowser.classList.add('collapsed');
+            }
+
+            // Hide header
+            const header = document.querySelector('.editor-header');
+            if (header) {
+                header.style.display = 'none';
+            }
+        }
+
+        function exitFullscreen() {
+            const previewPanel = document.getElementById('previewPanel');
+
+            previewPanel.classList.remove('fullscreen');
+
+            // Show header again
+            const header = document.querySelector('.editor-header');
+            if (header) {
+                header.style.display = 'flex';
+            }
         }
 
         // Regenerate slide
