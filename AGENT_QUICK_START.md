@@ -1,10 +1,44 @@
 # Web-to-Local Sync Agent - Quick Start
 
-## So verwenden Sie den Agent in Claude Code
+## 🚀 Empfohlener Workflow: Teleport + Agent
+
+**NEU:** Der bevorzugte Weg ist jetzt **Teleport** + **Agent** - nahtlos von Web zu Lokal!
+
+### Schnellstart (3 Schritte)
+
+```bash
+# 1. In claude.ai/code (Web): Feature entwickeln & committen
+# → Branch: claude/feature-xyz
+# → Teleport-Befehl erhalten: claude --teleport session_xxx
+
+# 2. Im lokalen Terminal: Session teleportieren
+cd /path/to/slide_assistant
+claude --teleport session_xxx
+# → Claude Code Desktop öffnet sich mit vollständigem Kontext
+
+# 3. In Claude Code Desktop: Agent testen lassen
+@agent web-to-local-sync-tester {
+  "remote_branch": "claude/feature-xyz",
+  "test_scope": "full"
+}
+# → Agent gibt Report (✅ Merge Ready / ❌ Fixes Needed)
+```
+
+**Vorteile:**
+- ✅ Kein Kontext-Verlust zwischen Web & Lokal
+- ✅ Vollständige Konversationshistorie bleibt erhalten
+- ✅ Automatisches Testing & Merge-Empfehlung
+- ✅ Ideal für 2+ parallele Web-Entwicklungen
+
+**Detaillierte Anleitung:** Siehe `TELEPORT_QUICK_GUIDE.md` (5 Min) oder `TELEPORT_MULTI_SESSION_WORKFLOW.md` (15 Min)
+
+---
+
+## Alternative: Direkter Agent-Aufruf (ohne Teleport)
+
+Falls Sie den Agent direkt aufrufen möchten (ohne Teleport):
 
 ### Schritt 1: Agent aufrufen
-
-Wenn Sie in Claude Code (Desktop oder Web) sind, geben Sie einfach ein:
 
 ```
 Der lokale Branch und der Remote Branch sind voneinander unterschiedlich,
@@ -77,12 +111,45 @@ Resolution Strategy: COMBINE both features
 
 ## Praktisches Beispiel
 
-### Ihr typischer Workflow:
+### Ihr typischer Workflow (mit Teleport - empfohlen):
+
+```bash
+# 1. Im Web entwickelt (claude.ai/code)
+# → Branch: claude/multi-provider-xyz
+# → Features: Anthropic + Gemini Support
+# → Git: Committed & gepusht
+# → Teleport-Befehl erhalten: claude --teleport session_abc123
+
+# 2. Im lokalen Terminal: Session teleportieren
+cd ~/Schreibtisch/cursor_dev/slide_assistant
+claude --teleport session_abc123
+# → Claude Code Desktop öffnet sich
+
+# 3. In Claude Code Desktop: Agent testen lassen
+@agent web-to-local-sync-tester {
+  "remote_branch": "claude/multi-provider-xyz",
+  "test_scope": "full"
+}
+
+# 4. Agent gibt Report:
+✅ Tests: 35 passed, 0 failed
+✅ No conflicts
+✅ MERGE READY
+
+# 5. Befehle ausführen (basierend auf Agent-Empfehlung):
+git checkout master
+git pull origin master
+git merge claude/multi-provider-xyz
+git push origin master
+
+# 6. Fertig! ✅
+```
+
+### Alternative: Ohne Teleport (Direkter Agent-Aufruf)
 
 ```
 # 1. Im Web entwickelt (claude.ai/code)
 # → Branch: claude/multi-provider-xyz
-# → Features: Anthropic + Gemini Support
 
 # 2. Lokal in Claude Code Desktop:
 Der Web-Branch claude/multi-provider-xyz soll getestet werden
@@ -94,18 +161,8 @@ bevor ich ihn merge.
   "test_scope": "full"
 }
 
-# 3. Agent gibt Report:
-✅ Tests: 35 passed, 0 failed
-✅ No conflicts
-✅ Merge-Ready!
-
-# 4. Befehle ausführen:
-git checkout master
-git pull origin master
-git merge claude/multi-provider-xyz
-git push origin master
-
-# 5. Fertig! ✅
+# 3. Agent gibt Report & Merge-Befehle
+# 4. Befehle ausführen
 ```
 
 ---
@@ -195,6 +252,12 @@ Der Agent kann NICHT:
 
 ## Nächste Schritte
 
+### Für Teleport-Workflow (empfohlen):
+1. **Lesen:** `TELEPORT_QUICK_GUIDE.md` (5 Min) - 3-Schritte-Anleitung
+2. **Vertiefen:** `TELEPORT_MULTI_SESSION_WORKFLOW.md` (15 Min) - Für 2+ parallele Features
+3. **Referenz:** `AGENT_WEB_TO_LOCAL_SYNC.md` - Vollständige Agent-Dokumentation
+
+### Für direkten Agent-Aufruf:
 1. **Lesen:** `AGENT_WEB_TO_LOCAL_SYNC.md` für vollständige Dokumentation
 2. **Testen:** Agent mit einem Test-Branch ausprobieren
 3. **Anpassen:** Test-Scope je nach Bedarf wählen
