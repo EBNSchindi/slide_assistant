@@ -18,13 +18,8 @@ import os
 api_dir = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, api_dir)
 
-from agents.content_analyzer_v2 import ContentAnalyzerAgentV2
-from agents.presentation_strategist_v2 import PresentationStrategistAgentV2
-from agents.content_generator_v2 import ContentGeneratorAgentV2
-from renderers.component_renderer import HTMLComponentRenderer, Theme, render_styled_slide
-from config import OPENAI_API_KEY, TEST_MODE, DEFAULT_MODEL, PROJECTS_BASE_PATH
-from services.file_service import FileService
-from services.style_parser import StyleParser
+from agents.orchestrator_v2 import AgentOrchestratorV2
+from config import OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY, TEST_MODE, DEFAULT_MODEL, PROJECTS_BASE_PATH, MODEL_TO_PROVIDER
 
 router = APIRouter(prefix="/api/v2", tags=["v2"])
 
@@ -34,7 +29,7 @@ async def generate_slide_v2(
     request_data: Dict[str, Any],
 ) -> Dict[str, Any]:
     """
-    Generate slide using new 3-agent pipeline with feedback loop
+    Generate slide using new 3-agent pipeline with multi-provider support
 
     Request body:
     {
@@ -42,19 +37,20 @@ async def generate_slide_v2(
       "slide_number": 46,
       "user_input": "Raw content for the slide",
       "slide_title": "Optional title",
-      "theme": "github|modern|minimal",
+      "theme": "github|modern|minimal|apple|openai",
       "language": "de|en",
+      "model": "gpt-4o|gpt-5|claude-sonnet-4.5|gemini-3.0-pro",  (optional, auto-detects provider)
       "images": [{"filename": "img.png", "description": "..."}]
     }
 
     Returns:
     {
       "success": true,
-      "html": "...",
-      "markdown": "...",
-      "slide_blueprint": {...},
-      "formatted_slide": {...},
-      "iteration_count": 1
+      "provider": "openai|anthropic|google",
+      "model": "gpt-4o",
+      "html_content": "...",
+      "markdown_content": "...",
+      "feedback_iterations": 0
     }
     """
 
@@ -67,6 +63,7 @@ async def generate_slide_v2(
         theme = request_data.get("theme", "github")
         language = request_data.get("language", "de")
         images = request_data.get("images", [])
+        model = request_data.get("model", DEFAULT_MODEL)
 
         if not project_name or not user_input:
             raise HTTPException(
@@ -75,164 +72,41 @@ async def generate_slide_v2(
             )
 
         # ═══════════════════════════════════════════════════════════
-        # STAGE 1: Content Analysis (Agent 1)
+        # USE ORCHESTRATOR V2 (Multi-Provider Support)
         # ═══════════════════════════════════════════════════════════
 
-        analyzer = ContentAnalyzerAgentV2(
-            api_key=OPENAI_API_KEY,
-            model=DEFAULT_MODEL,
+        # Auto-detect provider from model
+        provider = MODEL_TO_PROVIDER.get(model, "openai")
+
+        # Initialize orchestrator with provider-specific agents
+        orchestrator = AgentOrchestratorV2(
+            model=model,
+            test_mode=TEST_MODE,
+            provider=provider,
         )
 
-        analysis_result = analyzer.analyze(
+        # Prepare image references
+        image_filenames = [img.get("filename") for img in images] if images else []
+
+        # Generate slide
+        result = orchestrator.generate_slide(
             user_input=user_input,
+            project_name=project_name,
+            slide_title=slide_title or f"Folie {slide_number}",
+            slide_number=slide_number,
+            theme=theme,
+            language=language,
+            image_references=image_filenames,
         )
 
-        slide_intent = analysis_result.get("slide_intent", {})
-        content_blocks = analysis_result.get("content_blocks", [])
-
-        # Override language if explicitly set
-        if language:
-            slide_intent["language"] = language
-
-        # ═══════════════════════════════════════════════════════════
-        # STAGE 2: Layout Planning (Agent 2) with retry loop
-        # ═══════════════════════════════════════════════════════════
-
-        strategist = PresentationStrategistAgentV2(
-            api_key=OPENAI_API_KEY,
-            model=DEFAULT_MODEL,
-        )
-
-        # Load design system from project (includes components_schema from design-guide.json)
-        # Supports shared themes (apple, openai) and project-specific themes
-        project_path = os.path.join(PROJECTS_BASE_PATH, project_name)
-        style_parser = StyleParser(project_path, theme_name=theme)
-        design_system = style_parser.parse_project_style()
-
-        # Fallback for basic fields if not in parsed style
-        if "max_components" not in design_system:
-            design_system["max_components"] = 3
-
-        image_metadata = None
-        if images:
-            image_metadata = {
-                "images": images,
-            }
-
-        blueprint = strategist.plan(
-            slide_intent=slide_intent,
-            content_blocks=content_blocks,
-            design_system=design_system,
-            image_metadata=image_metadata,
-        )
-
-        # ═══════════════════════════════════════════════════════════
-        # STAGE 3: Content Generation (Agent 3) with feedback loop
-        # ═══════════════════════════════════════════════════════════
-
-        generator = ContentGeneratorAgentV2(
-            api_key=OPENAI_API_KEY,
-            model=DEFAULT_MODEL,
-        )
-
-        iteration_count = 0
-        max_iterations = 3
-        formatted_slide = None
-        validation_result = None
-
-        while iteration_count < max_iterations:
-            iteration_count += 1
-
-            # Generate content
-            gen_result = generator.generate(
-                slide_title=slide_title or blueprint.get("slide_title", ""),
-                slide_blueprint=blueprint,
-                content_blocks=content_blocks,
-                language=language,
-                design_system=design_system,  # Pass for slot validation
-            )
-
-            # Check if valid
-            if "is_valid" in gen_result and not gen_result["is_valid"]:
-                # Validation failed - feedback from Agent 3
-                validation_result = gen_result
-                suggested_changes = gen_result.get("suggested_changes", {})
-
-                # Ask strategist to replan
-                if iteration_count < max_iterations:
-                    blueprint = strategist.replan(
-                        original_blueprint=blueprint,
-                        feedback=validation_result,
-                    )
-                else:
-                    # Max iterations reached, return as-is with warning
-                    formatted_slide = {
-                        "slide_title": slide_title or blueprint.get("slide_title", ""),
-                        "components": [],
-                        "language": language,
-                        "warnings": ["Max iterations reached, some content may be cut"],
-                    }
-                    break
-            else:
-                # Success! Got valid formatted slide
-                formatted_slide = gen_result
-                break
-
-        if not formatted_slide:
+        if not result.get("success"):
             raise HTTPException(
                 status_code=500,
-                detail="Failed to generate formatted slide after max iterations",
+                detail=result.get("error", "Unknown error"),
             )
 
-        # ═══════════════════════════════════════════════════════════
-        # STAGE 4: HTML Rendering (Deterministic, no LLM)
-        # ═══════════════════════════════════════════════════════════
-
-        renderer = HTMLComponentRenderer(theme=Theme(name=theme))
-
-        # Add slide_id for HTML rendering
-        formatted_slide["slide_id"] = f"slide-{slide_number}" if slide_number else "slide-1"
-        formatted_slide["theme"] = theme
-
-        # Generate HTML
-        html = renderer.render_slide(formatted_slide)
-
-        # Convert to markdown (basic conversion)
-        markdown = _formatted_slide_to_markdown(formatted_slide)
-
-        # ═══════════════════════════════════════════════════════════
-        # SAVE OUTPUT
-        # ═══════════════════════════════════════════════════════════
-
-        # Save HTML and Markdown if project_name provided
-        if project_name and slide_number:
-            try:
-                project_path = os.path.join(PROJECTS_BASE_PATH, project_name)
-                file_service = FileService(project_path=project_path)
-
-                slide_slug = _slugify(slide_title or f"slide-{slide_number}")
-                filename = f"folie-{slide_number:02d}-{slide_slug}"
-
-                file_service.save_html_slide(
-                    slide_name=filename,
-                    content=html,
-                )
-                file_service.save_markdown_slide(
-                    slide_name=filename,
-                    content=markdown,
-                )
-            except Exception as e:
-                # Non-fatal: if saving fails, still return generated content
-                print(f"Warning: Failed to save files: {e}")
-
-        return {
-            "success": True,
-            "html": html,
-            "markdown": markdown,
-            "slide_blueprint": blueprint,
-            "formatted_slide": formatted_slide,
-            "iteration_count": iteration_count,
-        }
+        # Return result (already includes html_content, markdown_content, etc.)
+        return result
 
     except Exception as e:
         raise HTTPException(
