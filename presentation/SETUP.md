@@ -1,13 +1,14 @@
-# AI Content Editor - Setup Guide
+# Slide Assistant - Setup Guide
 
-Willkommen beim AI-powered Content Editor für deinen Slides Helper! Diese Anleitung führt dich durch die Installation und Einrichtung.
+Willkommen beim AI-powered Slide Assistant! Diese Anleitung führt dich durch die Installation und Einrichtung der V2-Architektur.
 
 ## 📋 Übersicht
 
 Das System besteht aus:
-- **Frontend**: `ai-editor.html` - Webbasierter Chat-Editor mit Live-Preview
-- **Backend**: FastAPI Server mit Multi-Agent-Architektur
-- **LLM Integration**: OpenAI GPT-4o (oder Mock-Modus für Entwicklung)
+- **Frontend**: `unified-editor.html` - Integrierter Editor mit Live-Preview
+- **Backend**: FastAPI Server mit V2 Multi-Agent-Architektur
+- **Templates**: Jinja2-basierte deterministische HTML-Generierung
+- **LLM Integration**: OpenAI GPT-4o/GPT-5 (oder Mock-Modus für Entwicklung)
 
 ## 🚀 Quick Start (5 Minuten)
 
@@ -26,47 +27,57 @@ source venv/bin/activate  # macOS/Linux
 pip install -r requirements.txt
 ```
 
-### 3. API starten
+### 3. Umgebung konfigurieren
 
 ```bash
-# Vom presentation Ordner:
+cp .env.example .env
+# Editiere .env und füge OPENAI_API_KEY hinzu
+# ODER setze TEST_MODE=true für Entwicklung
+```
+
+### 4. API starten
+
+```bash
+# Vom presentation/ Ordner:
+cd ..
 python3 run_api.py
 ```
 
 Server läuft unter: `http://localhost:8001`
 
-### 4. Editor öffnen
+### 5. Unified Editor öffnen
 
-Öffne die Datei `ai-editor.html` im Browser:
 ```bash
-# Option 1: File-Protokoll (funktioniert ohne Server für UI, aber keine Generierung)
-open ai-editor.html
+# Option 1: File-Protokoll (kann CORS-Probleme haben)
+open unified-editor.html
 
-# Option 2: Mit lokalem Server (volle Funktionalität)
+# Option 2: Mit lokalem Server (empfohlen)
 python3 -m http.server 8000
-# Dann: http://localhost:8000/ai-editor.html
+# Dann: http://localhost:8000/unified-editor.html
 ```
 
 ## ⚙️ Konfiguration
 
 ### Umgebungsvariablen (`.env`)
 
-Bereits vorkonfiguriert mit TEST_MODE=true:
+Erstelle `presentation/api/.env`:
 
 ```env
-# Für echte OpenAI Integration
+# Für Entwicklung (Standard)
+TEST_MODE=true
+
+# Für Produktion mit OpenAI
 OPENAI_API_KEY=sk-your-key-here
 TEST_MODE=false
-
-# Für Entwicklung (ohne API Key)
-TEST_MODE=true
+DEFAULT_MODEL=gpt-4o  # oder gpt-5, gpt-5-mini
 ```
 
-**TEST_MODE aktivieren:**
-- Nutzt Mock Agents statt echtem OpenAI
-- Generiert Dummy-Content für Entwicklung
-- Keine API Kosten
-- Perfekt zum Testen der UI
+**TEST_MODE aktivieren (empfohlen für Entwicklung):**
+- ✅ Nutzt Mock Agents statt echtem OpenAI
+- ✅ Keine API Kosten
+- ✅ Schnelle Entwicklung
+- ✅ Deterministisches Testing
+- ❌ Keine echten AI-Generierungen
 
 **Für echte OpenAI Integration:**
 1. API Key von [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys) holen
@@ -77,149 +88,152 @@ TEST_MODE=true
 
 ```
 presentation/
-├── api/                          # Backend FastAPI
-│   ├── main.py                   # Hauptserver
-│   ├── agents/                   # AI Agents
-│   │   ├── content_analyzer.py
-│   │   ├── presentation_strategist.py
-│   │   ├── content_generator.py
-│   │   └── mock_agents.py        # Test Agents
-│   ├── services/                 # Services
-│   │   ├── style_parser.py
-│   │   ├── file_service.py
-│   │   └── project_service.py
-│   └── requirements.txt           # Python Dependencies
-├── ai-editor.html                # Frontend Editor
+├── unified-editor.html           # Hauptanwendung (NEU!)
 ├── run_api.py                    # API Starter Script
-├── component-viewer.html         # Klassischer Viewer
+├── api/                          # Backend V2
+│   ├── main.py                   # FastAPI Server
+│   ├── config.py                 # Konfiguration
+│   ├── agents/                   # V2 Agenten
+│   │   ├── orchestrator.py       # Agent-Koordinator
+│   │   ├── content_analyzer_v2.py
+│   │   ├── presentation_strategist_v2.py
+│   │   ├── content_generator_v2.py
+│   │   └── mock_agents_v2.py     # Mock Agents für TEST_MODE
+│   ├── renderers/                # HTML-Rendering
+│   │   └── component_renderer.py # Jinja2-Renderer
+│   ├── routes/                   # API Endpoints
+│   │   └── v2.py                 # V2 Endpoints
+│   ├── services/                 # Services
+│   │   ├── file_service.py
+│   │   ├── project_service.py
+│   │   ├── style_parser.py
+│   │   └── template_loader.py
+│   ├── tests/                    # Test Suite
+│   └── requirements.txt          # Dependencies
+├── templates/                    # Jinja2 Templates
+│   ├── components/               # Component Templates (10 Typen)
+│   └── wrappers/                 # Wrapper Templates
 └── projects/
     └── beispiel-projekt/
         ├── markdown/
         │   ├── input/
         │   └── optimized/        # Generated Slides
         ├── html/                 # Generated HTML
-        └── styles/               # Design System
+        ├── images/uploads/       # Uploaded Images
+        └── styles/               # Design Themes
+            ├── github/
+            ├── modern/
+            └── minimal/
 ```
 
 ## 💬 Wie du es nutzt
 
-### NEU: Unified Editor (Empfohlen!)
+### Unified Editor Features
 
-Öffne **`unified-editor.html`** - eine integrierte Oberfläche mit:
-- Chat-Input (links)
-- Live-Rendered Preview mit echtem CSS (rechts)
-- Agent-Steps Toggle (optional)
-- Style-Switcher
-- Component Width Controls
-- Feedback-Loop
+Der **unified-editor.html** kombiniert alle Funktionen:
 
-### Oder: Legacy Editor
+**Links (Input):**
+- Projekt-Auswahl
+- Slide-Titel eingeben
+- Folien-Nummer setzen
+- Freier Text-Input
+- Theme-Auswahl (GitHub/Modern/Minimal)
 
-Öffne `ai-editor.html` (älter, einfacher)
+**Rechts (Preview):**
+- Live HTML-Rendering mit echtem CSS
+- Theme-Switch ohne Page-Reload
+- Export-Funktionen
+- Regenerierung mit Feedback
 
----
+**Features:**
+- Side-by-side Layout für bessere Übersicht
+- Kompakte Komponenten-Anzeige
+- Live Preview während Generierung
+- Theme-Switcher
+- Slide-Management
 
-## Schritt 1: Projekt wählen
+### Schritt-für-Schritt
 
-Öffne `unified-editor.html` und wähle ein Projekt aus der Dropdown-Liste aus.
+#### 1. Projekt wählen
 
-### Schritt 2: Content eingeben
+Wähle aus der Dropdown-Liste (z.B. "beispiel-projekt")
 
-Im Chat-Panel auf der linken Seite kannst du folgende Formate eingeben:
+#### 2. Slide-Info eingeben
+
+```
+Slide-Titel: Folie 12: Team-Übersicht
+Slide-Nummer: 12
+```
+
+#### 3. Content eingeben
 
 **Stichpunkte:**
 ```
-- Team: 5 Experten
-- 20 Jahre Erfahrung
+- 5 erfahrene Experten
+- 20+ Jahre kombinierte Erfahrung
 - Standorte: Berlin & München
-```
-
-**Markdown:**
-```
-# Team
-
-## Komponente 1: Größe
-- 5 Experten
-- Top-Talent
-
-## Komponente 2: Standorte
-- Berlin
-- München
 ```
 
 **Strukturierter Text:**
 ```
-Beschreibe dein Team: 5 erfahrene Experten mit 20 Jahren kombinierter Erfahrung,
-basierend in Berlin und München mit weltweiter Präsenz.
+Unser Team besteht aus 5 erfahrenen Experten mit über 20 Jahren
+kombinierter Erfahrung in der Softwareentwicklung. Wir haben
+Standorte in Berlin und München.
 ```
 
-### Schritt 2: Style auswählen (optional)
-
-Im Header kannst du das Style-Theme auswählen:
-- **github** (Default) - GitHub Design System
-- **modern** - Moderner Style
-- **minimal** - Minimalistischer Ansatz
-
-Das CSS wird live geladen und auf die Preview angewendet!
-
-### Schritt 3: Content eingeben
-
-Im Input-Panel (links) kannst du eingeben:
-- Stichpunkte mit Bullets
-- Markdown-formatierter Text
-- Freier Text/Beschreibung
-
-### Schritt 4: Generieren
-
-1. Text eingeben
-2. "Generate Content" Button klicken
-3. **Live-Preview auf der rechten Seite zeigt das Ergebnis mit CSS!**
-
-**Optional: Agent-Steps anzeigen**
-- Checkbox "Show Agent Steps" aktivieren
-- Siehst du jeden Schritt der Agent-Chain in Echtzeit
-
-### Schritt 5: Preview & Styling
-
-Im Preview-Panel (rechts) siehst du:
-- **Echte HTML mit CSS gerendert** (nicht nur Text!)
-- Slide-Titel und Komponenten-Info
-- **Component Width Controls** zum Optimieren für Screenshots:
-  - Auto (automatische Breite)
-  - 400px, 600px, 800px (feste Breiten)
-  - Full (volle Breite)
-
-### Schritt 6: Feedback & Regenerierung
-
-Unter jeder generierten Slide:
-1. Feedback-Text eingeben: z.B. "Mach es prägnanter", "Füge mehr Details hinzu"
-2. "🔄 Regenerate" Button klicken
-3. Agent analysiert Feedback und generiert die Slide neu
-4. Live-Preview aktualisiert sich sofort mit echtem CSS!
-
-## 🔧 Agent Chain Erklärung
-
-Wenn du Content eingibst, laufen folgende Agenten ab:
-
+**Statistiken:**
 ```
-1. Content Analyzer (5 Sek)
-   └─ Analysiert deinen Input
-   └─ Erkennt Inhaltstyp (Text, Liste, Statistiken)
-
-2. Presentation Strategist (5 Sek)
-   └─ Prüft Design System deines Projekts
-   └─ Empfiehlt optimale Komponenten
-   └─ Plant Layout
-
-3. Content Generator (10 Sek)
-   └─ Generiert Markdown
-   └─ Generiert HTML mit CSS-Klassen
-   └─ Speichert beide Formate
-
-Total: ~20 Sekunden
+- 5 Team-Mitglieder
+- 20+ Jahre Erfahrung
+- 100% Remote-fähig
 ```
 
-Alle Schritte siehst du live im Chat-Panel!
+#### 4. Theme auswählen
+
+- **GitHub** (Default) - Clean, professional
+- **Modern** - Contemporary styling
+- **Minimal** - Simplified design
+
+#### 5. Generieren
+
+1. "Generate" Button klicken
+2. Warte 3-5 Sekunden (V2 ist schnell!)
+3. Live-Preview zeigt Ergebnis
+
+#### 6. Review & Export
+
+- Prüfe Preview rechts
+- Nutze Theme-Switch zum Vergleichen
+- Export als HTML oder Screenshot
+
+## 🔧 V2 Agent Chain (Architektur)
+
+```
+User Input
+    ↓
+Agent 1: Content Analyzer (1-2s)
+  └─ Analysiert Input-Typ
+  └─ Erkennt Sprache (DE/EN)
+  └─ Identifiziert Content-Blöcke
+    ↓
+Agent 2: Presentation Strategist (1-2s) ←──┐ Feedback Loop
+  └─ Plant Component-Typen                 │ (bei Validation-Fehler)
+  └─ Referenziert design-guide.json        │
+  └─ Erstellt Slide-Blueprint              │
+    ↓──────────────────────────────────────┘
+Agent 3: Content Generator (1-2s)
+  └─ Generiert FormattedSlide (pure data, KEIN HTML!)
+  └─ Validiert gegen Pydantic schemas
+    ↓
+Jinja2 Renderer (<1s)
+  └─ Lädt Templates
+  └─ Rendert HTML deterministisch
+  └─ Wendet Theme-Tokens an
+    ↓
+HTML + Markdown Output
+
+Total: ~3-5s (V2 ist 3-4x schneller als V1!)
+```
 
 ## 📂 Generierte Dateien
 
@@ -227,108 +241,199 @@ Nach der Generierung entstehen:
 
 ```
 projects/beispiel-projekt/
-├── markdown/optimized/folie-xyz.md      # Markdown Source
-└── html/folie-xyz.html                  # Rendered HTML
+├── markdown/optimized/folie-12-team-übersicht.md  # Markdown Source
+└── html/folie-12-team-übersicht.html              # Rendered HTML
 ```
 
 Diese kannst du:
-- Mit [component-viewer.html](component-viewer.html) anschauen
-- In PowerPoint importieren
-- Manuell editieren
-- Weiter verarbeiten
+- Im unified-editor.html live bearbeiten
+- In PowerPoint als Screenshots einfügen
+- Weiter manuell anpassen
+- Für Dokumentation verwenden
 
 ## ❌ Fehlerbehandlung
 
-### "API Key not configured"
-- **Solution**: `TEST_MODE=true` in `.env` setzen für Entwicklung
+### "OPENAI_API_KEY not found"
+**Solution**: Setze `TEST_MODE=true` in `presentation/api/.env`
 
 ### "Connection refused"
-- **Solution**: API Server läuft nicht. Starte `python3 run_api.py`
+**Solution**: API Server läuft nicht
+```bash
+cd presentation
+python3 run_api.py
+```
 
-### "Project not found"
-- **Solution**: Wähle ein Projekt aus der Dropdown-Liste
+### "Template not found"
+**Solution**: Templates sind in `presentation/templates/`, nicht `presentation/api/templates/`
 
-### "Generate button grayed out"
-- **Solution**: Warten bis vorherige Generierung abgeschlossen ist
+### "Module import error"
+**Solution**: Stelle sicher, dass `__init__.py` in `api/schemas/` und `api/tests/` existiert
+
+### "Tests failing"
+**Solution**: Nutze TEST_MODE für Development
+```bash
+cd presentation/api
+export TEST_MODE=true
+python3 -m pytest tests/ -v
+```
+
+## 🧪 Testing
+
+### Quick Test (Mock Mode)
+
+```bash
+cd presentation/api
+export TEST_MODE=true
+python3 -m pytest tests/ -v
+```
+
+### Test einzelne Components
+
+```bash
+# Renderer Tests
+python3 -m pytest tests/test_renderer_fix.py -v
+
+# Agent Tests
+python3 -m pytest tests/test_agents_v2.py -v
+
+# Integration Tests
+python3 -m pytest tests/test_v2_integration.py -v
+```
+
+Siehe [TESTING.md](../TESTING.md) für vollständige Test-Dokumentation.
 
 ## 🎨 Style Guide Integration
 
-Der System liest automatisch den Style Guide deines Projekts:
-- `projects/{project}/styles/{theme}/variables.css` → Farben, Fonts
-- `projects/{project}/styles/{theme}/design-guide.md` → Design Rules
-- `projects/{project}/styles/{theme}/style.css` → CSS Komponenten
+Das System liest automatisch Design Guides:
+
+```
+projects/{project}/styles/{theme}/
+├── design-guide.json  # Component definitions & tokens
+├── design-guide.md    # Human-readable guide
+├── style.css          # Theme CSS
+└── variables.css      # CSS custom properties
+```
 
 Die Agents respektieren diese Vorgaben beim Generieren!
 
-## 🧪 Test Mode Features
+## 📊 API Endpoints
 
-Mit `TEST_MODE=true` (Standard):
-- ✅ Schnelle Mock-Generierung (sofort)
-- ✅ Kein API-Schlüssel nötig
-- ✅ Perfekt zum Testen der UI
-- ✅ Vollständige Agent Chain Simulation
-- ❌ Inhalte sind nicht LLM-generiert (Mock Content)
-
-## 📊 API Endpoints (Für Advanced Users)
+### V2 Endpoints (Current)
 
 ```bash
+# Generate slide (V2)
+curl -X POST http://localhost:8001/api/v2/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "project_name": "beispiel-projekt",
+    "user_input": "...",
+    "slide_title": "Folie 12",
+    "slide_number": 12,
+    "theme": "github",
+    "language": "de"
+  }'
+
+# Health check
+curl http://localhost:8001/health
+
 # List projects
 curl http://localhost:8001/api/projects
 
 # Get project info
 curl http://localhost:8001/api/projects/beispiel-projekt
-
-# Generate content
-curl -X POST http://localhost:8001/api/generate \
-  -H "Content-Type: application/json" \
-  -d '{"project_name":"beispiel-projekt","user_input":"..."}'
-
-# Regenerate slide
-curl -X POST http://localhost:8001/api/regenerate \
-  -H "Content-Type: application/json" \
-  -d '{"project_name":"beispiel-projekt","slide_name":"team","feedback":"..."}'
 ```
+
+### Legacy Endpoints (Removed)
+- ❌ `/api/generate` → Use `/api/v2/generate`
+- ❌ `/api/regenerate` → Merged into `/api/v2/generate`
 
 ## 🆘 Support & Troubleshooting
 
 ### API lädt nicht
-1. Stelle sicher, dass Python 3.10+ installiert ist: `python3 --version`
-2. Virtual environment aktiviert: `source api/venv/bin/activate`
-3. Port 8001 ist frei: `lsof -i :8001` (macOS/Linux)
+1. Python 3.10+ installiert? `python3 --version`
+2. Virtual environment aktiviert? `source api/venv/bin/activate`
+3. Port 8001 frei? `lsof -i :8001` (macOS/Linux)
 
 ### Frontend zeigt keine Projekte
 - Browser-Console öffnen (F12)
-- Auf Fetch-Fehler checken
-- Sicherstellen, dass API läuft
+- Fetch-Fehler checken
+- API läuft unter localhost:8001?
 
 ### Generierung dauert zu lange
-- Mit OpenAI API: Normal 30-60 Sekunden
-- Mit TEST_MODE: Sollte <5 Sekunden sein
-- Bei Timeout: API-Anfrage überprüfen
+- **Mit OpenAI API:** 3-5s normal
+- **Mit TEST_MODE:** <2s
+- **Bei Timeout:** API-Logs prüfen
 
 ## 🎯 Next Steps
 
 1. ✅ Setup abgeschlossen
-2. 💬 Öffne `ai-editor.html`
-3. 🎨 Wähle ein Projekt
+2. 💻 Öffne `unified-editor.html`
+3. 🎨 Wähle Projekt & Theme
 4. ✍️ Schreibe Test-Content
 5. 🚀 Generate!
-6. 🔄 Experimentiere mit Feedback-Loop
+6. 📊 Teste verschiedene Themes
 
 ## 📚 Weitere Dokumentation
 
-- [API README](api/README.md) - Technische API Doku
-- [component-viewer.html](component-viewer.html) - Klassischer Content-Viewer
-- [LLM-PROMPT.md](LLM-PROMPT.md) - Prompt für manuelle LLM-Nutzung
-- [QUICK-START.md](QUICK-START.md) - 5-Minuten Übersicht
+- **[CLAUDE.md](../CLAUDE.md)** - Vollständige Projekt-Dokumentation
+- **[README.md](../README.md)** - Projekt-Übersicht
+- **[TESTING.md](../TESTING.md)** - Test-Guide
+- **[api/README.md](api/README.md)** - API-Dokumentation
+- **[QUALITY-GUIDE.md](QUALITY-GUIDE.md)** - Qualitätsstandards
+- **[MIGRATION_GUIDE.md](../MIGRATION_GUIDE.md)** - V1→V2 Migration
 
 ## 🤝 Contributing
 
-Möchtest du neue Features hinzufügen?
+### Neue Features hinzufügen
 
-1. Neue Agent? → Füge in `api/agents/` hinzu
-2. Neue Service? → Füge in `api/services/` hinzu
-3. Frontend Verbesserungen? → Editiere `ai-editor.html`
-4. Bugs gefunden? → Schau dir die Error Logs an
+**Neue Component-Type:**
+1. Template erstellen: `presentation/templates/components/my-component.html.j2`
+2. Schema definieren: `api/agents/schemas.py`
+3. Renderer updaten: `api/renderers/component_renderer.py`
+4. Tests schreiben: `api/tests/test_template_system.py`
 
-Happy content generating! 🎉
+**Neuer Agent:**
+1. Agent erstellen: `api/agents/my_agent_v2.py`
+2. In Orchestrator integrieren: `api/agents/orchestrator.py`
+3. Tests schreiben: `api/tests/test_my_agent.py`
+
+**Frontend Änderungen:**
+1. Editiere `unified-editor.html`
+2. Teste mit lokalem Server
+3. Prüfe Browser-Kompatibilität
+
+## 🔍 Debugging
+
+### Enable Verbose Logging
+
+```python
+# In presentation/api/config.py
+import logging
+logging.basicConfig(level=logging.DEBUG)
+```
+
+### Check Agent Output
+
+```bash
+cd presentation/api
+python3 -c "
+from agents.orchestrator import AgentOrchestrator
+orch = AgentOrchestrator('beispiel-projekt')
+result = orch.generate_slide('Test input', 'Folie 1', 1)
+print(result)
+"
+```
+
+### Inspect Templates
+
+```bash
+ls -la presentation/templates/components/
+# Should show 10 .j2 files
+```
+
+## 🎉 Happy Content Generating!
+
+Bei Fragen:
+- Check [CLAUDE.md](../CLAUDE.md) für Details
+- Review [TESTING.md](../TESTING.md) für Tests
+- Siehe [api/README.md](api/README.md) für API-Details
