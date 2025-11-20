@@ -1084,11 +1084,24 @@
             right: 12px;
             display: none;
             gap: 8px;
-            z-index: 10000;
+            z-index: 10001;
         }
 
         .preview-panel.fullscreen .fullscreen-controls {
             display: flex;
+        }
+
+        /* Keep preview-controls visible in fullscreen but adjust positioning */
+        .preview-panel.fullscreen .preview-controls {
+            position: sticky;
+            top: 0;
+            z-index: 10000;
+            background: #161b22;
+        }
+
+        /* Hide fullscreen enter button when already in fullscreen */
+        .preview-panel.fullscreen .fullscreen-btn {
+            display: none;
         }
 
         .fullscreen-btn {
