@@ -1417,17 +1417,42 @@ Any specific requirements or limitations?
             }
         }
 
-        // Load project styles
+        // Load project styles + shared themes
         async function loadProjectStyles(projectName) {
             try {
                 const response = await fetch(`${API_BASE}/projects/${projectName}`);
                 const data = await response.json();
 
-                if (data.success && data.project.available_styles) {
-                    styleSelect.innerHTML = data.project.available_styles
-                        .map(s =>
-                            `<option value="${s}" ${s === DEFAULT_STYLE ? 'selected' : ''}>${s}</option>`
-                        ).join('');
+                if (data.success) {
+                    const projectStyles = data.project.available_styles || [];
+
+                    // Load shared themes from projects.json
+                    const projectsResponse = await fetch('projects.json');
+                    const projectsData = await projectsResponse.json();
+                    const sharedThemes = projectsData.sharedThemes || [];
+
+                    // Build options: project themes + shared themes
+                    let options = [];
+
+                    // Project-specific themes
+                    if (projectStyles.length > 0) {
+                        options.push('<optgroup label="Project Themes">');
+                        projectStyles.forEach(style => {
+                            options.push(`<option value="${style}" ${style === DEFAULT_STYLE ? 'selected' : ''}>${style}</option>`);
+                        });
+                        options.push('</optgroup>');
+                    }
+
+                    // Shared themes (global)
+                    if (sharedThemes.length > 0) {
+                        options.push('<optgroup label="Shared Themes">');
+                        sharedThemes.forEach(theme => {
+                            options.push(`<option value="${theme.name}">${theme.displayName}</option>`);
+                        });
+                        options.push('</optgroup>');
+                    }
+
+                    styleSelect.innerHTML = options.join('');
 
                     currentStyle = DEFAULT_STYLE;
                     styleSelect.value = DEFAULT_STYLE;
@@ -1438,10 +1463,28 @@ Any specific requirements or limitations?
             }
         }
 
-        // Load CSS stylesheet
-        function loadStyleSheet(projectName, styleName) {
-            const cssPath = `projects/${projectName}/styles/${styleName}/style.css`;
+        // Load CSS stylesheet (supports project and shared themes)
+        async function loadStyleSheet(projectName, styleName) {
             const styleLink = document.getElementById('projectStyle');
+
+            // Try project-specific theme first
+            let cssPath = `projects/${projectName}/styles/${styleName}/style.css`;
+
+            try {
+                // Check if project theme exists
+                const response = await fetch(cssPath, {method: 'HEAD'});
+
+                if (!response.ok) {
+                    // Fallback to shared theme
+                    cssPath = `shared-themes/${styleName}/style.css`;
+                    console.log(`Loading shared theme: ${styleName}`);
+                }
+            } catch (error) {
+                // Fallback to shared theme on error
+                cssPath = `shared-themes/${styleName}/style.css`;
+                console.log(`Loading shared theme: ${styleName}`);
+            }
+
             styleLink.href = cssPath;
         }
 

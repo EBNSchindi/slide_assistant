@@ -104,8 +104,9 @@ async def generate_slide_v2(
         )
 
         # Load design system from project (includes components_schema from design-guide.json)
+        # Supports shared themes (apple, openai) and project-specific themes
         project_path = os.path.join(PROJECTS_BASE_PATH, project_name)
-        style_parser = StyleParser(project_path)
+        style_parser = StyleParser(project_path, theme_name=theme)
         design_system = style_parser.parse_project_style()
 
         # Fallback for basic fields if not in parsed style
