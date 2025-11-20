@@ -340,10 +340,10 @@ test_renderer_fix.py       # Template rendering tests
 ```bash
 # Test with mock agents (no API key needed, fast)
 export TEST_MODE=true
-python -m pytest presentation/api/test_v2_integration.py -v
+python -m pytest presentation/api/tests/test_v2_integration.py -v
 
 # Test specific component
-python -m pytest presentation/api/test_renderer_fix.py::test_stat_grid -v
+python -m pytest presentation/api/tests/test_renderer_fix.py::test_stat_grid -v
 ```
 
 ---

@@ -46,6 +46,19 @@ slide_assistant/
 │   │   │   ├── project_service.py           # Project operations
 │   │   │   ├── template_loader.py           # Jinja2 template loader
 │   │   │   └── variant_style_parser.py      # Design variant parsing (archived)
+│   │   ├── schemas/                         # Blueprint schemas
+│   │   │   ├── blueprint.py                 # SlideBlueprintGenerator
+│   │   │   └── __init__.py
+│   │   ├── tests/                           # Test suite
+│   │   │   ├── test_agents_v2.py            # V2 agent tests
+│   │   │   ├── test_v2_integration.py       # Integration tests
+│   │   │   ├── test_v2_mock_flow.py         # Mock agent flow tests
+│   │   │   ├── test_renderer_fix.py         # Renderer tests
+│   │   │   ├── test_template_system.py      # Template system tests
+│   │   │   ├── test_table_*.py              # Table generation tests (3 files)
+│   │   │   ├── test_semantic_*.py           # Semantic framework tests (2 files)
+│   │   │   ├── test_pitch_deck_regeneration.py  # Pitch deck tests
+│   │   │   └── __init__.py
 │   │   └── models/                          # Request/response schemas
 │   ├── templates/                           # Jinja2 component templates (NOT in api/)
 │   │   ├── components/
@@ -249,15 +262,15 @@ cd presentation/api
 export TEST_MODE=true
 
 # Run V2 integration tests
-python3 -m pytest test_agents_v2.py -v
-python3 -m pytest test_v2_integration.py -v
-python3 -m pytest test_v2_mock_flow.py -v
+python3 -m pytest tests/test_agents_v2.py -v
+python3 -m pytest tests/test_v2_integration.py -v
+python3 -m pytest tests/test_v2_mock_flow.py -v
 
 # Run renderer tests
-python3 -m pytest test_renderer_fix.py -v
+python3 -m pytest tests/test_renderer_fix.py -v
 
 # Run all tests
-python3 -m pytest test_*.py -v
+python3 -m pytest tests/test_*.py -v
 ```
 
 **Note:** V1 tests have been removed. See MIGRATION_GUIDE.md for upgrading existing code.
@@ -427,14 +440,14 @@ When committing:
 
 ## Development Tips
 
-- Test mock agents in isolation with: `python3 -m pytest presentation/api/test_agents_v2.py -v`
+- Test mock agents in isolation with: `python3 -m pytest presentation/api/tests/test_agents_v2.py -v`
 - Use TEST_MODE=true for development/testing (no API costs)
 - Use GPT-5-mini for cost control, GPT-5 for complex strategy
 - Enable structured_outputs for production code (type safety)
 - German content generation: Set slide_title in German for better context
 - Keep components focused (1 idea per component)
 - Use pixel-perfect screenshots: Browser DevTools element inspector + 100% zoom
-- Batch test: `python3 -m pytest presentation/api/test_*.py -v -k keyword`
+- Batch test: `python3 -m pytest presentation/api/tests/test_*.py -v -k keyword`
 
 ## V2 Architecture & Recent Changes (2025-11-18)
 

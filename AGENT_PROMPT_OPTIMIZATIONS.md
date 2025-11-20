@@ -1,6 +1,6 @@
 # Agent Prompt Optimizations
 
-**Datum:** 18. November 2025
+**Datum:** 18. November 2024
 **Basierend auf:** Pitch Deck Test Analysis (8 Folien)
 **Ziel:** Verbesserung der feature-grid Erkennung und max_components Handling
 
@@ -208,22 +208,22 @@ EXAMPLE:
 1. **Unit Tests:**
    ```bash
    # Agent 1: FEATURE Content-Block-Type
-   python3 -m pytest presentation/api/test_content_analyzer_v2.py::test_feature_detection -v
+   python3 -m pytest presentation/api/tests/test_content_analyzer_v2.py::test_feature_detection -v
 
    # Agent 2: feature-grid Komponente
-   python3 -m pytest presentation/api/test_strategist_v2.py::test_feature_grid_selection -v
+   python3 -m pytest presentation/api/tests/test_strategist_v2.py::test_feature_grid_selection -v
    ```
 
 2. **Integration Test:**
    ```bash
    # Folie 06 regenerieren
-   python3 -m pytest presentation/api/test_pitch_deck_regeneration.py::test_slide_06 -v
+   python3 -m pytest presentation/api/tests/test_pitch_deck_regeneration.py::test_slide_06 -v
    ```
 
 3. **Full Regression:**
    ```bash
    # Alle 8 Folien erneut testen
-   python3 -m pytest presentation/api/test_pitch_deck_regeneration.py -v
+   python3 -m pytest presentation/api/tests/test_pitch_deck_regeneration.py -v
    ```
 
 ---
@@ -281,6 +281,6 @@ EXAMPLE:
 
 ---
 
-**Erstellt:** 18. November 2025, 14:45 UTC
+**Erstellt:** 18. November 2024, 14:45 UTC
 **Autor:** Claude Code Agent-Optimierung
 **Status:** ✅ Implementiert, ⏳ Tests ausstehend
