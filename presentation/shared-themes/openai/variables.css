@@ -1,0 +1,79 @@
+/* OpenAI Design System - CSS Variablen */
+
+:root {
+  /* Primärfarben - OpenAI Teal */
+  --color-primary: #10A37F;
+  --color-primary-light: #1AB88B;
+  --color-primary-dark: #0D8C6D;
+
+  /* Komponenten-Hintergrund */
+  --color-bg-component: #ffffff;
+  --color-bg-component-hover: #f7f7f8;
+  --color-bg-subtle: #f7f7f8;
+  --color-bg-overlay: #fafafa;
+
+  /* Text-Farben */
+  --color-text-primary: #2d333a;
+  --color-text-secondary: #6e6e80;
+  --color-text-muted: #acacbe;
+  --color-text-on-primary: #ffffff;
+
+  /* Rahmen-Farben */
+  --color-border: #e7e7e7;
+  --color-border-muted: #ececf1;
+  --color-border-hover: #10A37F;
+
+  /* Akzentfarben */
+  --color-accent: #6366F1;
+  --color-success: #10B981;
+  --color-success-bg: #D1FAE5;
+  --color-success-text: #065F46;
+  --color-warning: #F59E0B;
+  --color-warning-bg: #FEF3C7;
+  --color-warning-text: #92400E;
+  --color-danger: #EF4444;
+  --color-danger-bg: #FEE2E2;
+  --color-danger-text: #991B1B;
+
+  /* Schatten - weicher, mehrschichtig */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.09), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+  --shadow-xl: 0 20px 25px rgba(0,0,0,0.1), 0 10px 10px rgba(0,0,0,0.04);
+
+  /* Border Radius - mittel */
+  --border-radius-sm: 6px;
+  --border-radius-md: 10px;
+  --border-radius-lg: 16px;
+  --border-radius-full: 50%;
+
+  /* Schriftart - Modern (Inter preferred) */
+  --font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  --font-family-mono: "Roboto Mono", "Source Code Pro", "SF Mono", Menlo, Monaco, monospace;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* Komponenten-spezifisch */
+  --component-padding: 48px;
+  --component-border-width: 1px;
+  --component-border-radius: var(--border-radius-md);
+  --component-shadow: var(--shadow-sm);
+  --component-shadow-hover: var(--shadow-lg);
+
+  /* Label */
+  --label-bg: var(--color-primary);
+  --label-color: var(--color-text-on-primary);
+  --label-padding: 4px 12px;
+  --label-border-radius: var(--border-radius-sm);
+
+  /* Slide Title */
+  --slide-title-bg: #f7f7f8;
+  --slide-title-color: var(--color-text-primary);
+  --slide-title-border: var(--color-primary);
+}
