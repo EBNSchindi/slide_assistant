@@ -104,6 +104,7 @@ Die Grundlage für Anthropic Claude Support ist vorhanden:
 - ✅ API Key wird in `config.py` gelesen
 - ✅ `anthropic` Package in `requirements.txt`
 - ✅ Model-Provider Mapping in `config.py`
+- ✅ **Claude Sonnet 4.5 Support konfiguriert**
 - ❌ Agent-Wrapper noch nicht implementiert
 
 ### Setup (Wenn implementiert)
@@ -116,7 +117,7 @@ Die Grundlage für Anthropic Claude Support ist vorhanden:
    ```env
    ANTHROPIC_API_KEY=sk-ant-your-key-here
    MODEL_PROVIDER=anthropic
-   DEFAULT_MODEL=claude-3-5-sonnet-20241022
+   DEFAULT_MODEL=claude-sonnet-4.5-20250514
    ```
 
 3. **Dependency installieren:**
@@ -127,8 +128,11 @@ Die Grundlage für Anthropic Claude Support ist vorhanden:
 
 ### Verfügbare Modelle (Geplant)
 
-- **claude-3-5-sonnet-20241022**: Neuestes Claude-Modell
-- **claude-3-5-sonnet**: Alias für das neueste Sonnet-Modell
+- **claude-sonnet-4.5-20250514**: Neuestes Claude Sonnet 4.5 Modell (empfohlen)
+- **claude-sonnet-4.5**: Alias für Claude Sonnet 4.5
+- **claude-4.5-sonnet**: Alternativer Alias
+- **claude-3-5-sonnet-20241022**: Claude 3.5 Sonnet (ältere Version)
+- **claude-3-5-sonnet**: Alias für Claude 3.5 Sonnet
 
 ### Implementation TODO
 
@@ -252,15 +256,16 @@ async def generate_slide_v2(request_data: Dict[str, Any]):
 
 ## Model Comparison
 
-| Feature | GPT-4o | GPT-5 | GPT-5-mini | Claude 3.5 Sonnet |
-|---------|--------|-------|------------|-------------------|
-| Status | ✅ Full | ✅ Full | ✅ Full | ⚠️ Prepared |
-| Context Window | 128k | 128k | 128k | 200k |
-| Reasoning Controls | ❌ | ✅ | ✅ | ❌ |
-| Structured Outputs | ✅ | ✅ | ✅ | ⚠️ TBD |
-| Cost (per 1M tokens) | $5/$15 | $10/$30 | $0.30/$1.20 | $3/$15 |
-| Speed | Fast | Medium | Very Fast | Fast |
-| Quality | High | Very High | Medium | Very High |
+| Feature | GPT-4o | GPT-5 | GPT-5-mini | Claude Sonnet 4.5 | Claude 3.5 Sonnet |
+|---------|--------|-------|------------|-------------------|-------------------|
+| Status | ✅ Full | ✅ Full | ✅ Full | ⚠️ Prepared | ⚠️ Prepared |
+| Context Window | 128k | 128k | 128k | 200k | 200k |
+| Reasoning Controls | ❌ | ✅ | ✅ | ❌ | ❌ |
+| Structured Outputs | ✅ | ✅ | ✅ | ⚠️ TBD | ⚠️ TBD |
+| Cost (per 1M tokens) | $5/$15 | $10/$30 | $0.30/$1.20 | $3/$15 | $3/$15 |
+| Speed | Fast | Medium | Very Fast | Fast | Fast |
+| Quality | High | Very High | Medium | Very High | Very High |
+| Release Date | 2024 | 2025 | 2025 | 2025-05 | 2024-10 |
 
 ## Testing mit verschiedenen Modellen
 

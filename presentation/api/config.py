@@ -10,8 +10,8 @@ TEST_MODE = os.getenv("TEST_MODE", "false").lower() == "true"
 
 # Model Provider Configuration
 MODEL_PROVIDER = os.getenv("MODEL_PROVIDER", "openai")  # openai | anthropic
-DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gpt-4o")  # gpt-4o, gpt-5, claude-3-5-sonnet-20241022
-ANTHROPIC_DEFAULT_MODEL = "claude-3-5-sonnet-20241022"
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "gpt-4o")  # gpt-4o, gpt-5, claude-sonnet-4.5, claude-3-5-sonnet
+ANTHROPIC_DEFAULT_MODEL = "claude-sonnet-4.5-20250514"  # Latest Claude model
 TIMEOUT = 60
 
 # Model mapping for per-request model selection
@@ -20,9 +20,13 @@ MODEL_TO_PROVIDER = {
     "gpt-4o": "openai",
     "gpt-5": "openai",
     "gpt-5-mini": "openai",
-    # Anthropic models
+    # Anthropic models (latest first)
+    "claude-sonnet-4.5-20250514": "anthropic",
+    "claude-sonnet-4.5": "anthropic",  # Alias
+    "claude-4.5-sonnet": "anthropic",  # Alias
     "claude-3-5-sonnet-20241022": "anthropic",
     "claude-3-5-sonnet": "anthropic",  # Alias
+    "claude-3-sonnet": "anthropic",  # Older version
 }
 
 # Content Generation Limits
