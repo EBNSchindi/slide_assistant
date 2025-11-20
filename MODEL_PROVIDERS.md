@@ -1,13 +1,14 @@
 # Model Providers - Multi-Model Support
 
-Dokumentation für die Verwendung verschiedener LLM-Provider (OpenAI, Anthropic Claude) im Slide Assistant.
+Dokumentation für die Verwendung verschiedener LLM-Provider (OpenAI, Anthropic Claude, Google Gemini) im Slide Assistant.
 
 ## Übersicht
 
 Das System unterstützt mehrere LLM-Provider für die Content-Generierung:
 
 1. **OpenAI** (GPT-4o, GPT-5, GPT-5-mini) - **Fully Implemented ✅**
-2. **Anthropic Claude** (Claude 3.5 Sonnet) - **Prepared, Not Yet Implemented ⚠️**
+2. **Anthropic Claude** (Claude Sonnet 4.5, Claude 3.5 Sonnet) - **Prepared, Not Yet Implemented ⚠️**
+3. **Google Gemini** (Gemini 3.0 Pro, Gemini 2.5 Pro, Gemini 2.0 Flash) - **Prepared, Not Yet Implemented ⚠️**
 
 ## OpenAI (Fully Supported)
 
@@ -174,6 +175,119 @@ Um Anthropic Support zu vervollständigen, müssen folgende Dateien erstellt wer
        from .content_analyzer_v2 import ContentAnalyzerAgentV2 as ContentAnalyzerAgent
    ```
 
+## Google Gemini (Prepared)
+
+### Status: ⚠️ Infrastruktur vorbereitet, Agents noch nicht implementiert
+
+Die Grundlage für Google Gemini Support ist vorhanden:
+- ✅ API Key wird in `config.py` gelesen
+- ✅ `google-generativeai` Package in `requirements.txt`
+- ✅ Model-Provider Mapping in `config.py`
+- ✅ **Gemini 3.0 Pro Support konfiguriert**
+- ❌ Agent-Wrapper noch nicht implementiert
+
+### Setup (Wenn implementiert)
+
+1. **API Key erhalten:**
+   - Besuche https://aistudio.google.com/app/apikey
+   - Erstelle einen neuen API Key
+
+2. **.env konfigurieren:**
+   ```env
+   GOOGLE_API_KEY=AIzaSy...
+   MODEL_PROVIDER=google
+   DEFAULT_MODEL=gemini-3.0-pro
+   ```
+
+3. **Dependency installieren:**
+   ```bash
+   cd presentation/api
+   pip install -r requirements.txt  # Installiert google-generativeai>=0.8.0
+   ```
+
+### Verfügbare Modelle (Geplant)
+
+**Gemini 3.0 Serie (Neueste):**
+- **gemini-3.0-pro**: Gemini 3.0 Pro - Neuestes und leistungsfähigstes Modell (empfohlen)
+- **gemini-3.0**: Alias für Gemini 3.0 Pro
+
+**Gemini 2.5 Serie:**
+- **gemini-2.5-pro**: Gemini 2.5 Pro - Balance zwischen Performance und Kosten
+- **gemini-2.5**: Alias für Gemini 2.5 Pro
+
+**Gemini 2.0 Serie:**
+- **gemini-2.0-flash-exp**: Gemini 2.0 Flash Experimental - Schnellstes Modell
+- **gemini-2.0-flash**: Gemini 2.0 Flash - Optimiert für Geschwindigkeit
+
+**Gemini 1.5 Serie (Älter):**
+- **gemini-1.5-pro**: Gemini 1.5 Pro - Vorherige Generation
+- **gemini-1.5-flash**: Gemini 1.5 Flash - Vorherige Generation (schnell)
+
+### Model-Eigenschaften
+
+| Modell | Context Window | Multimodal | Speed | Best For |
+|--------|---------------|------------|-------|----------|
+| gemini-3.0-pro | 2M tokens | ✅ | Fast | Komplexe Aufgaben |
+| gemini-2.5-pro | 2M tokens | ✅ | Fast | Balance |
+| gemini-2.0-flash-exp | 1M tokens | ✅ | Very Fast | Schnelle Antworten |
+| gemini-2.0-flash | 1M tokens | ✅ | Very Fast | Einfache Aufgaben |
+
+### Implementation TODO
+
+Um Google Gemini Support zu vervollständigen, müssen folgende Dateien erstellt werden:
+
+1. **agents/content_analyzer_google.py**
+   ```python
+   import google.generativeai as genai
+
+   class ContentAnalyzerAgentGoogle:
+       def __init__(self, api_key: str, model: str = "gemini-3.0-pro"):
+           genai.configure(api_key=api_key)
+           self.model = genai.GenerativeModel(model)
+
+       def analyze(self, user_input: str, slide_title: str = None):
+           # Ähnlich wie OpenAI-Version, aber mit Google API
+           response = self.model.generate_content(
+               self.system_prompt + "\n\n" + user_input
+           )
+           # Parse und return analysis result
+   ```
+
+2. **agents/presentation_strategist_google.py**
+3. **agents/content_generator_google.py**
+
+4. **orchestrator.py Update:**
+   ```python
+   from config import MODEL_PROVIDER, MODEL_TO_PROVIDER
+
+   # Dynamic import basierend auf Model Provider
+   provider = MODEL_TO_PROVIDER.get(model, MODEL_PROVIDER)
+
+   if provider == "google":
+       from .content_analyzer_google import ContentAnalyzerAgentGoogle as ContentAnalyzerAgent
+   elif provider == "anthropic":
+       from .content_analyzer_anthropic import ContentAnalyzerAgentAnthropic as ContentAnalyzerAgent
+   else:
+       from .content_analyzer_v2 import ContentAnalyzerAgentV2 as ContentAnalyzerAgent
+   ```
+
+### Gemini-Spezifische Features
+
+**Multimodal Support:**
+- Gemini unterstützt nativ Text + Bilder in einem Request
+- Perfekt für Slides mit Bildern
+- Context-aware Image Analysis
+
+**Extrem großes Context Window:**
+- 2M tokens (Gemini 3.0/2.5)
+- 1M tokens (Gemini 2.0)
+- Ideal für lange Dokumente
+
+**Kosteneffizienz:**
+- Günstiger als GPT-5
+- Gemini 2.0 Flash: Sehr kostengünstig
+- Gemini 3.0 Pro: Beste Qualität
+
 ## Per-Request Model Selection
 
 ### Geplante Frontend-UI
@@ -188,7 +302,13 @@ Um Anthropic Support zu vervollständigen, müssen folgende Dateien erstellt wer
     <option value="gpt-5-mini">GPT-5 Mini</option>
   </optgroup>
   <optgroup label="Anthropic" disabled>
+    <option value="claude-sonnet-4.5">Claude Sonnet 4.5</option>
     <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
+  </optgroup>
+  <optgroup label="Google Gemini" disabled>
+    <option value="gemini-3.0-pro">Gemini 3.0 Pro</option>
+    <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+    <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
   </optgroup>
 </select>
 
@@ -256,16 +376,17 @@ async def generate_slide_v2(request_data: Dict[str, Any]):
 
 ## Model Comparison
 
-| Feature | GPT-4o | GPT-5 | GPT-5-mini | Claude Sonnet 4.5 | Claude 3.5 Sonnet |
-|---------|--------|-------|------------|-------------------|-------------------|
-| Status | ✅ Full | ✅ Full | ✅ Full | ⚠️ Prepared | ⚠️ Prepared |
-| Context Window | 128k | 128k | 128k | 200k | 200k |
-| Reasoning Controls | ❌ | ✅ | ✅ | ❌ | ❌ |
-| Structured Outputs | ✅ | ✅ | ✅ | ⚠️ TBD | ⚠️ TBD |
-| Cost (per 1M tokens) | $5/$15 | $10/$30 | $0.30/$1.20 | $3/$15 | $3/$15 |
-| Speed | Fast | Medium | Very Fast | Fast | Fast |
-| Quality | High | Very High | Medium | Very High | Very High |
-| Release Date | 2024 | 2025 | 2025 | 2025-05 | 2024-10 |
+| Feature | GPT-4o | GPT-5 | GPT-5-mini | Claude Sonnet 4.5 | Gemini 3.0 Pro | Gemini 2.0 Flash |
+|---------|--------|-------|------------|-------------------|----------------|------------------|
+| Status | ✅ Full | ✅ Full | ✅ Full | ⚠️ Prepared | ⚠️ Prepared | ⚠️ Prepared |
+| Context Window | 128k | 128k | 128k | 200k | 2M | 1M |
+| Multimodal | ❌ | ❌ | ❌ | ⚠️ TBD | ✅ | ✅ |
+| Reasoning Controls | ❌ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Structured Outputs | ✅ | ✅ | ✅ | ⚠️ TBD | ⚠️ TBD | ⚠️ TBD |
+| Cost (per 1M tokens) | $5/$15 | $10/$30 | $0.30/$1.20 | $3/$15 | $1.25/$5 | $0.075/$0.30 |
+| Speed | Fast | Medium | Very Fast | Fast | Fast | Very Fast |
+| Quality | High | Very High | Medium | Very High | Very High | High |
+| Release Date | 2024 | 2025 | 2025 | 2025-05 | 2025 | 2024 |
 
 ## Testing mit verschiedenen Modellen
 
@@ -306,12 +427,13 @@ python3 run_api.py
 
 ```env
 # Provider Configuration
-MODEL_PROVIDER=openai              # openai | anthropic
-DEFAULT_MODEL=gpt-4o               # gpt-4o | gpt-5 | gpt-5-mini | claude-3-5-sonnet
+MODEL_PROVIDER=openai              # openai | anthropic | google
+DEFAULT_MODEL=gpt-4o               # gpt-4o | gpt-5 | gpt-5-mini | claude-3-5-sonnet | gemini-3.0-pro
 
 # API Keys
 OPENAI_API_KEY=sk-...              # Required für OpenAI
 ANTHROPIC_API_KEY=sk-ant-...       # Required für Anthropic (wenn implementiert)
+GOOGLE_API_KEY=AIza...             # Required für Google Gemini (wenn implementiert)
 
 # GPT-5 Controls (Optional)
 REASONING_EFFORT=medium            # minimal | low | medium | high
