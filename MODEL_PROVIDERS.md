@@ -6,9 +6,9 @@ Dokumentation für die Verwendung verschiedener LLM-Provider (OpenAI, Anthropic 
 
 Das System unterstützt mehrere LLM-Provider für die Content-Generierung:
 
-1. **OpenAI** (GPT-4o, GPT-5, GPT-5-mini) - **Fully Implemented ✅**
-2. **Anthropic Claude** (Claude Sonnet 4.5, Claude 3.5 Sonnet) - **Prepared, Not Yet Implemented ⚠️**
-3. **Google Gemini** (Gemini 3.0 Pro, Gemini 2.5 Pro, Gemini 2.0 Flash) - **Prepared, Not Yet Implemented ⚠️**
+1. **OpenAI** (GPT-4o, GPT-5, GPT-5-mini) - **✅ Fully Implemented & Tested**
+2. **Anthropic Claude** (Claude Sonnet 4.5, Claude 3.5 Sonnet) - **✅ Implemented (Tests TODO)**
+3. **Google Gemini** (Gemini 3.0 Pro, Gemini 2.5 Pro, Gemini 2.0 Flash) - **✅ Implemented (Tests TODO)**
 
 ## OpenAI (Fully Supported)
 
@@ -97,18 +97,29 @@ result = orchestrator.generate_slide(
    TEST_MODE=true  # Keine API-Kosten
    ```
 
-## Anthropic Claude (Prepared)
+## Anthropic Claude (✅ Implemented)
 
-### Status: ⚠️ Infrastruktur vorbereitet, Agents noch nicht implementiert
+### Status: ✅ Agents implementiert, Integration tests TODO
 
-Die Grundlage für Anthropic Claude Support ist vorhanden:
+**Implementierte Komponenten:**
+- ✅ `content_analyzer_anthropic.py` (274 lines)
+- ✅ `presentation_strategist_anthropic.py` (401 lines)
+- ✅ `content_generator_anthropic.py` (540 lines)
+- ✅ `orchestrator_v2.py` mit Auto-Provider-Detection
+- ✅ `routes/v2.py` unterstützt "model" parameter
+- ✅ Anthropic Messages API integration
+- ✅ JSON extraction from markdown code blocks
+- ✅ Feedback loop support
 - ✅ API Key wird in `config.py` gelesen
 - ✅ `anthropic` Package in `requirements.txt`
 - ✅ Model-Provider Mapping in `config.py`
 - ✅ **Claude Sonnet 4.5 Support konfiguriert**
-- ❌ Agent-Wrapper noch nicht implementiert
 
-### Setup (Wenn implementiert)
+**TODO:**
+- ⏳ Integration tests erstellen
+- ⏳ Production testing mit echten API calls
+
+### Setup
 
 1. **API Key erhalten:**
    - Besuche https://console.anthropic.com/
@@ -125,6 +136,20 @@ Die Grundlage für Anthropic Claude Support ist vorhanden:
    ```bash
    cd presentation/api
    pip install -r requirements.txt  # Installiert anthropic==0.40.0
+   ```
+
+4. **Verwendung via API:**
+   ```bash
+   POST /api/v2/generate
+   {
+     "project_name": "beispiel-projekt",
+     "user_input": "Folie über unser Team...",
+     "slide_title": "Unser Team",
+     "slide_number": 5,
+     "theme": "apple",
+     "language": "de",
+     "model": "claude-sonnet-4.5"  // Auto-detects provider=anthropic
+   }
    ```
 
 ### Verfügbare Modelle (Geplant)
@@ -175,18 +200,29 @@ Um Anthropic Support zu vervollständigen, müssen folgende Dateien erstellt wer
        from .content_analyzer_v2 import ContentAnalyzerAgentV2 as ContentAnalyzerAgent
    ```
 
-## Google Gemini (Prepared)
+## Google Gemini (✅ Implemented)
 
-### Status: ⚠️ Infrastruktur vorbereitet, Agents noch nicht implementiert
+### Status: ✅ Agents implementiert, Integration tests TODO
 
-Die Grundlage für Google Gemini Support ist vorhanden:
+**Implementierte Komponenten:**
+- ✅ `content_analyzer_google.py` (274 lines)
+- ✅ `presentation_strategist_google.py` (401 lines)
+- ✅ `content_generator_google.py` (540 lines)
+- ✅ `orchestrator_v2.py` mit Auto-Provider-Detection
+- ✅ `routes/v2.py` unterstützt "model" parameter
+- ✅ Google Generative AI SDK integration
+- ✅ Combined prompts (system + user in one)
+- ✅ GenerationConfig support
 - ✅ API Key wird in `config.py` gelesen
 - ✅ `google-generativeai` Package in `requirements.txt`
 - ✅ Model-Provider Mapping in `config.py`
 - ✅ **Gemini 3.0 Pro Support konfiguriert**
-- ❌ Agent-Wrapper noch nicht implementiert
 
-### Setup (Wenn implementiert)
+**TODO:**
+- ⏳ Integration tests erstellen
+- ⏳ Production testing mit echten API calls
+
+### Setup
 
 1. **API Key erhalten:**
    - Besuche https://aistudio.google.com/app/apikey
@@ -205,7 +241,21 @@ Die Grundlage für Google Gemini Support ist vorhanden:
    pip install -r requirements.txt  # Installiert google-generativeai>=0.8.0
    ```
 
-### Verfügbare Modelle (Geplant)
+4. **Verwendung via API:**
+   ```bash
+   POST /api/v2/generate
+   {
+     "project_name": "beispiel-projekt",
+     "user_input": "Folie über unsere KPIs...",
+     "slide_title": "Q4 Metrics",
+     "slide_number": 12,
+     "theme": "openai",
+     "language": "en",
+     "model": "gemini-3.0-pro"  // Auto-detects provider=google
+   }
+   ```
+
+### Verfügbare Modelle
 
 **Gemini 3.0 Serie (Neueste):**
 - **gemini-3.0-pro**: Gemini 3.0 Pro - Neuestes und leistungsfähigstes Modell (empfohlen)
