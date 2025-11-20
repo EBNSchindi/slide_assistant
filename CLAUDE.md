@@ -101,6 +101,19 @@ slide_assistant/
 │                   ├── reference.html
 │                   ├── style.css
 │                   └── variables.css
+├── shared-themes/                          # Global themes (shared across projects)
+│   ├── apple/
+│   │   ├── design-guide.json               # Apple design system tokens
+│   │   ├── design-guide.md
+│   │   ├── reference.html
+│   │   ├── style.css
+│   │   └── variables.css
+│   └── openai/
+│       ├── design-guide.json               # OpenAI design system tokens
+│       ├── design-guide.md
+│       ├── reference.html
+│       ├── style.css
+│       └── variables.css
 └── requirements.txt                         # Python dependencies
 ```
 
@@ -135,7 +148,6 @@ User input (text/stichpunkte) in unified-editor.html
 **Unified Editor Features:**
 - **unified-editor.html** - Single-page editor combining all functionality:
   - Live slide preview with HTML rendering
-  - Fullscreen display mode for presentations (with component width controls)
   - Theme switching (GitHub/Modern/Minimal) without page reload
   - Project and slide management
   - Direct integration with /api/v2/generate endpoint
@@ -145,7 +157,13 @@ User input (text/stichpunkte) in unified-editor.html
 
 ### 2. Multi-Agent API System (`presentation/api/`) - V2 ARCHITECTURE
 
-**Purpose:** AI-powered intelligent slide content generation using OpenAI GPT-4o/GPT-5 with deterministic HTML rendering.
+**Purpose:** AI-powered intelligent slide content generation with multi-provider LLM support and deterministic HTML rendering.
+
+**Multi-Provider Support:**
+- OpenAI (GPT-4o, GPT-5, GPT-5-mini) - Production-ready
+- Anthropic Claude (Sonnet 4.5, 3.5 Sonnet) - Implemented
+- Google Gemini (3.0 Pro, 2.5 Pro, 2.0 Flash) - Implemented
+- Auto-detection via MODEL_TO_PROVIDER mapping
 
 **V2 Architecture (CURRENT - DETERMINISTIC):**
 ```
@@ -218,6 +236,11 @@ Each project has:
 
 **Dynamic Style Loading:** Viewers switch themes at runtime via dropdown.
 
+**Shared Themes:**
+- Global themes in `shared-themes/` (Apple, OpenAI)
+- Project-specific themes in `projects/{name}/styles/`
+- Fallback chain: project theme → shared theme → default theme
+
 ## Development Commands
 
 ### Root Setup
@@ -239,7 +262,10 @@ pip install -r requirements.txt
 
 # Configure environment
 cp .env.example .env
-# Edit .env and add OPENAI_API_KEY
+# Edit .env and add API keys for desired providers:
+# OPENAI_API_KEY=sk-...
+# ANTHROPIC_API_KEY=sk-ant-...
+# GOOGLE_API_KEY=AIza...
 ```
 
 ### Running the API Server
@@ -253,6 +279,12 @@ source api/venv/bin/activate
 python3 run_api.py
 # Server runs at http://localhost:8001
 # Health check: curl http://localhost:8001/health
+
+# Multi-Provider Support
+# Use model parameter to select provider:
+# - "gpt-4o" or "gpt-5" (OpenAI)
+# - "claude-sonnet-4.5" or "claude-3.5-sonnet" (Anthropic)
+# - "gemini-3.0-pro" or "gemini-2.5-pro" (Google)
 ```
 
 ### Testing (Mock Mode - V2)
@@ -318,11 +350,14 @@ These have been replaced by the unified-editor.html which combines all functiona
 - Default model: `gpt-4o` (can override to `gpt-5` or `gpt-5-mini`)
 
 **Key Classes:**
-- **AgentOrchestrator** (orchestrator.py): Coordinates all agents, handles test mode
+- **AgentOrchestrator** (orchestrator_v2.py): Coordinates all agents, handles provider routing and test mode
 - **ContentAnalyzerAgentV2** (content_analyzer_v2.py): Analyzes user input, detects language & content type
 - **PresentationStrategistAgentV2** (presentation_strategist_v2.py): Recommends layout & components
 - **ContentGeneratorAgentV2** (content_generator_v2.py): Generates formatted text (NO HTML)
-- **MockAgentsV2** (mock_agents_v2.py): Fake agents for testing (TEST_MODE)
+- **Provider-Specific Agents:**
+  - `content_analyzer_anthropic.py`, `presentation_strategist_anthropic.py`, `content_generator_anthropic.py`
+  - `content_analyzer_google.py`, `presentation_strategist_google.py`, `content_generator_google.py`
+- **MockAgents** (mock_agents_v2.py): Fake agents for testing without API keys
 
 **Agent Parameters:**
 - `reasoning_effort`: `minimal|low|medium|high` (GPT-5 only, saves cost/improves quality)
@@ -343,7 +378,11 @@ These have been replaced by the unified-editor.html which combines all functiona
 
 ### Known Issues
 
-None currently. Previous mock agent parameter issue has been resolved (mock_agents_v2.py now uses **kwargs).
+**Mock Agent Parameter Issue:**
+- Mock agents don't accept `reasoning_effort`, `verbosity`, `use_structured_outputs` parameters
+- The orchestrator passes these when in TEST_MODE, causing `TypeError`
+- **Fix:** Update mock_agents.py to accept and ignore these parameters in `__init__` methods
+- See: presentation/api/agents/mock_agents.py:8, :45, :87
 
 ## File Naming Conventions
 
@@ -365,65 +404,82 @@ The main template CSS is `github-presentation-template.css` in the presentation 
 
 ## Git Workflow
 
-Main branch: `master`
+Current branch: `master` (also the main branch)
+
+Recent changes show:
+- Deleted legacy `pitch/` content
+- Added new `presentation/` system
+- Established projects-based architecture
+- Added component viewer with dynamic loading
 
 When committing:
 - Focus on functional changes
 - Document architectural shifts
 - Keep markdown sources in version control
 - Generated HTML can be gitignored if desired
-- Use descriptive commit messages with context
 
 ## Common Gotchas & Troubleshooting
 
 ### API & Testing
-1. **TEST_MODE vs Production:**
+1. **Mock Agent TypeError:** Mock agents missing parameter support
+   - Error: `MockContentAnalyzerAgent.__init__() got an unexpected keyword argument 'reasoning_effort'`
+   - Cause: TEST_MODE agents don't accept new parameters (reasoning_effort, verbosity, use_structured_outputs)
+   - Fix: Update mock_agents.py to accept **kwargs or add explicit parameters
+
+2. **TEST_MODE vs Production:**
    - TEST_MODE=true uses mock agents (no OpenAI API needed)
    - TEST_MODE=false requires valid OPENAI_API_KEY in .env
    - Check presentation/api/config.py for current mode
 
-2. **OPENAI_API_KEY not found:**
+3. **OPENAI_API_KEY not found:**
    - Ensure presentation/api/.env exists and contains OPENAI_API_KEY
    - Try: `cp presentation/api/.env.example presentation/api/.env`
    - Then edit .env to add your actual API key
 
+4. **Provider API Keys Missing:**
+   - Ensure correct API key for selected provider is set in .env
+   - OpenAI: OPENAI_API_KEY=sk-...
+   - Anthropic: ANTHROPIC_API_KEY=sk-ant-...
+   - Google: GOOGLE_API_KEY=AIza...
+   - Provider auto-detection fails if API key is not configured
+
 ### Frontend & Viewing
-3. **CORS Issues:** unified-editor.html may require local server
+5. **CORS Issues:** unified-editor.html may require local server
    - Use: `python3 -m http.server 8000` in presentation directory
    - Then visit: http://localhost:8000/unified-editor.html
 
-4. **Component IDs:** Must follow format `slide-{X}-comp-{Y}`
+6. **Component IDs:** Must follow format `slide-{X}-comp-{Y}`
    - Auto-generated by API's component_renderer.py
    - Ensures unique IDs for each component on each slide
 
-5. **Style Paths:** Relative to project. Check projects.json for correct theme paths
+7. **Style Paths:** Relative to project. Check projects.json for correct theme paths
    - Example: `projects/beispiel-projekt/styles/github/style.css`
 
-6. **Template Paths:** Templates in `presentation/templates/`, NOT `presentation/api/templates/`
+8. **Template Paths:** Templates in `presentation/templates/`, NOT `presentation/api/templates/`
    - Component renderer uses template_loader.py to find templates
    - Template path is relative to presentation/ directory
 
 ### Content Generation
-7. **Statistics Detection:** Requires units for auto-detection
+9. **Statistics Detection:** Requires units for auto-detection
    - Regex: `\d+[.,\d]*\s*(Mio|Mrd|%|€|$|USD)`
    - Example: "€12,3 Mio" ✅, "12.3 million" ❌
 
-8. **Language Mixing:** API auto-detects primary language
-   - Mostly German + one English term? Output in German
-   - Use consistent language for best results
+10. **Language Mixing:** API auto-detects primary language
+    - Mostly German + one English term? Output in German
+    - Use consistent language for best results
 
 ### Development
-9. **API Venv Location:** API has its own venv
+11. **API Venv Location:** API has its own venv
     - Location: presentation/api/venv
-    - Dependencies: FastAPI, OpenAI, Jinja2, Pydantic
+    - Dependencies: FastAPI, Anthropic, Google AI, Jinja2, Pydantic
 
-10. **Image Paths:** Images saved to `projects/{name}/images/uploads/`
+12. **Image Paths:** Images saved to `projects/{name}/images/uploads/`
     - Generated HTML references this path
     - Ensure project exists before uploading
 
-11. **Python Dependencies:**
+13. **Python Dependencies:**
     - Root requirements.txt: Minimal (python-docx if Word converter was active)
-    - API requirements: presentation/api/requirements.txt (fastapi, uvicorn, openai, pydantic, jinja2)
+    - API requirements: presentation/api/requirements.txt (fastapi, uvicorn, openai, anthropic, google-generativeai, pydantic, jinja2)
 
 ## Development Tips
 
@@ -506,22 +562,20 @@ POST /api/v2/generate
 | API Calls | 1-4 | 1 |
 | Cost | 4x tokens | 1x tokens |
 
-### Current Limitations
+### Known Issues & Gotchas
 
-1. **design-guide.json partial integration**
+1. **design-guide.json not fully integrated yet**
    - Files created ✅
-   - Agents still need to read and validate against them for improved recommendations
+   - Agents still need to read and validate against them
    - See: REMAINING_FEATURES.md task #6
 
-2. **Image color extraction**
-   - Not yet implemented for automatic color scheme matching
+2. **Image color extraction not implemented**
    - Reference: REMAINING_FEATURES.md task #1
    - Requires: pillow + colorthief
 
-3. **Variant generation**
+3. **Variant generation uses theme switching (future)**
    - Currently: Each theme manually configured
    - Future: FormattedSlide renders with different themes for instant variants
-   - See: REMAINING_FEATURES.md for roadmap
 
 ## Questions?
 

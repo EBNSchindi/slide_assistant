@@ -1,5 +1,19 @@
 {
   "defaultStyle": "github",
+  "sharedThemes": [
+    {
+      "name": "apple",
+      "displayName": "Apple Design",
+      "cssPath": "shared-themes/apple/style.css",
+      "default": false
+    },
+    {
+      "name": "openai",
+      "displayName": "OpenAI Design",
+      "cssPath": "shared-themes/openai/style.css",
+      "default": false
+    }
+  ],
   "projects": [
     {
       "name": "beispiel-projekt",

@@ -1,0 +1,79 @@
+/* Apple Design System - CSS Variablen */
+
+:root {
+  /* Primärfarben - Apple Blue */
+  --color-primary: #0071E3;
+  --color-primary-light: #4DA3FF;
+  --color-primary-dark: #0051B3;
+
+  /* Komponenten-Hintergrund */
+  --color-bg-component: #ffffff;
+  --color-bg-component-hover: #f5f5f7;
+  --color-bg-subtle: #f5f5f7;
+  --color-bg-overlay: #fafafa;
+
+  /* Text-Farben */
+  --color-text-primary: #1d1d1d;
+  --color-text-secondary: #555555;
+  --color-text-muted: #888888;
+  --color-text-on-primary: #ffffff;
+
+  /* Rahmen-Farben */
+  --color-border: #e5e5e7;
+  --color-border-muted: #f0f0f2;
+  --color-border-hover: #0071E3;
+
+  /* Akzentfarben */
+  --color-accent: #5E5CE6;
+  --color-success: #34C759;
+  --color-success-bg: #D1F1D1;
+  --color-success-text: #0A6F08;
+  --color-warning: #FF9500;
+  --color-warning-bg: #FFE8CC;
+  --color-warning-text: #8B5000;
+  --color-danger: #FF3B30;
+  --color-danger-bg: #FFCCCC;
+  --color-danger-text: #B91F1F;
+
+  /* Schatten - subtil */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.07);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-xl: 0 8px 24px rgba(0,0,0,0.12);
+
+  /* Border Radius - klein */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-full: 50%;
+
+  /* Schriftart - Apple System */
+  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-family-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* Komponenten-spezifisch */
+  --component-padding: 48px;
+  --component-border-width: 1px;
+  --component-border-radius: var(--border-radius-md);
+  --component-shadow: var(--shadow-sm);
+  --component-shadow-hover: var(--shadow-md);
+
+  /* Label */
+  --label-bg: var(--color-primary);
+  --label-color: var(--color-text-on-primary);
+  --label-padding: 4px 12px;
+  --label-border-radius: var(--border-radius-sm);
+
+  /* Slide Title */
+  --slide-title-bg: #fafafa;
+  --slide-title-color: var(--color-text-primary);
+  --slide-title-border: var(--color-border);
+}

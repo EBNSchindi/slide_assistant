@@ -6,11 +6,20 @@ from pathlib import Path
 
 
 class StyleParser:
-    """Parse CSS variables and design guides from project styles (JSON + Markdown fallback)"""
+    """Parse CSS variables and design guides from project styles (JSON + Markdown fallback)
 
-    def __init__(self, project_path: str):
+    Supports shared themes from presentation/shared-themes/ directory.
+    Fallback chain: project-theme → shared-theme → default
+    """
+
+    def __init__(self, project_path: str, theme_name: Optional[str] = None):
         self.project_path = project_path
         self.styles_path = os.path.join(project_path, "styles")
+        self.theme_name = theme_name
+
+        # Shared themes path (relative to presentation/)
+        presentation_dir = Path(project_path).parent.parent
+        self.shared_themes_path = os.path.join(presentation_dir, "shared-themes")
 
     def parse_project_style(self) -> Dict:
         """Parse all style information from a project (tries JSON first, falls back to Markdown)"""
@@ -130,10 +139,33 @@ class StyleParser:
         return recommendations.get(content_type, ["paragraph", "bullet-list"])
 
     def _find_design_guide_json(self) -> Optional[str]:
-        """Find design-guide.json in project styles (NEW - V2)"""
+        """Find design-guide.json in project styles or shared-themes (NEW - V2)
+
+        Fallback chain:
+        1. Project-specific theme: projects/{project}/styles/{theme}/design-guide.json
+        2. Shared theme: shared-themes/{theme}/design-guide.json
+        3. Any design-guide.json in project styles (legacy)
+        """
+        # Priority 1: Project-specific theme (if theme_name specified)
+        if self.theme_name:
+            project_theme_path = os.path.join(self.styles_path, self.theme_name, "design-guide.json")
+            if os.path.exists(project_theme_path):
+                print(f"✅ Found project theme: {self.theme_name}")
+                return project_theme_path
+
+        # Priority 2: Shared theme (if theme_name specified)
+        if self.theme_name and os.path.exists(self.shared_themes_path):
+            shared_theme_path = os.path.join(self.shared_themes_path, self.theme_name, "design-guide.json")
+            if os.path.exists(shared_theme_path):
+                print(f"✅ Found shared theme: {self.theme_name}")
+                return shared_theme_path
+
+        # Priority 3: Fallback to any design-guide.json in project (legacy)
         for root, dirs, files in os.walk(self.styles_path):
             if "design-guide.json" in files:
+                print(f"⚠️ Using legacy design-guide.json from {root}")
                 return os.path.join(root, "design-guide.json")
+
         return None
 
     def _load_design_guide_json(self, json_file: str) -> Optional[Dict]:
