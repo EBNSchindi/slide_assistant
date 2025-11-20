@@ -4,19 +4,31 @@
 
 **NEU:** Der bevorzugte Weg ist jetzt **Teleport** + **Agent** - nahtlos von Web zu Lokal!
 
-### Schnellstart (3 Schritte)
+### Schnellstart (4 Schritte)
 
 ```bash
 # 1. In claude.ai/code (Web): Feature entwickeln & committen
 # → Branch: claude/feature-xyz
+# → Git: Committed & gepusht
 # → Teleport-Befehl erhalten: claude --teleport session_xxx
 
-# 2. Im lokalen Terminal: Session teleportieren
+# 2. Lokale Umgebung vorbereiten
 cd /path/to/slide_assistant
+
+# Falls Sie lokal AUCH entwickelt haben:
+git status                                    # Status prüfen
+git add . && git commit -m "WIP: Local work" # Changes sichern
+git checkout master                           # Zu Master wechseln
+git pull origin master                        # Master aktualisieren
+
+# Falls Sie lokal NICHTS entwickelt haben:
+git checkout master && git pull origin master # Einfach Master aktualisieren
+
+# 3. Im lokalen Terminal: Session teleportieren
 claude --teleport session_xxx
 # → Claude Code Desktop öffnet sich mit vollständigem Kontext
 
-# 3. In Claude Code Desktop: Agent testen lassen
+# 4. In Claude Code Desktop: Agent testen lassen
 @agent web-to-local-sync-tester {
   "remote_branch": "claude/feature-xyz",
   "test_scope": "full"
@@ -120,29 +132,48 @@ Resolution Strategy: COMBINE both features
 # → Git: Committed & gepusht
 # → Teleport-Befehl erhalten: claude --teleport session_abc123
 
-# 2. Im lokalen Terminal: Session teleportieren
+# 2. Lokale Umgebung vorbereiten
 cd ~/Schreibtisch/cursor_dev/slide_assistant
+
+# Prüfen, ob lokal entwickelt wurde:
+git status
+
+# Falls uncommitted changes (lokal entwickelt):
+git add .
+git commit -m "WIP: Fullscreen feature local work"
+# Optional: Branch pushen für Backup
+git push origin claude/fullscreen-local
+
+# Zu Master wechseln:
+git checkout master
+git pull origin master
+
+# 3. Im lokalen Terminal: Session teleportieren
 claude --teleport session_abc123
 # → Claude Code Desktop öffnet sich
 
-# 3. In Claude Code Desktop: Agent testen lassen
+# 4. In Claude Code Desktop: Agent testen lassen
 @agent web-to-local-sync-tester {
   "remote_branch": "claude/multi-provider-xyz",
   "test_scope": "full"
 }
 
-# 4. Agent gibt Report:
+# 5. Agent gibt Report:
 ✅ Tests: 35 passed, 0 failed
 ✅ No conflicts
 ✅ MERGE READY
 
-# 5. Befehle ausführen (basierend auf Agent-Empfehlung):
+# 6. Befehle ausführen (basierend auf Agent-Empfehlung):
 git checkout master
 git pull origin master
 git merge claude/multi-provider-xyz
 git push origin master
 
-# 6. Fertig! ✅
+# 7. Optional: Zurück zu lokaler Arbeit
+git checkout claude/fullscreen-local
+git rebase master  # Lokale Arbeit auf neuen Master rebasen
+
+# 8. Fertig! ✅
 ```
 
 ### Alternative: Ohne Teleport (Direkter Agent-Aufruf)
@@ -223,6 +254,50 @@ Feature 2: Fullscreen
 
 ---
 
+### Szenario 4: Lokal + Web entwickelt (Hybrid Workflow)
+
+```bash
+# Ausgangssituation:
+# - Lokal: claude/feature-a (in Arbeit, uncommitted)
+# - Web: claude/feature-b (fertig, gepusht)
+
+# Schritt 1: Lokale Arbeit sichern
+cd ~/Schreibtisch/cursor_dev/slide_assistant
+git status  # Zeigt uncommitted changes in Feature A
+git add .
+git commit -m "WIP: Feature A - work in progress"
+git push origin claude/feature-a  # Backup!
+
+# Schritt 2: Zu Master wechseln
+git checkout master
+git pull origin master
+
+# Schritt 3: Web-Feature via Teleport testen
+claude --teleport session_xxx
+
+# In Claude Code Desktop:
+@agent web-to-local-sync-tester {
+  "remote_branch": "claude/feature-b",
+  "test_scope": "full"
+}
+
+# Schritt 4: Web-Feature mergen (wenn ✅)
+git checkout master
+git merge claude/feature-b
+git push origin master
+
+# Schritt 5: Zurück zu lokaler Arbeit
+git checkout claude/feature-a
+git rebase master  # Feature A auf aktuellen Master (inkl. Feature B)
+
+# Schritt 6: Weiter an Feature A arbeiten
+# → Feature A hat jetzt Feature B integriert
+```
+
+**Ergebnis:** Beide Features bleiben aktuell, keine Konflikte durch rechtzeitiges Rebase
+
+---
+
 ## Wichtige Hinweise
 
 ### ⚠️ Agent ist kein Ersatz für manuelle Prüfung
@@ -248,12 +323,40 @@ Der Agent kann NICHT:
 3. **Bei Unsicherheit: Manuelle Prüfung zusätzlich**
 4. **Agent-Report dokumentieren** (Copy-Paste in File)
 
+### ✅ Lokale Umgebung vorbereiten
+
+**Vor jedem Teleport:**
+
+```bash
+# 1. Status prüfen
+git status
+
+# 2. Uncommitted changes sichern (falls vorhanden)
+git add . && git commit -m "WIP: Lokale Arbeit"
+
+# 3. Aktuellen Branch pushen (Backup!)
+git push origin $(git branch --show-current)
+
+# 4. Zu Master wechseln
+git checkout master
+git pull origin master
+
+# 5. Jetzt erst teleportieren
+claude --teleport session_xxx
+```
+
+**Warum wichtig?**
+- ✅ Keine Arbeit geht verloren
+- ✅ Sauberer Zustand für Agent-Tests
+- ✅ Master ist aktuell für Merge
+- ✅ Zurückkehren zu lokaler Arbeit jederzeit möglich
+
 ---
 
 ## Nächste Schritte
 
 ### Für Teleport-Workflow (empfohlen):
-1. **Lesen:** `TELEPORT_QUICK_GUIDE.md` (5 Min) - 3-Schritte-Anleitung
+1. **Lesen:** `TELEPORT_QUICK_GUIDE.md` (5 Min) - 4-Schritte-Anleitung mit lokaler Vorbereitung
 2. **Vertiefen:** `TELEPORT_MULTI_SESSION_WORKFLOW.md` (15 Min) - Für 2+ parallele Features
 3. **Referenz:** `AGENT_WEB_TO_LOCAL_SYNC.md` - Vollständige Agent-Dokumentation
 
