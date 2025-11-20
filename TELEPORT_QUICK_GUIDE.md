@@ -17,7 +17,7 @@ claude --teleport session_014KZZLRj1jWZvTfp2HMt6rq
 
 ---
 
-## 📋 3-Schritte-Anleitung
+## 📋 4-Schritte-Anleitung
 
 ### Schritt 1: Web-Entwicklung abschließen
 
@@ -30,17 +30,51 @@ In claude.ai/code:
    → claude --teleport session_xxx
 ```
 
-### Schritt 2: Session teleportieren
+### Schritt 2: Lokale Umgebung vorbereiten
+
+**Wenn Sie lokal AUCH entwickelt haben:**
 
 ```bash
 # Im lokalen Terminal
 cd /path/to/slide_assistant
+
+# 1. Status prüfen
+git status
+
+# 2. Falls uncommitted changes:
+git add .
+git commit -m "WIP: Lokale Änderungen vor Teleport"
+
+# 3. Falls auf Feature-Branch:
+git checkout master
+git pull origin master
+
+# 4. Optional: Lokalen Branch sichern
+git branch backup/local-work-$(date +%Y%m%d)
+
+# 5. Arbeitsverzeichnis sauber halten
+git stash  # Falls nötig
+```
+
+**Wenn Sie lokal NICHTS entwickelt haben:**
+
+```bash
+# Im lokalen Terminal
+cd /path/to/slide_assistant
+git checkout master
+git pull origin master
+```
+
+### Schritt 3: Session teleportieren
+
+```bash
+# Jetzt teleportieren
 claude --teleport session_xxx
 ```
 
 **→ Claude Code Desktop öffnet sich mit Session**
 
-### Schritt 3: Agent testen lassen
+### Schritt 4: Agent testen lassen
 
 ```
 In Claude Code Desktop (nach Teleport):
@@ -253,6 +287,8 @@ claude --teleport session_ccc
 ✅ **Feature fertig entwickelt** (im Web committet & gepusht)
 ✅ **Branch-Name kennen** (für Agent-Aufruf)
 ✅ **Richtiges Verzeichnis** (`cd /path/to/project`)
+✅ **Lokale Änderungen sichern** (committen oder stashen)
+✅ **Master aktuell** (`git checkout master && git pull`)
 
 ### Nach Teleport
 
@@ -265,6 +301,8 @@ claude --teleport session_ccc
 ❌ **"Session not found"** → Prüfen Sie Session-ID
 ❌ **"Not in git repo"** → cd in richtiges Verzeichnis
 ❌ **"Tests fail after teleport"** → Dependencies lokal installieren
+❌ **"Uncommitted changes"** → Änderungen committen/stashen vor Teleport
+❌ **"Merge conflicts lokal"** → Lokalen Branch sichern, master pullen
 
 ---
 
@@ -328,6 +366,39 @@ git pull origin master
 # Dann nächste Session:
 claude --teleport session_next
 ```
+
+### 4. Lokale + Web Entwicklung kombinieren
+
+```bash
+# Szenario: Lokal auf Feature-A, Web entwickelt Feature-B
+
+# 1. Lokale Arbeit sichern
+git add .
+git commit -m "Feature A: Work in progress"
+git push origin claude/feature-a
+
+# 2. Zurück zu Master
+git checkout master
+git pull origin master
+
+# 3. Web-Feature teleportieren
+claude --teleport session_xxx
+
+# 4. Agent testen lassen (Feature B)
+@agent web-to-local-sync-tester {
+  "remote_branch": "claude/feature-b",
+  "test_scope": "full"
+}
+
+# 5. Feature B mergen
+git merge claude/feature-b
+
+# 6. Zurück zu lokaler Arbeit (Feature A)
+git checkout claude/feature-a
+git rebase master  # Feature A auf aktuellen Master rebasen
+```
+
+**→ So bleiben beide Features aktuell!**
 
 ---
 
