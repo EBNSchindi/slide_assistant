@@ -52,6 +52,12 @@ Falls Sie den Agent direkt aufrufen möchten (ohne Teleport):
 
 ### Schritt 1: Agent aufrufen
 
+## So verwenden Sie den Agent in Claude Code
+
+### Schritt 1: Agent aufrufen
+
+Wenn Sie in Claude Code (Desktop oder Web) sind, geben Sie einfach ein:
+
 ```
 Der lokale Branch und der Remote Branch sind voneinander unterschiedlich,
 da ich hier zwei unterschiedliche Features entwickelt habe. Einmal lokal
@@ -164,6 +170,29 @@ claude --teleport session_abc123
 ✅ MERGE READY
 
 # 6. Befehle ausführen (basierend auf Agent-Empfehlung):
+### Ihr typischer Workflow:
+
+```
+# 1. Im Web entwickelt (claude.ai/code)
+# → Branch: claude/multi-provider-xyz
+# → Features: Anthropic + Gemini Support
+
+# 2. Lokal in Claude Code Desktop:
+Der Web-Branch claude/multi-provider-xyz soll getestet werden
+bevor ich ihn merge.
+
+@agent web-to-local-sync-tester {
+  "remote_branch": "claude/multi-provider-xyz",
+  "local_branch": "master",
+  "test_scope": "full"
+}
+
+# 3. Agent gibt Report:
+✅ Tests: 35 passed, 0 failed
+✅ No conflicts
+✅ Merge-Ready!
+
+# 4. Befehle ausführen:
 git checkout master
 git pull origin master
 git merge claude/multi-provider-xyz
@@ -194,6 +223,7 @@ bevor ich ihn merge.
 
 # 3. Agent gibt Report & Merge-Befehle
 # 4. Befehle ausführen
+# 5. Fertig! ✅
 ```
 
 ---
